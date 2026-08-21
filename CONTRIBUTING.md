@@ -37,8 +37,8 @@ Currently, TileLens provides cycle and memory models for GEMM. High-value areas 
 
 ```bash
 # 1. Fork & clone the repo
-git clone https://github.com/your-username/tilelens.git
-cd tilelens
+git clone https://github.com/preetham-s7/TileLens.git
+cd TileLens
 
 # 2. Create a virtual environment
 python -m venv venv

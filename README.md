@@ -82,8 +82,8 @@ flowchart LR
 
 ```bash
 # Clone repository
-git clone https://github.com/your-username/tilelens.git
-cd tilelens
+git clone https://github.com/preetham-s7/TileLens.git
+cd TileLens
 
 # Install in development mode
 pip install -e .

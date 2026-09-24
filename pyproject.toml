@@ -54,3 +54,7 @@ tilelens = "tilelens.cli.main:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["tilelens*"]
+
+[tool.vercel]
+entrypoint = "api/index.py"
+

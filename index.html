@@ -592,7 +592,7 @@
 
         .die-canvas-container {
             width: 100%;
-            height: 480px;
+            min-height: 380px;
             background: #060911;
             border: 1px solid rgba(0, 229, 255, 0.25);
             border-radius: var(--radius-md);
@@ -601,7 +601,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 18px;
+            padding: 16px;
             box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.85);
             background-image: 
                 radial-gradient(rgba(0, 229, 255, 0.08) 1px, transparent 1px),
@@ -640,6 +640,162 @@
         .die-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
         .die-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
         .die-br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        /* High-Level Silicon Graphics Canvas & Controls */
+        .die-graphics-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .die-view-modes, .die-view-toggles {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .die-mode-btn, .die-toggle-btn {
+            background: rgba(18, 26, 44, 0.7);
+            border: 1px solid rgba(71, 85, 105, 0.4);
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+            font-size: 11.5px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .die-mode-btn:hover, .die-toggle-btn:hover {
+            color: #fff;
+            border-color: rgba(0, 229, 255, 0.4);
+            background: rgba(0, 229, 255, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .die-mode-btn.active {
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.22), rgba(192, 132, 252, 0.18));
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+        }
+
+        .die-toggle-btn.active {
+            background: rgba(56, 189, 248, 0.18);
+            border-color: var(--accent-blue);
+            color: #fff;
+        }
+
+        #silicon-canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 680px;
+            max-height: 440px;
+            aspect-ratio: 680 / 440;
+            border-radius: 10px;
+            cursor: crosshair;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 229, 255, 0.2);
+            transition: opacity 0.25s ease;
+        }
+
+        .canvas-hud-overlay {
+            position: absolute;
+            pointer-events: none;
+            display: none;
+            background: rgba(8, 12, 22, 0.94);
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 229, 255, 0.3);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: #fff;
+            z-index: 50;
+            white-space: nowrap;
+            backdrop-filter: blur(8px);
+            transition: opacity 0.15s ease;
+        }
+
+        /* Systolic Simulation Canvas */
+        .systolic-sim-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(16px);
+            margin-top: 10px;
+        }
+
+        .systolic-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .systolic-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .systolic-btn {
+            background: rgba(20, 28, 48, 0.8);
+            border: 1px solid rgba(71, 85, 105, 0.45);
+            color: #fff;
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .systolic-btn:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 229, 255, 0.15);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .systolic-canvas-wrap {
+            width: 100%;
+            min-height: 220px;
+            background: #060911;
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            padding: 8px;
+        }
+
+        #systolic-canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 800px;
+            max-height: 250px;
+            aspect-ratio: 800 / 250;
+            border-radius: 8px;
+        }
 
         .silicon-block {
             min-inline-size: 0;
@@ -1383,7 +1539,8 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
             .die-canvas-container {
-                height: 380px;
+                min-height: 320px;
+                height: auto;
             }
             .blueprint-inspector {
                 position: static;
@@ -1440,7 +1597,8 @@
             .metric-value {
                 font-size: 17px;
             }
-            .die-canvas-container { height: auto; padding: 8px; overflow: visible; }
+            .die-canvas-container { height: auto; min-height: 240px; padding: 8px; overflow: visible; }
+            .systolic-canvas-wrap { height: auto; min-height: 180px; padding: 6px; }
             .silicon-die {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
                 grid-auto-rows: minmax(120px, auto);
@@ -1576,16 +1734,30 @@
                         <div class="stage-title">
                             <span>🔍 Silicon Die Floorplan & Microarchitecture Blueprint</span>
                         </div>
-                        <span style="font-size: 12px; color: var(--text-dim);">Tap/Click blocks to inspect</span>
+                        <div class="die-view-toggles">
+                            <button type="button" class="die-toggle-btn active" id="btn-toggle-canvas" title="Interactive High-Fidelity Canvas View">🎨 High-Res Canvas</button>
+                            <button type="button" class="die-toggle-btn" id="btn-toggle-grid" title="Classic Block Grid View">🧱 Grid View</button>
+                        </div>
                     </div>
-                    <div class="die-canvas-container">
-                        <div class="silicon-die" id="die-grid">
+                    <div class="die-graphics-controls">
+                        <div class="die-view-modes" role="group" aria-label="Floorplan Graphics Modes">
+                            <button type="button" class="die-mode-btn active" data-mode="floorplan">🗺️ Blueprint</button>
+                            <button type="button" class="die-mode-btn" data-mode="thermal">🔥 Thermal Heatmap</button>
+                            <button type="button" class="die-mode-btn" data-mode="traffic">⚡ Live Bus Flow</button>
+                            <button type="button" class="die-mode-btn" data-mode="xray">🔬 Silicon X-Ray</button>
+                        </div>
+                        <span style="font-size: 11.5px; color: var(--text-dim); font-family: var(--font-mono);" id="canvas-status-tag">60 FPS // Live Interconnect Bus</span>
+                    </div>
+                    <div class="die-canvas-container" id="die-canvas-wrapper">
+                        <canvas id="silicon-canvas" width="680" height="440" aria-label="Interactive Silicon Die Floorplan"></canvas>
+                        <div class="silicon-die" id="die-grid" style="display: none;">
                             <div class="die-corner-mark die-tl"></div>
                             <div class="die-corner-mark die-tr"></div>
                             <div class="die-corner-mark die-bl"></div>
                             <div class="die-corner-mark die-br"></div>
                             <!-- Blocks populated dynamically by JavaScript -->
                         </div>
+                        <div id="canvas-hud" class="canvas-hud-overlay"></div>
                     </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; color: var(--text-muted);">
                         <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--accent-cyan); border-radius: 2px;"></span> Compute Cores/SMs</span>
@@ -1856,6 +2028,26 @@
                             <span>SRAM Buffer Utilization:</span>
                             <span id="tile-sram-pct" style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-green);">50.0%</span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Live Systolic Array Simulation Engine -->
+                <div class="systolic-sim-container" style="grid-column: 1 / -1;">
+                    <div class="systolic-header">
+                        <div>
+                            <h3 style="font-size: 16px; font-weight: 700; color: #fff;">⚡ Interactive Systolic Array Wavefront & Multi-Buffering Engine</h3>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 3px;">
+                                Visualizing physical matrix tile streams (Tm × Tk @ left, Tk × Tn @ top) propagating diagonally through 2D Multiply-Accumulate (MAC) processing elements.
+                            </p>
+                        </div>
+                        <div class="systolic-controls">
+                            <button type="button" class="systolic-btn" id="btn-systolic-play">⏸ Pause</button>
+                            <button type="button" class="systolic-btn" id="btn-systolic-step">Step Clock</button>
+                            <button type="button" class="systolic-btn" id="btn-systolic-reset">Reset</button>
+                        </div>
+                    </div>
+                    <div class="systolic-canvas-wrap">
+                        <canvas id="systolic-canvas" width="800" height="250" aria-label="Systolic Array Simulation"></canvas>
                     </div>
                 </div>
             </div>
@@ -2584,6 +2776,7 @@
             renderCompareTable();
             setupEventListeners();
             autoDetectHardware();
+            initGraphicsEngines();
         }
 
         // Populate Select Dropdown
@@ -2673,10 +2866,15 @@
 
             // Inspect the first block by default
             inspectBlock(blocks[0]);
+            updateSiliconCanvas(chip);
         }
 
         // Inspect Block details in side card
         function inspectBlock(b) {
+            if (typeof siliconLayoutBoxes !== 'undefined' && siliconLayoutBoxes.length > 0) {
+                const foundIdx = siliconLayoutBoxes.findIndex(item => item.block.name === b.name);
+                if (foundIdx >= 0) selectedBlockIndex = foundIdx;
+            }
             const domainBadge = document.getElementById("insp-domain");
             domainBadge.className = `inspector-badge domain-${b.domain}`;
             domainBadge.textContent = `${b.domain.toUpperCase()} DOMAIN`;
@@ -2921,6 +3119,7 @@
             const actualHbm = totalTiles * (currentMatrixSize / currentTileK) * (tileA + tileB);
             const reloadFactor = Math.max(1.0, actualHbm / idealHbm);
             document.getElementById("tier-reload").textContent = `${reloadFactor.toFixed(2)}x Reload Amplification`;
+            updateSystolicParameters();
         }
 
         // Render Compare Table
@@ -2944,6 +3143,1128 @@
                 `;
                 tbody.appendChild(tr);
             }
+        }
+
+        // ============================================================
+        // HIGH-LEVEL SILICON DIE GRAPHICS ENGINE
+        // ============================================================
+        let siliconCanvas = null;
+        let siliconCtx = null;
+        let siliconAnimFrame = null;
+        let currentFloorplanMode = 'floorplan';
+        let siliconLayoutBoxes = [];
+        let hoveredBlockIndex = -1;
+        let selectedBlockIndex = 0;
+        let dieMouse = { x: 340, y: 220, isHovering: false };
+        let busPackets = [];
+        let chipThermalData = [];
+
+        const DOMAIN_COLORS = {
+            compute: { main: '#00e5ff', bg: 'rgba(0, 229, 255, 0.08)', border: 'rgba(0, 229, 255, 0.45)', glow: 'rgba(0, 229, 255, 0.6)' },
+            tensor: { main: '#10b981', bg: 'rgba(16, 185, 129, 0.08)', border: 'rgba(16, 185, 129, 0.45)', glow: 'rgba(16, 185, 129, 0.6)' },
+            npu: { main: '#a855f7', bg: 'rgba(168, 85, 247, 0.08)', border: 'rgba(168, 85, 247, 0.45)', glow: 'rgba(168, 85, 247, 0.6)' },
+            cache: { main: '#f59e0b', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.45)', glow: 'rgba(245, 158, 11, 0.6)' },
+            memory_ctrl: { main: '#f43f5e', bg: 'rgba(244, 63, 94, 0.08)', border: 'rgba(244, 63, 94, 0.45)', glow: 'rgba(244, 63, 94, 0.6)' },
+            media: { main: '#38bdf8', bg: 'rgba(56, 189, 248, 0.08)', border: 'rgba(56, 189, 248, 0.45)', glow: 'rgba(56, 189, 248, 0.6)' },
+            io: { main: '#64748b', bg: 'rgba(100, 116, 139, 0.08)', border: 'rgba(100, 116, 139, 0.45)', glow: 'rgba(100, 116, 139, 0.6)' },
+            interconnect: { main: '#06b6d4', bg: 'rgba(6, 182, 212, 0.08)', border: 'rgba(6, 182, 212, 0.45)', glow: 'rgba(6, 182, 212, 0.6)' }
+        };
+
+        function getDomainColor(domain) {
+            return DOMAIN_COLORS[domain] || DOMAIN_COLORS.compute;
+        }
+
+        // Proportional 2D Die Treemap Layout Algorithm
+        function computeFloorplanBoxes(blocks, width, height) {
+            if (!blocks || blocks.length === 0) return [];
+            const pad = 24;
+            const innerX = pad;
+            const innerY = pad;
+            const innerW = width - pad * 2;
+            const innerH = height - pad * 2;
+
+            function partition(items, x, y, w, h) {
+                if (items.length === 0) return [];
+                if (items.length === 1) {
+                    return [{
+                        block: items[0].block,
+                        index: items[0].index,
+                        x: Math.round(x),
+                        y: Math.round(y),
+                        w: Math.round(w),
+                        h: Math.round(h)
+                    }];
+                }
+
+                const total = items.reduce((s, it) => s + it.block.area, 0);
+                let acc = 0;
+                let splitIdx = 0;
+                let minDiff = Infinity;
+
+                for (let i = 0; i < items.length - 1; i++) {
+                    acc += items[i].block.area;
+                    const diff = Math.abs(acc - (total - acc));
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        splitIdx = i + 1;
+                    }
+                }
+
+                const leftGroup = items.slice(0, splitIdx);
+                const rightGroup = items.slice(splitIdx);
+                const leftSum = leftGroup.reduce((s, it) => s + it.block.area, 0);
+                const ratio = total > 0 ? (leftSum / total) : 0.5;
+
+                const gap = 4;
+                if (w >= h) {
+                    const wLeft = Math.max(24, Math.round((w - gap) * ratio));
+                    const wRight = Math.max(24, w - wLeft - gap);
+                    return [
+                        ...partition(leftGroup, x, y, wLeft, h),
+                        ...partition(rightGroup, x + wLeft + gap, y, wRight, h)
+                    ];
+                } else {
+                    const hTop = Math.max(24, Math.round((h - gap) * ratio));
+                    const hBottom = Math.max(24, h - hTop - gap);
+                    return [
+                        ...partition(leftGroup, x, y, w, hTop),
+                        ...partition(rightGroup, x, y + hTop + gap, w, hBottom)
+                    ];
+                }
+            }
+
+            const items = blocks.map((b, idx) => ({ block: b, index: idx }));
+            return partition(items, innerX, innerY, innerW, innerH);
+        }
+
+        function updateSiliconCanvas(chip) {
+            if (typeof document === 'undefined') return;
+            const canvas = document.getElementById('silicon-canvas');
+            if (!canvas || typeof canvas.getContext !== 'function') return;
+
+            siliconCanvas = canvas;
+            siliconCtx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            siliconLayoutBoxes = computeFloorplanBoxes(chip.blueprint_blocks, w, h);
+            hoveredBlockIndex = -1;
+            selectedBlockIndex = 0;
+
+            // Generate Bus Interconnect Pathways and Data Packets
+            busPackets = [];
+            if (siliconLayoutBoxes.length >= 2) {
+                const memBoxes = siliconLayoutBoxes.filter(b => b.block.domain === 'memory_ctrl');
+                const cacheBoxes = siliconLayoutBoxes.filter(b => b.block.domain === 'cache');
+                const compBoxes = siliconLayoutBoxes.filter(b => b.block.domain === 'compute' || b.block.domain === 'tensor' || b.block.domain === 'npu');
+
+                const paths = [];
+                memBoxes.forEach(m => {
+                    cacheBoxes.forEach(c => {
+                        paths.push({
+                            x1: m.x + m.w / 2, y1: m.y + m.h / 2,
+                            x2: c.x + c.w / 2, y2: c.y + c.h / 2,
+                            type: 'dram-to-cache'
+                        });
+                    });
+                });
+                cacheBoxes.forEach(c => {
+                    compBoxes.forEach(comp => {
+                        paths.push({
+                            x1: c.x + c.w / 2, y1: c.y + c.h / 2,
+                            x2: comp.x + comp.w / 2, y2: comp.y + comp.h / 2,
+                            type: 'cache-to-core'
+                        });
+                    });
+                });
+                if (paths.length === 0) {
+                    for (let i = 0; i < siliconLayoutBoxes.length - 1; i++) {
+                        const b1 = siliconLayoutBoxes[i];
+                        const b2 = siliconLayoutBoxes[i + 1];
+                        paths.push({
+                            x1: b1.x + b1.w / 2, y1: b1.y + b1.h / 2,
+                            x2: b2.x + b2.w / 2, y2: b2.y + b2.h / 2,
+                            type: 'adjacent'
+                        });
+                    }
+                }
+
+                const bw = chip.bandwidth_gbs || 50;
+                const numPackets = Math.min(48, Math.max(12, Math.round(bw / 60)));
+                const speedScale = Math.min(2.5, Math.max(0.6, bw / 500));
+
+                for (let i = 0; i < numPackets; i++) {
+                    const p = paths[i % paths.length];
+                    busPackets.push({
+                        path: p,
+                        progress: Math.random(),
+                        speed: (0.003 + Math.random() * 0.005) * speedScale,
+                        color: p.type === 'dram-to-cache' ? '#f43f5e' : (p.type === 'cache-to-core' ? '#00e5ff' : '#10b981'),
+                        size: 2.5 + Math.random() * 2
+                    });
+                }
+            }
+
+            // Generate Thermal Hotspot Profile
+            chipThermalData = siliconLayoutBoxes.map(b => {
+                let baseTemp = 42;
+                if (b.block.domain === 'compute') baseTemp = 84 + (b.index % 5);
+                else if (b.block.domain === 'tensor') baseTemp = 87 + (b.index % 4);
+                else if (b.block.domain === 'npu') baseTemp = 82 + (b.index % 5);
+                else if (b.block.domain === 'cache') baseTemp = 60 + (b.index % 4);
+                else if (b.block.domain === 'memory_ctrl') baseTemp = 52 + (b.index % 3);
+                else baseTemp = 44 + (b.index % 4);
+
+                return {
+                    cx: b.x + b.w / 2,
+                    cy: b.y + b.h / 2,
+                    radius: Math.max(b.w, b.h) * 0.85,
+                    temp: baseTemp,
+                    name: b.block.name
+                };
+            });
+        }
+
+        function drawSiliconSubstrate(ctx, w, h, chip) {
+            const waferGrad = ctx.createLinearGradient(0, 0, w, h);
+            waferGrad.addColorStop(0, '#0a0e1a');
+            waferGrad.addColorStop(0.5, '#060810');
+            waferGrad.addColorStop(1, '#0c1120');
+            ctx.fillStyle = waferGrad;
+            ctx.fillRect(0, 0, w, h);
+
+            // Outer package perimeter line
+            ctx.strokeStyle = 'rgba(0, 229, 255, 0.12)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(10, 10, w - 20, h - 20);
+
+            // BGA Micro-Bump / Solder Ball perimeter pads
+            const padSpacing = 16;
+            ctx.fillStyle = '#d4af37';
+            for (let x = 16; x < w - 16; x += padSpacing) {
+                ctx.beginPath(); ctx.arc(x, 10, 2, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(x, h - 10, 2, 0, Math.PI * 2); ctx.fill();
+            }
+            for (let y = 16; y < h - 16; y += padSpacing) {
+                ctx.beginPath(); ctx.arc(10, y, 2, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(w - 10, y, 2, 0, Math.PI * 2); ctx.fill();
+            }
+
+            // Precision Optical Alignment Fiducials (+) at 4 corners
+            const fiducials = [
+                { x: 18, y: 18 }, { x: w - 18, y: 18 },
+                { x: 18, y: h - 18 }, { x: w - 18, y: h - 18 }
+            ];
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 1;
+            fiducials.forEach(f => {
+                ctx.beginPath();
+                ctx.moveTo(f.x - 5, f.y); ctx.lineTo(f.x + 5, f.y);
+                ctx.moveTo(f.x, f.y - 5); ctx.lineTo(f.x + 5, f.y);
+                ctx.stroke();
+                ctx.beginPath(); ctx.arc(f.x, f.y, 3, 0, Math.PI * 2); ctx.stroke();
+            });
+
+            // Die Edge Seal / Guard Ring
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(22, 22, w - 44, h - 44);
+
+            // Laser Etched Wafer Inscription watermark
+            if (chip) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                ctx.font = '8.5px "JetBrains Mono", monospace';
+                ctx.textAlign = 'left';
+                const inscription = `${chip.vendor.toUpperCase()} • ${chip.name.toUpperCase()} • ${chip.process_node_nm}nm • ${chip.die_size_mm2 ? chip.die_size_mm2 + 'mm²' : 'MONOLITHIC'} • TDP ${chip.tdp_watts}W`;
+                ctx.fillText(inscription, 26, h - 13);
+            }
+        }
+
+        function drawSpecularSheen(ctx, w, h) {
+            if (!dieMouse.isHovering) return;
+            const sheen = ctx.createRadialGradient(dieMouse.x, dieMouse.y, 5, dieMouse.x, dieMouse.y, 220);
+            sheen.addColorStop(0, 'rgba(255, 255, 255, 0.10)');
+            sheen.addColorStop(0.3, 'rgba(0, 229, 255, 0.05)');
+            sheen.addColorStop(0.7, 'rgba(168, 85, 247, 0.02)');
+            sheen.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = sheen;
+            ctx.fillRect(22, 22, w - 44, h - 44);
+        }
+
+        function drawBlockInternalTexture(ctx, b, color) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(b.x + 2, b.y + 20, b.w - 4, b.h - 22);
+            ctx.clip();
+
+            const domain = b.block.domain;
+            if (domain === 'compute') {
+                ctx.strokeStyle = 'rgba(0, 229, 255, 0.12)';
+                ctx.lineWidth = 1;
+                const laneW = 12;
+                for (let x = b.x + 4; x < b.x + b.w; x += laneW) {
+                    ctx.beginPath(); ctx.moveTo(x, b.y + 22); ctx.lineTo(x, b.y + b.h - 4); ctx.stroke();
+                    for (let y = b.y + 26; y < b.y + b.h - 4; y += 10) {
+                        ctx.fillStyle = 'rgba(0, 229, 255, 0.2)';
+                        ctx.fillRect(x - 2, y, 4, 1.5);
+                    }
+                }
+            } else if (domain === 'tensor' || domain === 'npu') {
+                ctx.fillStyle = domain === 'tensor' ? 'rgba(16, 185, 129, 0.35)' : 'rgba(168, 85, 247, 0.35)';
+                const dotPitch = 11;
+                for (let x = b.x + 8; x < b.x + b.w - 6; x += dotPitch) {
+                    for (let y = b.y + 26; y < b.y + b.h - 6; y += dotPitch) {
+                        ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI * 2); ctx.fill();
+                    }
+                }
+            } else if (domain === 'cache') {
+                ctx.strokeStyle = 'rgba(245, 158, 11, 0.12)';
+                ctx.lineWidth = 1;
+                for (let x = b.x + 6; x < b.x + b.w; x += 10) {
+                    ctx.beginPath(); ctx.moveTo(x, b.y + 22); ctx.lineTo(x, b.y + b.h - 4); ctx.stroke();
+                }
+                for (let y = b.y + 24; y < b.y + b.h; y += 8) {
+                    ctx.beginPath(); ctx.moveTo(b.x + 4, y); ctx.lineTo(b.x + b.w - 4, y); ctx.stroke();
+                }
+            } else if (domain === 'memory_ctrl') {
+                ctx.strokeStyle = 'rgba(244, 63, 94, 0.22)';
+                ctx.lineWidth = 1.5;
+                for (let y = b.y + 26; y < b.y + b.h - 4; y += 7) {
+                    ctx.beginPath(); ctx.moveTo(b.x + 4, y); ctx.lineTo(b.x + b.w - 4, y); ctx.stroke();
+                }
+            } else {
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.15)';
+                ctx.lineWidth = 1;
+                for (let x = b.x + 8; x < b.x + b.w; x += 16) {
+                    ctx.beginPath(); ctx.moveTo(x, b.y + 24); ctx.lineTo(x, b.y + 32); ctx.lineTo(x + 8, b.y + 40); ctx.lineTo(x + 8, b.y + b.h - 6); ctx.stroke();
+                }
+            }
+            ctx.restore();
+        }
+
+        function drawSiliconBlock(ctx, b, isHovered, isSelected) {
+            const color = getDomainColor(b.block.domain);
+
+            ctx.fillStyle = isHovered ? 'rgba(255, 255, 255, 0.08)' : (isSelected ? 'rgba(0, 229, 255, 0.12)' : color.bg);
+            ctx.fillRect(b.x, b.y, b.w, b.h);
+
+            drawBlockInternalTexture(ctx, b, color);
+
+            // Header Banner
+            ctx.fillStyle = 'rgba(10, 14, 26, 0.85)';
+            ctx.fillRect(b.x, b.y, b.w, 18);
+
+            ctx.fillStyle = color.main;
+            ctx.fillRect(b.x + 4, b.y + 4, 3, 10);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '600 10.5px "Inter", sans-serif';
+            ctx.textAlign = 'left';
+            const maxNameWidth = b.w - 45;
+            let nameStr = b.block.name;
+            if (ctx.measureText(nameStr).width > maxNameWidth && maxNameWidth > 20) {
+                while (ctx.measureText(nameStr + '…').width > maxNameWidth && nameStr.length > 2) {
+                    nameStr = nameStr.slice(0, -1);
+                }
+                nameStr += '…';
+            }
+            ctx.fillText(nameStr, b.x + 11, b.y + 13);
+
+            ctx.fillStyle = color.main;
+            ctx.font = '9px "JetBrains Mono", monospace';
+            ctx.textAlign = 'right';
+            ctx.fillText(`${b.block.area}%`, b.x + b.w - 5, b.y + 13);
+
+            if (b.h >= 55) {
+                const specEntries = Object.entries(b.block.specs || {});
+                if (specEntries.length > 0) {
+                    const firstSpec = `${specEntries[0][0]}: ${specEntries[0][1]}`;
+                    ctx.fillStyle = 'rgba(203, 213, 225, 0.75)';
+                    ctx.font = '9px "JetBrains Mono", monospace';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(firstSpec, b.x + 6, b.y + b.h - 6);
+                }
+            }
+
+            if (isSelected) {
+                ctx.save();
+                ctx.strokeStyle = '#00e5ff';
+                ctx.lineWidth = 2;
+                ctx.shadowColor = '#00e5ff';
+                ctx.shadowBlur = 10;
+                ctx.strokeRect(b.x, b.y, b.w, b.h);
+
+                const brk = 6;
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(b.x, b.y + brk); ctx.lineTo(b.x, b.y); ctx.lineTo(b.x + brk, b.y);
+                ctx.moveTo(b.x + b.w - brk, b.y); ctx.lineTo(b.x + b.w, b.y); ctx.lineTo(b.x + b.w, b.y + brk);
+                ctx.moveTo(b.x, b.y + b.h - brk); ctx.lineTo(b.x, b.y + b.h); ctx.lineTo(b.x + brk, b.y + b.h);
+                ctx.moveTo(b.x + b.w - brk, b.y + b.h); ctx.lineTo(b.x + b.w, b.y + b.h); ctx.lineTo(b.x + b.w, b.y + b.h - brk);
+                ctx.stroke();
+                ctx.restore();
+            } else if (isHovered) {
+                ctx.save();
+                ctx.strokeStyle = color.main;
+                ctx.lineWidth = 2;
+                ctx.shadowColor = color.main;
+                ctx.shadowBlur = 8;
+                ctx.strokeRect(b.x, b.y, b.w, b.h);
+                ctx.restore();
+            } else {
+                ctx.strokeStyle = color.border;
+                ctx.lineWidth = 1;
+                ctx.strokeRect(b.x, b.y, b.w, b.h);
+            }
+        }
+
+        function drawInterconnectBus(ctx, chip) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(0, 229, 255, 0.22)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+
+            const uniquePaths = [];
+            busPackets.forEach(p => {
+                if (!uniquePaths.includes(p.path)) uniquePaths.push(p.path);
+            });
+
+            uniquePaths.forEach(p => {
+                ctx.beginPath();
+                ctx.moveTo(p.x1, p.y1);
+                const midX = p.x1 + (p.x2 - p.x1) * 0.5;
+                ctx.lineTo(midX, p.y1);
+                ctx.lineTo(midX, p.y2);
+                ctx.lineTo(p.x2, p.y2);
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(0, 229, 255, 0.4)';
+                ctx.beginPath();
+                ctx.arc(midX, (p.y1 + p.y2) * 0.5, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.setLineDash([]);
+            ctx.restore();
+
+            busPackets.forEach(p => {
+                p.progress += p.speed;
+                if (p.progress > 1) p.progress -= 1;
+
+                const midX = p.path.x1 + (p.path.x2 - p.path.x1) * 0.5;
+                let px, py;
+                if (p.progress < 0.33) {
+                    const t = p.progress / 0.33;
+                    px = p.path.x1 + (midX - p.path.x1) * t;
+                    py = p.path.y1;
+                } else if (p.progress < 0.66) {
+                    const t = (p.progress - 0.33) / 0.33;
+                    px = midX;
+                    py = p.path.y1 + (p.path.y2 - p.path.y1) * t;
+                } else {
+                    const t = (p.progress - 0.66) / 0.34;
+                    px = midX + (p.path.x2 - midX) * t;
+                    py = p.path.y2;
+                }
+
+                ctx.save();
+                ctx.fillStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 6;
+                ctx.beginPath();
+                ctx.arc(px, py, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        function drawThermalHeatmap(ctx, w, h) {
+            ctx.fillStyle = '#030712';
+            ctx.fillRect(0, 0, w, h);
+
+            chipThermalData.forEach(spot => {
+                const grad = ctx.createRadialGradient(spot.cx, spot.cy, 2, spot.cx, spot.cy, spot.radius);
+                if (spot.temp >= 80) {
+                    grad.addColorStop(0, 'rgba(255, 255, 255, 0.90)');
+                    grad.addColorStop(0.2, 'rgba(255, 68, 68, 0.80)');
+                    grad.addColorStop(0.5, 'rgba(245, 158, 11, 0.50)');
+                    grad.addColorStop(0.8, 'rgba(16, 185, 129, 0.20)');
+                    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                } else if (spot.temp >= 60) {
+                    grad.addColorStop(0, 'rgba(245, 158, 11, 0.80)');
+                    grad.addColorStop(0.4, 'rgba(234, 88, 12, 0.50)');
+                    grad.addColorStop(0.7, 'rgba(16, 185, 129, 0.20)');
+                    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                } else {
+                    grad.addColorStop(0, 'rgba(16, 185, 129, 0.70)');
+                    grad.addColorStop(0.4, 'rgba(6, 182, 212, 0.40)');
+                    grad.addColorStop(0.8, 'rgba(59, 130, 246, 0.15)');
+                    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                }
+                ctx.fillStyle = grad;
+                ctx.beginPath(); ctx.arc(spot.cx, spot.cy, spot.radius, 0, Math.PI * 2); ctx.fill();
+            });
+
+            siliconLayoutBoxes.forEach(b => {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(b.x, b.y, b.w, b.h);
+
+                const spot = chipThermalData.find(s => s.name === b.block.name);
+                const tempVal = spot ? spot.temp : 55;
+                const tempColor = tempVal >= 80 ? '#ff4d4d' : (tempVal >= 60 ? '#f59e0b' : '#38bdf8');
+
+                ctx.fillStyle = 'rgba(10, 14, 26, 0.85)';
+                const labelW = 56;
+                const labelH = 16;
+                ctx.fillRect(b.x + b.w / 2 - labelW / 2, b.y + b.h / 2 - labelH / 2, labelW, labelH);
+                ctx.strokeStyle = tempColor;
+                ctx.strokeRect(b.x + b.w / 2 - labelW / 2, b.y + b.h / 2 - labelH / 2, labelW, labelH);
+
+                ctx.fillStyle = tempColor;
+                ctx.font = 'bold 9.5px "JetBrains Mono", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${tempVal.toFixed(1)}°C`, b.x + b.w / 2, b.y + b.h / 2 + 3.5);
+            });
+
+            const barX = w - 180;
+            const barY = h - 22;
+            const barW = 150;
+            const barH = 10;
+            const lg = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+            lg.addColorStop(0, '#0284c7');
+            lg.addColorStop(0.35, '#10b981');
+            lg.addColorStop(0.7, '#f59e0b');
+            lg.addColorStop(0.9, '#ef4444');
+            lg.addColorStop(1, '#ffffff');
+            ctx.fillStyle = lg;
+            ctx.fillRect(barX, barY, barW, barH);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.strokeRect(barX, barY, barW, barH);
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '8px "JetBrains Mono", monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('30°C', barX, barY - 3);
+            ctx.textAlign = 'center';
+            ctx.fillText('60°C', barX + barW / 2, barY - 3);
+            ctx.textAlign = 'right';
+            ctx.fillText('95°C', barX + barW, barY - 3);
+        }
+
+        function drawTrafficMode(ctx, w, h, chip) {
+            ctx.fillStyle = '#060913';
+            ctx.fillRect(0, 0, w, h);
+
+            siliconLayoutBoxes.forEach(b => {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+                ctx.strokeStyle = 'rgba(0, 229, 255, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(b.x, b.y, b.w, b.h);
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.font = '9.5px "Inter", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(b.block.name, b.x + 6, b.y + 14);
+            });
+
+            drawInterconnectBus(ctx, chip);
+
+            const bw = chip.bandwidth_gbs || 50;
+            const satPct = Math.min(98.5, Math.max(72.0, 75 + (bw / 3000) * 20)).toFixed(1);
+
+            ctx.fillStyle = 'rgba(10, 14, 26, 0.9)';
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 1;
+            const satBoxW = 280;
+            const satBoxH = 22;
+            ctx.fillRect(w / 2 - satBoxW / 2, h - 32, satBoxW, satBoxH);
+            ctx.strokeRect(w / 2 - satBoxW / 2, h - 32, satBoxW, satBoxH);
+
+            ctx.fillStyle = '#10b981';
+            ctx.font = 'bold 10px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(`⚡ BUS SATURATION: ${satPct}% • ${(bw * 0.94).toFixed(0)} GB/s ACTIVE`, w / 2, h - 17);
+        }
+
+        function drawSiliconXRay(ctx, w, h, chip) {
+            ctx.fillStyle = '#020408';
+            ctx.fillRect(0, 0, w, h);
+
+            ctx.strokeStyle = 'rgba(16, 185, 129, 0.08)';
+            ctx.lineWidth = 0.5;
+            for (let x = 24; x < w - 24; x += 6) {
+                ctx.beginPath(); ctx.moveTo(x, 24); ctx.lineTo(x, h - 24); ctx.stroke();
+            }
+            for (let y = 24; y < h - 24; y += 6) {
+                ctx.beginPath(); ctx.moveTo(24, y); ctx.lineTo(w - 24, y); ctx.stroke();
+            }
+
+            siliconLayoutBoxes.forEach(b => {
+                ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(b.x, b.y, b.w, b.h);
+
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.7)';
+                ctx.font = '9px "JetBrains Mono", monospace';
+                ctx.textAlign = 'left';
+                ctx.fillText(`[M${(b.index % 8) + 1}] ${b.block.name}`, b.x + 4, b.y + 12);
+            });
+
+            const cx = w / 2;
+            const cy = h / 2;
+            ctx.save();
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = '#00e5ff';
+            ctx.shadowBlur = 8;
+
+            const hSpan1 = (w - 120) * 0.4;
+            const vSpan1 = (h - 100) * 0.35;
+            ctx.beginPath();
+            ctx.moveTo(cx - hSpan1, cy); ctx.lineTo(cx + hSpan1, cy);
+            ctx.moveTo(cx - hSpan1, cy - vSpan1); ctx.lineTo(cx - hSpan1, cy + vSpan1);
+            ctx.moveTo(cx + hSpan1, cy - vSpan1); ctx.lineTo(cx + hSpan1, cy + vSpan1);
+            ctx.stroke();
+
+            ctx.lineWidth = 1.5;
+            const hSpan2 = hSpan1 * 0.45;
+            const corners = [
+                { x: cx - hSpan1, y: cy - vSpan1 }, { x: cx - hSpan1, y: cy + vSpan1 },
+                { x: cx + hSpan1, y: cy - vSpan1 }, { x: cx + hSpan1, y: cy + vSpan1 }
+            ];
+            corners.forEach(c => {
+                ctx.beginPath(); ctx.moveTo(c.x - hSpan2, c.y); ctx.lineTo(c.x + hSpan2, c.y); ctx.stroke();
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath(); ctx.arc(c.x, c.y, 2.5, 0, Math.PI * 2); ctx.fill();
+            });
+
+            ctx.fillStyle = '#00e5ff';
+            ctx.fillRect(cx - 16, cy - 10, 32, 20);
+            ctx.strokeStyle = '#ffffff';
+            ctx.strokeRect(cx - 16, cy - 10, 32, 20);
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 8px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('PLL', cx, cy + 3);
+            ctx.restore();
+
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.5)';
+            ctx.font = '9px "JetBrains Mono", monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('LITHOGRAPHY: FINFET / GAA METALLIZATION STACK (M1-M12) • BALANCED CLOCK H-TREE', 26, h - 12);
+        }
+
+        function handleSiliconCanvasMouseMove(e) {
+            const canvas = document.getElementById('silicon-canvas');
+            if (!canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            const mouseY = (e.clientY - rect.top) * scaleY;
+
+            dieMouse.x = mouseX;
+            dieMouse.y = mouseY;
+            dieMouse.isHovering = true;
+
+            let foundIdx = -1;
+            for (let i = 0; i < siliconLayoutBoxes.length; i++) {
+                const b = siliconLayoutBoxes[i];
+                if (mouseX >= b.x && mouseX <= b.x + b.w && mouseY >= b.y && mouseY <= b.y + b.h) {
+                    foundIdx = i;
+                    break;
+                }
+            }
+
+            hoveredBlockIndex = foundIdx;
+            canvas.style.cursor = foundIdx >= 0 ? 'pointer' : 'default';
+
+            const hud = document.getElementById('canvas-hud');
+            if (foundIdx >= 0 && hud) {
+                const b = siliconLayoutBoxes[foundIdx];
+                const block = b.block;
+                const specsStr = Object.entries(block.specs || {}).map(([k, v]) => `${k}: ${v}`).join(' • ');
+
+                hud.innerHTML = `
+                    <div style="font-weight: 700; color: #fff; font-size: 12px; margin-bottom: 3px;">${block.name}</div>
+                    <div style="font-size: 10px; color: var(--accent-cyan); font-family: var(--font-mono); margin-bottom: 4px;">
+                        ${block.domain.toUpperCase()} DOMAIN • ${block.area}% DIE AREA
+                    </div>
+                    <div style="font-size: 10px; color: var(--text-muted);">${specsStr || block.desc}</div>
+                    <div style="font-size: 9px; color: var(--accent-green); margin-top: 5px;">⚡ Click to inspect in Co-Design Panel</div>
+                `;
+
+                const hudX = Math.min(rect.width - 240, Math.max(10, (e.clientX - rect.left) + 15));
+                const hudY = Math.min(rect.height - 110, Math.max(10, (e.clientY - rect.top) + 15));
+                hud.style.left = `${hudX}px`;
+                hud.style.top = `${hudY}px`;
+                hud.style.display = 'block';
+            } else if (hud) {
+                hud.style.display = 'none';
+            }
+        }
+
+        function handleSiliconCanvasMouseLeave() {
+            dieMouse.isHovering = false;
+            hoveredBlockIndex = -1;
+            const hud = document.getElementById('canvas-hud');
+            if (hud) hud.style.display = 'none';
+        }
+
+        function handleSiliconCanvasClick() {
+            if (hoveredBlockIndex >= 0) {
+                selectedBlockIndex = hoveredBlockIndex;
+                const b = siliconLayoutBoxes[hoveredBlockIndex].block;
+                inspectBlock(b);
+
+                const gridBlocks = document.querySelectorAll('.silicon-block');
+                gridBlocks.forEach((el, idx) => {
+                    if (idx === hoveredBlockIndex) el.classList.add('selected');
+                    else el.classList.remove('selected');
+                });
+            }
+        }
+
+        function renderSiliconCanvasLoop() {
+            if (typeof document === 'undefined') return;
+            const canvas = document.getElementById('silicon-canvas');
+            if (!canvas || typeof canvas.getContext !== 'function') return;
+
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            const chip = HARDWARE_DB[currentChipKey];
+
+            if (currentFloorplanMode === 'thermal') {
+                drawThermalHeatmap(ctx, w, h);
+            } else if (currentFloorplanMode === 'traffic') {
+                drawTrafficMode(ctx, w, h, chip);
+            } else if (currentFloorplanMode === 'xray') {
+                drawSiliconXRay(ctx, w, h, chip);
+            } else {
+                drawSiliconSubstrate(ctx, w, h, chip);
+                siliconLayoutBoxes.forEach((b, idx) => {
+                    drawSiliconBlock(ctx, b, idx === hoveredBlockIndex, idx === selectedBlockIndex);
+                });
+                drawInterconnectBus(ctx, chip);
+                drawSpecularSheen(ctx, w, h);
+            }
+
+            if (typeof requestAnimationFrame !== 'undefined') {
+                siliconAnimFrame = requestAnimationFrame(renderSiliconCanvasLoop);
+            }
+        }
+
+        function initSiliconCanvas() {
+            if (typeof document === 'undefined') return;
+            const canvas = document.getElementById('silicon-canvas');
+            if (!canvas || typeof canvas.getContext !== 'function') return;
+
+            siliconCanvas = canvas;
+            siliconCtx = canvas.getContext('2d');
+
+            canvas.addEventListener('mousemove', handleSiliconCanvasMouseMove);
+            canvas.addEventListener('mouseleave', handleSiliconCanvasMouseLeave);
+            canvas.addEventListener('click', handleSiliconCanvasClick);
+
+            // Mode Toggle Buttons
+            document.querySelectorAll('.die-mode-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.die-mode-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFloorplanMode = btn.getAttribute('data-mode');
+                    const statusTag = document.getElementById('canvas-status-tag');
+                    if (statusTag) {
+                        if (currentFloorplanMode === 'thermal') statusTag.textContent = '60 FPS // FLIR Infrared Thermal Field';
+                        else if (currentFloorplanMode === 'traffic') statusTag.textContent = '60 FPS // Live Telemetry Traffic Bus';
+                        else if (currentFloorplanMode === 'xray') statusTag.textContent = '60 FPS // M1-M12 Metallization & H-Tree';
+                        else statusTag.textContent = '60 FPS // Live Interconnect Bus';
+                    }
+                });
+            });
+
+            // View Switch Toggles (Canvas vs Grid)
+            const btnCanvas = document.getElementById('btn-toggle-canvas');
+            const btnGrid = document.getElementById('btn-toggle-grid');
+            const dieGrid = document.getElementById('die-grid');
+            const hud = document.getElementById('canvas-hud');
+
+            if (btnCanvas && btnGrid && dieGrid) {
+                btnCanvas.addEventListener('click', () => {
+                    btnCanvas.classList.add('active');
+                    btnGrid.classList.remove('active');
+                    canvas.style.display = 'block';
+                    dieGrid.style.display = 'none';
+                });
+                btnGrid.addEventListener('click', () => {
+                    btnGrid.classList.add('active');
+                    btnCanvas.classList.remove('active');
+                    canvas.style.display = 'none';
+                    if (hud) hud.style.display = 'none';
+                    dieGrid.style.display = 'grid';
+                });
+            }
+
+            updateSiliconCanvas(HARDWARE_DB[currentChipKey]);
+
+            if (typeof requestAnimationFrame !== 'undefined') {
+                siliconAnimFrame = requestAnimationFrame(renderSiliconCanvasLoop);
+            }
+        }
+
+        // ============================================================
+        // 2D SYSTOLIC ARRAY & MULTI-BUFFERING WAVEFRONT SIMULATOR
+        // ============================================================
+        let systolicCanvas = null;
+        let systolicCtx = null;
+        let systolicAnimFrame = null;
+        let systolicPlaying = true;
+        let systolicCycle = 0;
+        let systolicLastTime = 0;
+        const SYSTOLIC_STEP_INTERVAL = 650;
+
+        let systolicGridC = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
+
+        const MATRIX_A = [
+            [1.2, 0.8, 1.5, 2.0],
+            [0.5, 1.4, 0.9, 1.1],
+            [1.8, 0.6, 1.2, 0.7],
+            [0.9, 1.1, 1.6, 1.3]
+        ];
+        const MATRIX_B = [
+            [1.0, 0.7, 1.3, 0.8],
+            [1.5, 1.2, 0.6, 1.4],
+            [0.8, 1.6, 1.1, 0.9],
+            [1.2, 0.5, 1.4, 1.7]
+        ];
+
+        function stepSystolicClock() {
+            systolicCycle++;
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const k = (systolicCycle - (r + c)) % 4;
+                    if (k >= 0 && k < 4) {
+                        const valA = MATRIX_A[r][k];
+                        const valB = MATRIX_B[k][c];
+                        systolicGridC[r][c] = parseFloat(((systolicGridC[r][c] + valA * valB) % 99.9).toFixed(1));
+                    }
+                }
+            }
+        }
+
+        function resetSystolicSimulation() {
+            systolicCycle = 0;
+            systolicGridC = [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0]
+            ];
+        }
+
+        function updateSystolicParameters() {
+            // Keep simulation responsive to tile changes
+        }
+
+        function drawSystolicSimulation(ctx, w, h) {
+            ctx.fillStyle = '#060911';
+            ctx.fillRect(0, 0, w, h);
+
+            const peStartX = 230;
+            const peStartY = 45;
+            const peSize = 42;
+            const peGap = 16;
+
+            // 1. Matrix A Input Queues (Streaming from Left)
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 9.5px "Inter", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('MATRIX A (ROWS)', 20, 25);
+
+            for (let r = 0; r < 4; r++) {
+                const y = peStartY + r * (peSize + peGap);
+                ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(20, y + peSize / 2);
+                ctx.lineTo(peStartX - 10, y + peSize / 2);
+                ctx.stroke();
+
+                for (let k = 0; k < 3; k++) {
+                    const packetX = peStartX - 28 - k * 36;
+                    if (packetX > 20) {
+                        const isEntering = ((systolicCycle - r - k) % 6 === 0);
+                        ctx.fillStyle = isEntering ? '#00e5ff' : 'rgba(0, 229, 255, 0.25)';
+                        ctx.fillRect(packetX, y + peSize / 2 - 9, 28, 18);
+                        ctx.strokeStyle = isEntering ? '#ffffff' : 'rgba(0, 229, 255, 0.5)';
+                        ctx.strokeRect(packetX, y + peSize / 2 - 9, 28, 18);
+
+                        ctx.fillStyle = isEntering ? '#000000' : '#ffffff';
+                        ctx.font = 'bold 8.5px "JetBrains Mono", monospace';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(`a${r}${k}`, packetX + 14, y + peSize / 2 + 3);
+                    }
+                }
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.font = '8px "JetBrains Mono", monospace';
+                ctx.textAlign = 'left';
+                ctx.fillText(`A[${r},*]`, 20, y + peSize / 2 - 12);
+            }
+
+            // 2. Matrix B Input Queues (Streaming from Top)
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 9.5px "Inter", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('MATRIX B (COLUMNS)', peStartX + 100, 20);
+
+            for (let c = 0; c < 4; c++) {
+                const x = peStartX + c * (peSize + peGap) + peSize / 2;
+                ctx.strokeStyle = 'rgba(16, 185, 129, 0.15)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x, 26);
+                ctx.lineTo(x, peStartY - 6);
+                ctx.stroke();
+
+                const isEnteringCol = ((systolicCycle - c) % 4 === 0);
+                ctx.fillStyle = isEnteringCol ? '#10b981' : 'rgba(16, 185, 129, 0.25)';
+                ctx.fillRect(x - 12, 26, 24, 12);
+                ctx.strokeStyle = isEnteringCol ? '#ffffff' : 'rgba(16, 185, 129, 0.5)';
+                ctx.strokeRect(x - 12, 26, 24, 12);
+
+                ctx.fillStyle = isEnteringCol ? '#000000' : '#ffffff';
+                ctx.font = 'bold 8px "JetBrains Mono", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(`b*${c}`, x, 35);
+            }
+
+            // 3. 4x4 Processing Element (PE) Array
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const x = peStartX + c * (peSize + peGap);
+                    const y = peStartY + r * (peSize + peGap);
+
+                    const isWavefront = ((r + c) === (systolicCycle % 7));
+                    const isPassed = ((r + c) < (systolicCycle % 7));
+
+                    if (isWavefront) {
+                        ctx.save();
+                        ctx.fillStyle = 'rgba(0, 229, 255, 0.35)';
+                        ctx.shadowColor = '#00e5ff';
+                        ctx.shadowBlur = 12;
+                        ctx.fillRect(x, y, peSize, peSize);
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(x, y, peSize, peSize);
+                        ctx.restore();
+                    } else if (isPassed) {
+                        ctx.fillStyle = 'rgba(16, 185, 129, 0.12)';
+                        ctx.fillRect(x, y, peSize, peSize);
+                        ctx.strokeStyle = 'rgba(16, 185, 129, 0.45)';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(x, y, peSize, peSize);
+                    } else {
+                        ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+                        ctx.fillRect(x, y, peSize, peSize);
+                        ctx.strokeStyle = 'rgba(51, 65, 85, 0.7)';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(x, y, peSize, peSize);
+                    }
+
+                    ctx.fillStyle = isWavefront ? '#ffffff' : 'rgba(255, 255, 255, 0.6)';
+                    ctx.font = '7.5px "JetBrains Mono", monospace';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(`PE${r}${c}`, x + 3, y + 10);
+
+                    ctx.fillStyle = isWavefront ? '#00e5ff' : '#cbd5e1';
+                    ctx.font = 'bold 9.5px "JetBrains Mono", monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${systolicGridC[r][c].toFixed(1)}`, x + peSize / 2, y + 26);
+
+                    ctx.fillStyle = isWavefront ? '#10b981' : 'rgba(148, 163, 184, 0.3)';
+                    ctx.font = '7px sans-serif';
+                    ctx.fillText('✕+=', x + peSize / 2, y + 36);
+
+                    if (c < 3) {
+                        ctx.strokeStyle = 'rgba(0, 229, 255, 0.2)';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(x + peSize, y + peSize / 2);
+                        ctx.lineTo(x + peSize + peGap, y + peSize / 2);
+                        ctx.stroke();
+                    }
+                    if (r < 3) {
+                        ctx.strokeStyle = 'rgba(16, 185, 129, 0.2)';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(x + peSize / 2, y + peSize);
+                        ctx.lineTo(x + peSize / 2, y + peSize + peGap);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            // 4. Multi-Buffering Ping-Pong State Visualizer (Right Side)
+            const pipeX = 490;
+            const pipeW = w - pipeX - 20;
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 9.5px "Inter", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`MULTI-BUFFERING PIPELINE (${currentStages} STAGES)`, pipeX, 25);
+
+            const stagesList = [
+                { name: 'Buffer 0: Compute Tile', state: 'ACTIVE IN PEs', color: '#10b981', tag: 'SRAM' },
+                { name: 'Buffer 1: Async DMA Prefetch', state: 'DRAM STREAMING', color: '#f59e0b', tag: 'BUS' }
+            ];
+            if (currentStages >= 3) {
+                stagesList.push({ name: 'Buffer 2: Writeback Drain', state: 'L2 WRITEBACK', color: '#a855f7', tag: 'DMA' });
+            }
+
+            stagesList.forEach((st, idx) => {
+                const sy = 40 + idx * 48;
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+                ctx.fillRect(pipeX, sy, pipeW, 40);
+                ctx.strokeStyle = st.color;
+                ctx.lineWidth = 1;
+                ctx.strokeRect(pipeX, sy, pipeW, 40);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '600 10px "Inter", sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(st.name, pipeX + 8, sy + 16);
+
+                ctx.fillStyle = st.color;
+                ctx.font = 'bold 8.5px "JetBrains Mono", monospace';
+                ctx.textAlign = 'right';
+                ctx.fillText(st.tag, pipeX + pipeW - 8, sy + 16);
+
+                const progW = pipeW - 16;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.fillRect(pipeX + 8, sy + 22, progW, 10);
+
+                const fillRatio = idx === 0 ? 1.0 : ((systolicCycle * 0.2 + idx * 0.3) % 1.0);
+                ctx.fillStyle = st.color;
+                ctx.fillRect(pipeX + 8, sy + 22, progW * fillRatio, 10);
+            });
+
+            // SRAM Footprint Mini Gauge
+            const chip = HARDWARE_DB[currentChipKey];
+            const byteSize = currentPrecision === 'fp8' || currentPrecision === 'int8' ? 1.0 : (currentPrecision === 'fp32' ? 4.0 : 2.0);
+            const tileA = currentTileM * currentTileK * byteSize;
+            const tileB = currentTileK * currentTileN * byteSize;
+            const tileC = currentTileM * currentTileN * 4.0;
+            const sramReqKb = ((tileA + tileB) * currentStages + tileC) / 1024.0;
+            const sramLimitKb = chip.sram_per_core_kb;
+            const isOverflow = sramReqKb > sramLimitKb;
+
+            const gaugeY = 40 + stagesList.length * 48;
+            ctx.fillStyle = isOverflow ? 'rgba(244, 63, 94, 0.15)' : 'rgba(16, 185, 129, 0.10)';
+            ctx.fillRect(pipeX, gaugeY, pipeW, 26);
+            ctx.strokeStyle = isOverflow ? '#f43f5e' : '#10b981';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(pipeX, gaugeY, pipeW, 26);
+
+            ctx.fillStyle = isOverflow ? '#f43f5e' : '#10b981';
+            ctx.font = 'bold 9px "JetBrains Mono", monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText(`SRAM: ${sramReqKb.toFixed(1)} KB / ${sramLimitKb} KB`, pipeX + 8, gaugeY + 16);
+            ctx.textAlign = 'right';
+            ctx.fillText(isOverflow ? 'OVERFLOW' : 'FIT: OK', pipeX + pipeW - 8, gaugeY + 16);
+
+            // 5. Bottom Telemetry Status Strip
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.fillRect(0, h - 22, w, 22);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.strokeRect(0, h - 22, w, 22);
+
+            ctx.fillStyle = '#00e5ff';
+            ctx.font = 'bold 9.5px "JetBrains Mono", monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText(`CLK CYCLE #${systolicCycle}`, 16, h - 7);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '9px "JetBrains Mono", monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(`TILES: Tm=${currentTileM} × Tn=${currentTileN} × Tk=${currentTileK}  •  PRECISION: ${currentPrecision.toUpperCase()}`, w / 2, h - 7);
+
+            ctx.fillStyle = '#10b981';
+            ctx.textAlign = 'right';
+            ctx.fillText(`WAVEFRONT: ${systolicPlaying ? 'RUNNING (60 FPS)' : 'PAUSED'}`, w - 16, h - 7);
+        }
+
+        function renderSystolicLoop(timestamp) {
+            if (typeof document === 'undefined') return;
+            const canvas = document.getElementById('systolic-canvas');
+            if (!canvas || typeof canvas.getContext !== 'function') return;
+
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            if (systolicPlaying) {
+                if (!systolicLastTime) systolicLastTime = timestamp;
+                if (timestamp - systolicLastTime >= SYSTOLIC_STEP_INTERVAL) {
+                    stepSystolicClock();
+                    systolicLastTime = timestamp;
+                }
+            }
+
+            drawSystolicSimulation(ctx, w, h);
+
+            if (typeof requestAnimationFrame !== 'undefined') {
+                systolicAnimFrame = requestAnimationFrame(renderSystolicLoop);
+            }
+        }
+
+        function initSystolicEngine() {
+            if (typeof document === 'undefined') return;
+            const canvas = document.getElementById('systolic-canvas');
+            if (!canvas || typeof canvas.getContext !== 'function') return;
+
+            systolicCanvas = canvas;
+            systolicCtx = canvas.getContext('2d');
+
+            const btnPlay = document.getElementById('btn-systolic-play');
+            const btnStep = document.getElementById('btn-systolic-step');
+            const btnReset = document.getElementById('btn-systolic-reset');
+
+            if (btnPlay) {
+                btnPlay.addEventListener('click', () => {
+                    systolicPlaying = !systolicPlaying;
+                    btnPlay.textContent = systolicPlaying ? '⏸ Pause' : '▶ Resume';
+                });
+            }
+            if (btnStep) {
+                btnStep.addEventListener('click', () => {
+                    systolicPlaying = false;
+                    if (btnPlay) btnPlay.textContent = '▶ Resume';
+                    stepSystolicClock();
+                });
+            }
+            if (btnReset) {
+                btnReset.addEventListener('click', () => {
+                    resetSystolicSimulation();
+                });
+            }
+
+            if (typeof requestAnimationFrame !== 'undefined') {
+                systolicAnimFrame = requestAnimationFrame(renderSystolicLoop);
+            }
+        }
+
+        function initGraphicsEngines() {
+            if (typeof window === 'undefined' || typeof document === 'undefined') return;
+            initSiliconCanvas();
+            initSystolicEngine();
         }
 
         // Setup All Event Listeners
@@ -2983,6 +4304,10 @@
 
                     if (activeView === "roofline") {
                         renderRooflineChart();
+                    } else if (activeView === "blueprint") {
+                        updateSiliconCanvas(HARDWARE_DB[currentChipKey]);
+                    } else if (activeView === "memory") {
+                        updateSystolicParameters();
                     }
                 });
             });

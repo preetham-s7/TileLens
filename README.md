@@ -7,7 +7,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Target: GPUs & TPUs](https://img.shields.io/badge/Hardware-NVIDIA%20%7C%20Google%20TPU%20%7C%20OpenSilicon-green.svg)](#supported-hardware)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fpreetham-s7%2FTileLens)
 
 </div>
 

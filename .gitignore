@@ -42,3 +42,6 @@ llama3_ffn_comparison.html
 .vscode/
 .idea/
 *.swp
+
+.vercel
+.env*

@@ -49,6 +49,28 @@ class TestTileSimulator(unittest.TestCase):
         self.assertIsNotNone(report.optimal_tile_config)
         self.assertTrue(any(s.category == "BANDWIDTH" for s in report.suggestions))
 
+    def test_invalid_tile_settings(self):
+        for field in ("tile_m", "tile_n", "tile_k", "pipeline_stages"):
+            for value in (0, -1, 1.5, True, float("nan"), float("inf")):
+                with self.subTest(field=field, value=value):
+                    with self.assertRaisesRegex(ValueError, field + " must be a positive integer"):
+                        TileConfig(**{field: value})
+
+    def test_invalid_matrix_dimensions(self):
+        for axis in range(3):
+            for value in (0, -1, 1.5, True):
+                dimensions = [4096, 4096, 4096]
+                dimensions[axis] = value
+                with self.subTest(axis=axis, value=value):
+                    with self.assertRaisesRegex(ValueError, "must be a positive integer"):
+                        self.sim.simulate_gemm(*dimensions)
+
+    def test_mutated_tile_settings_are_validated(self):
+        cfg = TileConfig()
+        cfg.pipeline_stages = -1
+        with self.assertRaisesRegex(ValueError, "pipeline_stages"):
+            self.sim.simulate_gemm(4096, 4096, 4096, cfg)
+
 
 if __name__ == "__main__":
     unittest.main()

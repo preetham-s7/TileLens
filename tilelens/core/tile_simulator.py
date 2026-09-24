@@ -6,6 +6,7 @@ import math
 from dataclasses import dataclass
 from typing import Optional
 from tilelens.hardware.spec import HardwareSpec, Precision
+from tilelens.core.validation import require_positive_integer
 
 
 @dataclass
@@ -17,6 +18,13 @@ class TileConfig:
     pipeline_stages: int = 2           # Multi-buffering depth (2 for double buffer, 3-4 for Hopper async TMA)
     precision: Precision = Precision.BF16
     accum_precision: Precision = Precision.FP32  # Accumulators usually kept in FP32
+
+    def __post_init__(self):
+        self.validate()
+
+    def validate(self) -> None:
+        for name in ("tile_m", "tile_n", "tile_k", "pipeline_stages"):
+            require_positive_integer(name, getattr(self, name))
 
 
 @dataclass
@@ -79,6 +87,10 @@ class TileSimulator:
         """Simulate execution of GEMM on the hardware with specified tile configuration."""
         if tile_config is None:
             tile_config = TileConfig()
+
+        for name, value in (("M", M), ("N", N), ("K", K)):
+            require_positive_integer(name, value)
+        tile_config.validate()
 
         elem_bytes = tile_config.precision.byte_size
         accum_bytes = tile_config.accum_precision.byte_size

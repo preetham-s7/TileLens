@@ -447,6 +447,16 @@ def handle_export_viz(args):
     print_msg(f"[bold green][OK] Interactive dashboard exported successfully:[/bold green] {filepath}")
 
 
+def positive_integer(value: str) -> int:
+    try:
+        number = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError("must be a positive integer") from None
+    if number <= 0:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return number
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="TileLens: Hardware-Software Co-Design, Chip Blueprint Inspector & Roofline Visualizer for Mobile, Laptop PCs & Cloud AI",
@@ -476,38 +486,38 @@ def main():
 
     # Command: gemm
     p_gemm = subparsers.add_parser("gemm", help="Simulate GEMM tile flow and analyze hardware bottlenecks.")
-    p_gemm.add_argument("-M", "-m", dest="m", type=int, default=4096, help="GEMM M dimension")
-    p_gemm.add_argument("-N", "-n", dest="n", type=int, default=4096, help="GEMM N dimension")
-    p_gemm.add_argument("-K", "-k", dest="k", type=int, default=4096, help="GEMM K dimension")
+    p_gemm.add_argument("-M", "-m", dest="m", type=positive_integer, default=4096, help="GEMM M dimension")
+    p_gemm.add_argument("-N", "-n", dest="n", type=positive_integer, default=4096, help="GEMM N dimension")
+    p_gemm.add_argument("-K", "-k", dest="k", type=positive_integer, default=4096, help="GEMM K dimension")
     p_gemm.add_argument("--device", "-d", default="h100", help="Target hardware alias (e.g. a17, m4, h100, tpu_v5e)")
     p_gemm.add_argument("--precision", "-p", default="bf16", help="Precision format")
-    p_gemm.add_argument("--tile-m", type=int, default=128, help="Tile M dimension")
-    p_gemm.add_argument("--tile-n", type=int, default=128, help="Tile N dimension")
-    p_gemm.add_argument("--tile-k", type=int, default=64, help="Tile K dimension")
-    p_gemm.add_argument("--stages", type=int, default=2, help="Pipeline multi-buffering stages (2, 3, 4)")
+    p_gemm.add_argument("--tile-m", type=positive_integer, default=128, help="Tile M dimension")
+    p_gemm.add_argument("--tile-n", type=positive_integer, default=128, help="Tile N dimension")
+    p_gemm.add_argument("--tile-k", type=positive_integer, default=64, help="Tile K dimension")
+    p_gemm.add_argument("--stages", type=positive_integer, default=2, help="Pipeline multi-buffering stages (2, 3, 4)")
 
     # Command: compare
     p_comp = subparsers.add_parser("compare", help="Compare GEMM performance across multiple GPUs, Mobile SoCs & TPUs.")
-    p_comp.add_argument("-M", "-m", dest="m", type=int, default=4096, help="GEMM M dimension")
-    p_comp.add_argument("-N", "-n", dest="n", type=int, default=4096, help="GEMM N dimension")
-    p_comp.add_argument("-K", "-k", dest="k", type=int, default=4096, help="GEMM K dimension")
+    p_comp.add_argument("-M", "-m", dest="m", type=positive_integer, default=4096, help="GEMM M dimension")
+    p_comp.add_argument("-N", "-n", dest="n", type=positive_integer, default=4096, help="GEMM N dimension")
+    p_comp.add_argument("-K", "-k", dest="k", type=positive_integer, default=4096, help="GEMM K dimension")
     p_comp.add_argument("--devices", default="a17,m4,rtx4060,h100", help="Comma-separated device list")
     p_comp.add_argument("--precision", "-p", default="bf16", help="Precision format")
-    p_comp.add_argument("--tile-m", type=int, default=128, help="Tile M dimension")
-    p_comp.add_argument("--tile-n", type=int, default=128, help="Tile N dimension")
-    p_comp.add_argument("--tile-k", type=int, default=64, help="Tile K dimension")
+    p_comp.add_argument("--tile-m", type=positive_integer, default=128, help="Tile M dimension")
+    p_comp.add_argument("--tile-n", type=positive_integer, default=128, help="Tile N dimension")
+    p_comp.add_argument("--tile-k", type=positive_integer, default=64, help="Tile K dimension")
     p_comp.add_argument("--output-html", "-o", default=None, help="Optional path to export interactive HTML dashboard")
 
     # Command: export-viz
     p_viz = subparsers.add_parser("export-viz", help="Export an interactive HTML dashboard.")
-    p_viz.add_argument("-M", "-m", dest="m", type=int, default=4096, help="GEMM M dimension")
-    p_viz.add_argument("-N", "-n", dest="n", type=int, default=4096, help="GEMM N dimension")
-    p_viz.add_argument("-K", "-k", dest="k", type=int, default=4096, help="GEMM K dimension")
+    p_viz.add_argument("-M", "-m", dest="m", type=positive_integer, default=4096, help="GEMM M dimension")
+    p_viz.add_argument("-N", "-n", dest="n", type=positive_integer, default=4096, help="GEMM N dimension")
+    p_viz.add_argument("-K", "-k", dest="k", type=positive_integer, default=4096, help="GEMM K dimension")
     p_viz.add_argument("--devices", default="a17,m4,h100,b200,rtx4090", help="Comma-separated device list")
     p_viz.add_argument("--precision", "-p", default="bf16", help="Precision format")
-    p_viz.add_argument("--tile-m", type=int, default=128, help="Tile M")
-    p_viz.add_argument("--tile-n", type=int, default=128, help="Tile N")
-    p_viz.add_argument("--tile-k", type=int, default=64, help="Tile K")
+    p_viz.add_argument("--tile-m", type=positive_integer, default=128, help="Tile M")
+    p_viz.add_argument("--tile-n", type=positive_integer, default=128, help="Tile N")
+    p_viz.add_argument("--tile-k", type=positive_integer, default=64, help="Tile K")
     p_viz.add_argument("--output", "-o", default="tilelens_dashboard.html", help="Output HTML filepath")
     p_viz.add_argument("--title", default="TileLens Hardware Co-Design Roofline Dashboard", help="Dashboard title")
 
@@ -533,4 +543,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

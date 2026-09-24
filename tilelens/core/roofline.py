@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 from tilelens.hardware.spec import HardwareSpec, Precision
+from tilelens.core.validation import require_positive_integer
 
 
 class BoundType(str, Enum):
@@ -131,6 +132,12 @@ def calculate_gemm_intensity(
     With tiling:
       Bytes = ((M*N/tile_n) * K + (M*N/tile_m) * K + M*N) * byte_size
     """
+    for name, value in (("M", M), ("N", N), ("K", K)):
+        require_positive_integer(name, value)
+    for name, value in (("tile_m", tile_m), ("tile_n", tile_n), ("tile_k", tile_k)):
+        if value is not None:
+            require_positive_integer(name, value)
+
     bytes_per_elem = precision.byte_size
     total_flops = 2.0 * M * N * K
 

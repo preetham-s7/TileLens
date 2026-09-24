@@ -49,6 +49,9 @@ pip install -e ".[dev,viz]"
 
 # 4. Run tests
 python -m unittest discover -s tests
+
+# Dashboard calculation and interaction regression tests (requires Node.js)
+node --test tests/test_dashboard.cjs
 ```
 
 ---

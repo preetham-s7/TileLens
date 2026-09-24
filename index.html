@@ -1590,7 +1590,7 @@
                 </div>
                 <div class="form-group">
                     <label for="c-tflops">Peak BF16/FP16 Compute (TFLOPs)</label>
-                    <input type="number" id="c-tflops" value="25.0" step="1" required>
+                    <input type="number" id="c-tflops" value="25.0" min="1" step="1" required>
                 </div>
                 <div class="form-group">
                     <label for="c-npu">Dedicated NPU (TOPS)</label>
@@ -1607,6 +1607,7 @@
         // Comprehensive Hardware Database
         const HARDWARE_DB = {
             "apple_a17_pro": {
+                dense_tflops: {"fp32": 2.15, "fp16": 4.3, "bf16": 4.3, "int8": 35.0, "int4": 70.0},
                 name: "Apple A17 Pro",
                 vendor: "Apple",
                 category: "mobile",
@@ -1647,6 +1648,7 @@
             },
 
             "snapdragon_8_gen3": {
+                dense_tflops: {"fp32": 3.4, "fp16": 6.8, "bf16": 6.8, "int8": 45.0, "int4": 90.0},
                 name: "Qualcomm Snapdragon 8 Gen 3",
                 vendor: "Qualcomm",
                 category: "mobile",
@@ -1687,6 +1689,7 @@
             },
 
             "google_tensor_g4": {
+                dense_tflops: {"fp32": 1.8, "fp16": 3.6, "bf16": 3.6, "int8": 37.0, "int4": 74.0},
                 name: "Google Tensor G4",
                 vendor: "Google",
                 category: "mobile",
@@ -1724,6 +1727,7 @@
             },
 
             "mediatek_dimensity_9300": {
+                dense_tflops: {"fp32": 4.6, "fp16": 9.2, "bf16": 9.2, "int8": 46.0, "int4": 92.0},
                 name: "MediaTek Dimensity 9300",
                 vendor: "MediaTek",
                 category: "mobile",
@@ -1761,6 +1765,7 @@
             },
 
             "apple_m4": {
+                dense_tflops: {"fp32": 4.3, "fp16": 8.6, "bf16": 8.6, "int8": 38.0, "int4": 76.0},
                 name: "Apple M4",
                 vendor: "Apple",
                 category: "laptop",
@@ -1800,6 +1805,7 @@
             },
 
             "apple_m3_max": {
+                dense_tflops: {"fp32": 16.2, "fp16": 32.4, "bf16": 32.4, "int8": 64.8},
                 name: "Apple M3 Max",
                 vendor: "Apple",
                 category: "laptop",
@@ -1837,6 +1843,7 @@
             },
 
             "intel_lunar_lake_288v": {
+                dense_tflops: {"fp32": 8.4, "fp16": 16.8, "bf16": 16.8, "int8": 67.0, "int4": 134.0},
                 name: "Intel Core Ultra 7 288V",
                 vendor: "Intel",
                 category: "laptop",
@@ -1874,6 +1881,7 @@
             },
 
             "amd_ryzen_ai_9_hx370": {
+                dense_tflops: {"fp32": 7.8, "fp16": 15.6, "bf16": 15.6, "int8": 50.0},
                 name: "AMD Ryzen AI 9 HX 370",
                 vendor: "AMD",
                 category: "laptop",
@@ -1911,6 +1919,7 @@
             },
 
             "nvidia_rtx_4060_mobile": {
+                dense_tflops: {"fp32": 15.1, "fp16": 60.5, "bf16": 60.5, "fp8": 121.0, "int8": 121.0},
                 name: "NVIDIA GeForce RTX 4060 Laptop",
                 vendor: "NVIDIA",
                 category: "laptop",
@@ -1948,6 +1957,7 @@
             },
 
             "nvidia_rtx_4090": {
+                dense_tflops: {"fp32": 82.6, "fp16": 330.0, "bf16": 330.0, "fp8": 660.0, "int8": 660.0},
                 name: "NVIDIA GeForce RTX 4090",
                 vendor: "NVIDIA",
                 category: "laptop",
@@ -1983,6 +1993,7 @@
             },
 
             "nvidia_h100_sxm": {
+                dense_tflops: {"fp64": 34.0, "fp32": 67.0, "tf32": 494.5, "fp16": 989.0, "bf16": 989.0, "fp8": 1978.0, "int8": 1978.0},
                 name: "NVIDIA H100 SXM5",
                 vendor: "NVIDIA",
                 category: "cloud",
@@ -2019,6 +2030,7 @@
             },
 
             "nvidia_b200": {
+                dense_tflops: {"fp64": 45.0, "fp32": 90.0, "tf32": 1125.0, "fp16": 2250.0, "bf16": 2250.0, "fp8": 4500.0, "int4": 9000.0},
                 name: "NVIDIA Blackwell B200",
                 vendor: "NVIDIA",
                 category: "cloud",
@@ -2055,6 +2067,7 @@
             },
 
             "amd_mi300x": {
+                dense_tflops: {"fp64": 81.7, "fp32": 163.4, "fp16": 1307.0, "bf16": 1307.0, "fp8": 2614.0, "int8": 2614.0},
                 name: "AMD Instinct MI300X",
                 vendor: "AMD",
                 category: "cloud",
@@ -2090,6 +2103,7 @@
             },
 
             "google_tpu_v5p": {
+                dense_tflops: {"fp32": 57.0, "bf16": 459.0, "fp8": 918.0, "int8": 918.0},
                 name: "Google TPU v5p",
                 vendor: "Google",
                 category: "cloud",
@@ -2125,6 +2139,7 @@
             },
 
             "google_tpu_v5e": {
+                dense_tflops: {"bf16": 197.0, "fp16": 197.0, "int8": 394.0},
                 name: "Google TPU v5e",
                 vendor: "Google",
                 category: "cloud",
@@ -2158,6 +2173,7 @@
             },
 
             "custom_open_tpu_130nm": {
+                dense_tflops: {"int8": 0.0512},
                 name: "OpenTPU-130 (SkyWater 130nm)",
                 vendor: "Open Silicon",
                 category: "edge",
@@ -2209,6 +2225,7 @@
 
         // Initialize App
         function initApp() {
+            updatePrecisionOptions();
             populateChipSelect();
             renderChipHero(HARDWARE_DB[currentChipKey]);
             renderBlueprint(HARDWARE_DB[currentChipKey]);
@@ -2387,7 +2404,8 @@
 
                 // TTFT for 1024 tokens prompt (Compute Bound)
                 // Operations = 2 * params * 1024
-                const gigaFlops = 2.0 * parseFloat(m.params) * 1024.0 / 1e9;
+                // Parameter counts are expressed in billions, so this is already GFLOPs.
+                const gigaFlops = 2.0 * parseFloat(m.params) * 1024.0;
                 const ttftMs = fitClass === "status-oom" ? "—" : `${Math.max(8.0, (gigaFlops / (chip.peak_bf16_tflops * 1000)) * 1000).toFixed(0)} ms`;
 
                 tr.innerHTML = `
@@ -2411,10 +2429,23 @@
             });
         }
 
+        // Offer only precisions defined by the selected hardware profile.
+        function updatePrecisionOptions() {
+            const chip = HARDWARE_DB[currentChipKey];
+            const select = document.getElementById("ctrl-precision");
+            for (const option of select.options) {
+                option.disabled = !(chip.dense_tflops[option.value] > 0);
+            }
+            if (!(chip.dense_tflops[currentPrecision] > 0)) {
+                currentPrecision = Array.from(select.options).find(option => !option.disabled).value;
+            }
+            select.value = currentPrecision;
+        }
+
         // Render Interactive Roofline Model Chart
         function renderRooflineChart() {
             const chip = HARDWARE_DB[currentChipKey];
-            const peakTflops = chip.peak_bf16_tflops;
+            const peakTflops = chip.dense_tflops[currentPrecision];
             const bwTbs = chip.bandwidth_gbs / 1000.0;
             const ridge = (peakTflops * 1000.0) / chip.bandwidth_gbs;
 
@@ -2430,7 +2461,7 @@
                 x: xVals,
                 y: yRoofline,
                 mode: 'lines',
-                name: `${chip.name} Theoretical Limit`,
+                name: `${chip.name} ${currentPrecision.toUpperCase()} Theoretical Limit`,
                 line: { color: '#00e5ff', width: 3 }
             };
 
@@ -2502,15 +2533,14 @@
             document.getElementById("tier-mem-desc").textContent = `${chip.vram_gb} GB ${chip.memory_type} @ ${chip.bandwidth_gbs} GB/s`;
             document.getElementById("tier-cache-desc").textContent = `${chip.l2_cache_mb || 0} MB Shared L2 / SLC Buffer`;
             document.getElementById("tier-sram-desc").textContent = `${chip.sram_per_core_kb} KB Fast Scratchpad per Core (${chip.num_compute_units} units)`;
-            document.getElementById("tier-cores-desc").textContent = `${chip.num_compute_units} Compute Units | Peak ${chip.peak_bf16_tflops} TFLOPs`;
+            document.getElementById("tier-cores-desc").textContent = `${chip.num_compute_units} Compute Units | Peak ${chip.dense_tflops[currentPrecision]} TFLOPs (${currentPrecision.toUpperCase()})`;
 
             // SRAM requirement formula:
-            // Element byte size: BF16 = 2 bytes
-            // SRAM per core = (Tm*Tk + Tk*Tn + Tm*Tn) * byte_size * stages / 1024 (KB)
+            // Stage A/B buffers at input precision; keep one FP32 accumulator tile.
             const byteSize = currentPrecision === "fp8" || currentPrecision === "int8" ? 1.0 : (currentPrecision === "fp32" ? 4.0 : 2.0);
             const tileA = currentTileM * currentTileK * byteSize;
             const tileB = currentTileK * currentTileN * byteSize;
-            const tileC = currentTileM * currentTileN * byteSize;
+            const tileC = currentTileM * currentTileN * 4.0;
             const sramReqKb = ((tileA + tileB) * currentStages + tileC) / 1024.0;
             const sramLimitKb = chip.sram_per_core_kb;
             const sramPct = (sramReqKb / sramLimitKb) * 100.0;
@@ -2616,6 +2646,7 @@
             // Precision Selector
             document.getElementById("ctrl-precision").addEventListener("change", (e) => {
                 currentPrecision = e.target.value;
+                renderRooflineChart();
                 renderTileSimulation();
             });
 
@@ -2695,6 +2726,7 @@
                     num_compute_units: 8,
                     peak_bf16_tflops: tflops,
                     peak_fp8_tflops: tflops * 2,
+                    dense_tflops: { bf16: tflops, fp8: tflops * 2 },
                     npu_tops: npu,
                     tdp_watts: tdp,
                     description: `Custom designed accelerator synthesized via TileLens Architect targeting ${target}.`,
@@ -2738,6 +2770,7 @@
         // On Chip Selection Change
         function onChipChanged() {
             const chip = HARDWARE_DB[currentChipKey];
+            updatePrecisionOptions();
             renderChipHero(chip);
             renderBlueprint(chip);
             renderCapabilities(chip);

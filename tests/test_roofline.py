@@ -46,6 +46,14 @@ class TestRoofline(unittest.TestCase):
         self.assertIsNotNone(res)
         self.assertGreater(res.attainable_tflops, 0)
 
+    def test_gemm_intensity_rejects_invalid_dimensions(self):
+        for field in ("M", "N", "K", "tile_m", "tile_n", "tile_k"):
+            with self.subTest(field=field):
+                args = dict(M=128, N=128, K=64, tile_m=32, tile_n=32, tile_k=16)
+                args[field] = 0
+                with self.assertRaisesRegex(ValueError, field + " must be a positive integer"):
+                    calculate_gemm_intensity(**args)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,2824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TileLens: Chip Blueprint & Hardware Co-Design Inspector</title>
+    <meta name="description" content="Inspect chip blueprints, microarchitectures, and operational capabilities across Mobile SoCs, Laptop PCs, and Cloud AI Accelerators.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <style>
+        :root {
+            --bg-base: #07090e;
+            --bg-surface: #0e131f;
+            --bg-surface-elevated: #141c2e;
+            --bg-card: rgba(18, 26, 43, 0.75);
+            --bg-card-hover: rgba(26, 37, 61, 0.85);
+            --border: rgba(56, 80, 120, 0.28);
+            --border-highlight: rgba(0, 229, 255, 0.4);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --accent-cyan: #00e5ff;
+            --accent-blue: #3b82f6;
+            --accent-purple: #a855f7;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --glow-cyan: 0 0 24px rgba(0, 229, 255, 0.25);
+            --glow-purple: 0 0 24px rgba(168, 85, 247, 0.25);
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --header-h: 70px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1.5;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 10%, rgba(0, 229, 255, 0.04) 0%, transparent 45%),
+                radial-gradient(circle at 85% 65%, rgba(168, 85, 247, 0.05) 0%, transparent 50%),
+                linear-gradient(to bottom, #07090e, #0a0e17);
+        }
+
+        /* Top Navigation Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: var(--header-h);
+            background: rgba(10, 14, 23, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: var(--glow-cyan);
+        }
+
+        .brand-title {
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-tag {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            padding: 2px 7px;
+            border-radius: 20px;
+            background: rgba(0, 229, 255, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            text-transform: uppercase;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-detect {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(168, 85, 247, 0.15));
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            color: #fff;
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-detect:hover {
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.28), rgba(168, 85, 247, 0.28));
+            border-color: var(--accent-cyan);
+            box-shadow: var(--glow-cyan);
+            transform: translateY(-1px);
+        }
+
+        .btn-detect .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.3); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Device Auto-Detect Banner */
+        #detect-banner {
+            display: none;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.12), rgba(0, 229, 255, 0.12));
+            border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 10px 24px;
+            font-size: 13px;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .banner-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .banner-btn {
+            background: var(--accent-green);
+            color: #07090e;
+            font-weight: 700;
+            font-size: 12px;
+            border: none;
+            padding: 5px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .banner-btn:hover {
+            filter: brightness(1.15);
+        }
+
+        /* Main Container */
+        .app-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Chip Selection Toolbar */
+        .chip-selector-bar {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            backdrop-filter: blur(12px);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            max-width: 100%;
+            padding-bottom: 4px;
+        }
+
+        .filter-tab {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(71, 85, 105, 0.4);
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .filter-tab.active, .filter-tab:hover {
+            background: rgba(0, 229, 255, 0.15);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+        }
+
+        .chip-dropdown-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+            max-width: 480px;
+        }
+
+        .select-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .chip-select {
+            flex-grow: 1;
+            background: #0f172a;
+            border: 1px solid var(--border-highlight);
+            color: #fff;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 9px 14px;
+            border-radius: var(--radius-sm);
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .chip-select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+        }
+
+        /* Hero Chip Overview Card */
+        .chip-hero {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(20, 28, 48, 0.95) 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .chip-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-amber));
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chip-badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chip-class-badge {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(59, 130, 246, 0.18);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.35);
+        }
+
+        .chip-node-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-family: var(--font-mono);
+        }
+
+        .chip-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            color: #fff;
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .chip-vendor {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .chip-desc {
+            color: #cbd5e1;
+            font-size: 14px;
+            max-width: 800px;
+            line-height: 1.6;
+        }
+
+        /* Hero Quick Key Metrics Grid */
+        .hero-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .metric-box {
+            background: rgba(10, 15, 26, 0.7);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dim);
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            color: #fff;
+        }
+
+        .metric-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Navigation Tabs for Views */
+        .view-nav {
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            overflow-x: auto;
+        }
+
+        .view-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .view-btn:hover {
+            color: #fff;
+            background: rgba(30, 41, 59, 0.5);
+        }
+
+        .view-btn.active {
+            color: var(--accent-cyan);
+            background: rgba(0, 229, 255, 0.12);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            box-shadow: 0 0 16px rgba(0, 229, 255, 0.15);
+        }
+
+        /* View Content Sections */
+        .view-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================================ */
+        /* VIEW 1: INTERACTIVE SILICON BLUEPRINT & DIE LAYOUT          */
+        /* ============================================================ */
+        .blueprint-layout {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .blueprint-stage {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            backdrop-filter: blur(12px);
+        }
+
+        .stage-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stage-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .die-canvas-container {
+            width: 100%;
+            height: 480px;
+            background: #090d16;
+            border: 2px dashed rgba(56, 80, 120, 0.35);
+            border-radius: var(--radius-md);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        /* Silicon Die SVG representation */
+        .silicon-die {
+            width: 100%;
+            height: 100%;
+            max-width: 680px;
+            max-height: 440px;
+            border-radius: 8px;
+            background: #0b111e;
+            border: 2px solid #233554;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(0, 229, 255, 0.05);
+            position: relative;
+            display: grid;
+            padding: 8px;
+            gap: 6px;
+        }
+
+        .die-corner-mark {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--accent-cyan);
+        }
+        .die-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; }
+        .die-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; }
+        .die-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; }
+        .die-br { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+
+        .silicon-block {
+            border-radius: 6px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .silicon-block:hover, .silicon-block.selected {
+            transform: scale(1.02);
+            z-index: 10;
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .block-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .block-spec-mini {
+            font-size: 10px;
+            font-family: var(--font-mono);
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 4px;
+        }
+
+        /* Color classes for architectural domains */
+        .domain-compute {
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.18), rgba(14, 116, 144, 0.28));
+            border-color: rgba(0, 229, 255, 0.45);
+            color: var(--accent-cyan);
+        }
+        .domain-tensor {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(5, 150, 105, 0.28));
+            border-color: rgba(16, 185, 129, 0.45);
+            color: var(--accent-green);
+        }
+        .domain-npu {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(126, 34, 206, 0.32));
+            border-color: rgba(168, 85, 247, 0.5);
+            color: var(--accent-purple);
+        }
+        .domain-cache {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(217, 119, 6, 0.28));
+            border-color: rgba(245, 158, 11, 0.45);
+            color: var(--accent-amber);
+        }
+        .domain-memory_ctrl {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.18), rgba(190, 18, 60, 0.28));
+            border-color: rgba(244, 63, 94, 0.45);
+            color: var(--accent-rose);
+        }
+        .domain-media {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(67, 56, 202, 0.28));
+            border-color: rgba(99, 102, 241, 0.45);
+            color: #818cf8;
+        }
+        .domain-interconnect {
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.18), rgba(13, 148, 136, 0.28));
+            border-color: rgba(20, 184, 166, 0.45);
+            color: #2dd4bf;
+        }
+        .domain-io {
+            background: linear-gradient(135deg, rgba(148, 163, 184, 0.18), rgba(71, 85, 105, 0.28));
+            border-color: rgba(148, 163, 184, 0.45);
+            color: #cbd5e1;
+        }
+
+        /* Blueprint Inspector Side Card */
+        .blueprint-inspector {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 90px;
+        }
+
+        .inspector-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            width: fit-content;
+        }
+
+        .inspector-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .inspector-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .inspector-specs-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .inspector-specs-table tr {
+            border-bottom: 1px solid rgba(56, 80, 120, 0.2);
+        }
+
+        .inspector-specs-table td {
+            padding: 8px 0;
+        }
+
+        .inspector-specs-table td:first-child {
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .inspector-specs-table td:last-child {
+            color: #fff;
+            text-align: right;
+            font-family: var(--font-mono);
+            font-weight: 600;
+        }
+
+        .role-highlight-box {
+            background: rgba(0, 229, 255, 0.08);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            font-size: 12px;
+            color: #e2e8f0;
+            line-height: 1.5;
+        }
+
+        /* ============================================================ */
+        /* VIEW 2: WHAT ELSE IT DOES (OPERATIONAL PROFILE)              */
+        /* ============================================================ */
+        .capabilities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 24px;
+        }
+
+        .cap-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            backdrop-filter: blur(12px);
+        }
+
+        .cap-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .cap-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* LLM Capability Matrix Table */
+        .llm-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .llm-table th {
+            text-align: left;
+            padding: 10px 8px;
+            color: var(--text-dim);
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .llm-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid rgba(56, 80, 120, 0.2);
+        }
+
+        .status-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-fit {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-quant {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-amber);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-oom {
+            background: rgba(244, 63, 94, 0.15);
+            color: var(--accent-rose);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+        }
+
+        .tok-speed {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        /* Checkbox capability list */
+        .capability-checklist {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .capability-checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .check-icon {
+            color: var(--accent-green);
+            font-weight: bold;
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-top: -2px;
+        }
+
+        /* ============================================================ */
+        /* VIEW 3: ROOFLINE & CO-DESIGN ANALYZER                       */
+        /* ============================================================ */
+        .roofline-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+        }
+
+        .plot-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            backdrop-filter: blur(12px);
+        }
+
+        #roofline-chart {
+            width: 100%;
+            height: 460px;
+        }
+
+        .controls-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            backdrop-filter: blur(12px);
+        }
+
+        .control-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .control-val {
+            font-family: var(--font-mono);
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-cyan);
+            background: #1e293b;
+            height: 6px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .workload-preset-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .preset-pill {
+            background: #1e293b;
+            border: 1px solid rgba(71, 85, 105, 0.4);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-pill:hover, .preset-pill.active {
+            background: rgba(0, 229, 255, 0.2);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+        }
+
+        /* Co-Design Diagnostic Alert */
+        .diagnostic-card {
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-top: 8px;
+            border: 1px solid transparent;
+            font-size: 13px;
+        }
+
+        .diag-compute {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.35);
+            color: #6ee7b7;
+        }
+
+        .diag-memory {
+            background: rgba(244, 63, 94, 0.12);
+            border-color: rgba(244, 63, 94, 0.35);
+            color: #fca5a5;
+        }
+
+        /* ============================================================ */
+        /* VIEW 4: TILE MEMORY FLOW & SRAM BUFFER SIMULATOR            */
+        /* ============================================================ */
+        .tile-flow-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .tile-pipeline-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .memory-hierarchy-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .tier-box {
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .tier-hbm {
+            background: rgba(244, 63, 94, 0.12);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            color: #fda4af;
+        }
+
+        .tier-l2 {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fde68a;
+        }
+
+        .tier-sram {
+            background: rgba(0, 229, 255, 0.12);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            color: #a5f3fc;
+        }
+
+        .tier-compute {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+
+        .tier-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-dim);
+            font-family: var(--font-mono);
+        }
+
+        /* ============================================================ */
+        /* VIEW 5: MULTI-CHIP COMPARISON                               */
+        /* ============================================================ */
+        .compare-table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow-x: auto;
+            backdrop-filter: blur(12px);
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 900px;
+        }
+
+        .compare-table th {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 14px 16px;
+            text-align: left;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .compare-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(56, 80, 120, 0.2);
+            color: #cbd5e1;
+        }
+
+        .compare-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* ============================================================ */
+        /* VIEW 6: CUSTOM CHIP ARCHITECT                               */
+        /* ============================================================ */
+        .custom-architect-form {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input, .form-group select {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: #fff;
+            padding: 10px 14px;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .btn-architect {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            color: #07090e;
+            font-weight: 800;
+            font-size: 15px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-architect:hover {
+            box-shadow: 0 0 24px rgba(0, 229, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Mobile Adjustments & Media Queries */
+        @media (max-width: 900px) {
+            .app-container {
+                padding: 16px;
+                gap: 16px;
+            }
+            .chip-hero {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            .hero-metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .blueprint-layout, .roofline-grid, .tile-flow-grid {
+                grid-template-columns: 1fr;
+            }
+            .die-canvas-container {
+                height: 380px;
+            }
+            .blueprint-inspector {
+                position: static;
+            }
+            .chip-title {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 0 16px;
+            }
+            .brand-title {
+                font-size: 16px;
+            }
+            .btn-detect span {
+                display: none;
+            }
+            .hero-metrics-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .metric-value {
+                font-size: 17px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="brand-group">
+            <div class="logo-icon">🔍</div>
+            <div class="brand-title">
+                TileLens
+                <span class="brand-tag">Silicon & Co-Design</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-detect" id="btn-detect-device" title="Probe browser WebGL/WebGPU to identify your hardware">
+                <span class="pulse-dot"></span>
+                <span>Auto-Detect My Chip</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Auto-Detect Notification Banner -->
+    <div id="detect-banner">
+        <div class="banner-content">
+            <span>✨</span>
+            <span id="detect-text">Detected System: Apple GPU (M-Series / A-Series)</span>
+        </div>
+        <button class="banner-btn" id="btn-apply-detected">Load Blueprint</button>
+    </div>
+
+    <!-- Main Container -->
+    <main class="app-container">
+
+        <!-- Chip Selector Toolbar -->
+        <section class="chip-selector-bar">
+            <div class="filter-tabs" id="category-tabs">
+                <button class="filter-tab active" data-filter="all">All Chips (18)</button>
+                <button class="filter-tab" data-filter="mobile">📱 Mobile Phones</button>
+                <button class="filter-tab" data-filter="laptop">💻 Laptop PCs</button>
+                <button class="filter-tab" data-filter="cloud">☁️ Cloud & Datacenter</button>
+                <button class="filter-tab" data-filter="edge">⚡ Custom & Edge ASIC</button>
+            </div>
+            <div class="chip-dropdown-group">
+                <label for="chip-select" class="select-label">Select Chip:</label>
+                <select id="chip-select" class="chip-select">
+                    <!-- Populated dynamically via JS -->
+                </select>
+            </div>
+        </section>
+
+        <!-- Hero Overview Card -->
+        <section class="chip-hero">
+            <div class="hero-left">
+                <div class="chip-badge-row">
+                    <span class="chip-class-badge" id="hero-target">Mobile Phone</span>
+                    <span class="chip-node-badge" id="hero-node">3nm TSMC</span>
+                    <span class="chip-class-badge" id="hero-tdp" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3);">10W TDP</span>
+                </div>
+                <h1 class="chip-title">
+                    <span id="hero-name">Apple A17 Pro</span>
+                    <span class="chip-vendor" id="hero-vendor">(Apple)</span>
+                </h1>
+                <p class="chip-desc" id="hero-desc">
+                    First commercial 3nm smartphone chip with 6-core GPU featuring hardware Ray Tracing and a 35 TOPS Neural Engine.
+                </p>
+                <div class="hero-metrics-grid">
+                    <div class="metric-box">
+                        <span class="metric-label">Memory Bandwidth</span>
+                        <span class="metric-value" id="m-bw">51.2 GB/s</span>
+                        <span class="metric-sub" id="m-mem-type">8 GB LPDDR5X (128-bit)</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-label">Peak Compute / NPU</span>
+                        <span class="metric-value" id="m-compute" style="color: var(--accent-green);">35.0 TOPS</span>
+                        <span class="metric-sub" id="m-compute-sub">4.3 TF FP16 | 35 NPU</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-label">Transistor Count</span>
+                        <span class="metric-value" id="m-transistors">19.0 B</span>
+                        <span class="metric-sub" id="m-die-size">Die Size: 103.8 mm²</span>
+                    </div>
+                    <div class="metric-box">
+                        <span class="metric-label">On-Chip Fast SRAM</span>
+                        <span class="metric-value" id="m-sram" style="color: var(--accent-cyan);">24.8 MB</span>
+                        <span class="metric-sub" id="m-sram-sub">24 MB SLC + 128KB/Core</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- View Navigation Tabs -->
+        <nav class="view-nav" aria-label="Dashboard Views">
+            <button class="view-btn active" data-view="blueprint">🗺️ Silicon Blueprint</button>
+            <button class="view-btn" data-view="capabilities">⚡ What Else It Does</button>
+            <button class="view-btn" data-view="roofline">📊 Roofline & Workload</button>
+            <button class="view-btn" data-view="tiles">🧱 Tile Memory Flow</button>
+            <button class="view-btn" data-view="compare">⚖️ Multi-Chip Compare</button>
+            <button class="view-btn" data-view="architect">🛠️ Custom Chip Architect</button>
+        </nav>
+
+        <!-- ============================================================ -->
+        <!-- VIEW 1: SILICON BLUEPRINT & DIE LAYOUT                       -->
+        <!-- ============================================================ -->
+        <section class="view-content active" id="view-blueprint">
+            <div class="blueprint-layout">
+                <div class="blueprint-stage">
+                    <div class="stage-header">
+                        <div class="stage-title">
+                            <span>🔍 Silicon Die Floorplan & Microarchitecture Blueprint</span>
+                        </div>
+                        <span style="font-size: 12px; color: var(--text-dim);">Tap/Click blocks to inspect</span>
+                    </div>
+                    <div class="die-canvas-container">
+                        <div class="silicon-die" id="die-grid">
+                            <div class="die-corner-mark die-tl"></div>
+                            <div class="die-corner-mark die-tr"></div>
+                            <div class="die-corner-mark die-bl"></div>
+                            <div class="die-corner-mark die-br"></div>
+                            <!-- Blocks populated dynamically by JavaScript -->
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; color: var(--text-muted);">
+                        <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--accent-cyan); border-radius: 2px;"></span> Compute Cores/SMs</span>
+                        <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--accent-green); border-radius: 2px;"></span> Matrix/Tensor Cores</span>
+                        <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--accent-purple); border-radius: 2px;"></span> Neural Engine / NPU</span>
+                        <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--accent-amber); border-radius: 2px;"></span> SRAM & L2/SLC Cache</span>
+                        <span style="display: flex; align-items: center; gap: 4px;"><span style="width: 10px; height: 10px; background: var(--accent-rose); border-radius: 2px;"></span> Memory Controllers & PHY</span>
+                    </div>
+                </div>
+
+                <!-- Inspector Card -->
+                <div class="blueprint-inspector" id="inspector-card">
+                    <div class="inspector-badge domain-compute" id="insp-domain">Compute Domain</div>
+                    <h3 class="inspector-title" id="insp-name">Apple 6-Core GPU</h3>
+                    <p class="inspector-desc" id="insp-desc">6 Shader Cores with dedicated Hardware Ray Tracing and Mesh Shading pipelines.</p>
+                    <table class="inspector-specs-table">
+                        <tbody id="insp-specs-body">
+                            <!-- Dynamic key/value pairs -->
+                        </tbody>
+                    </table>
+                    <div class="role-highlight-box" id="insp-role">
+                        💡 <b>Function in AI:</b> Executes parallel matrix multiply and activation kernels with zero memory overhead.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- VIEW 2: WHAT ELSE IT DOES (CAPABILITIES & OPERATIONAL)       -->
+        <!-- ============================================================ */ -->
+        <section class="view-content" id="view-capabilities">
+            <div class="capabilities-grid">
+                <!-- LLM Compatibility Matrix -->
+                <div class="cap-card" style="grid-column: 1 / -1;">
+                    <div class="cap-card-header">
+                        <h2 class="cap-card-title">🤖 Local LLM & Generative AI Capability Matrix</h2>
+                        <span style="font-size: 12px; color: var(--accent-cyan); font-family: var(--font-mono);">
+                            Throughput dictated by Memory Bandwidth: <span id="cap-bw-label">51.2 GB/s</span>
+                        </span>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="llm-table">
+                            <thead>
+                                <tr>
+                                    <th>Model Name</th>
+                                    <th>Parameters</th>
+                                    <th>RAM Needed (4-Bit)</th>
+                                    <th>Fit Status</th>
+                                    <th>Predicted Speed</th>
+                                    <th>Time-To-First-Token (1K prompt)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="llm-matrix-body">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Operational Profile & Hardware Features -->
+                <div class="cap-card">
+                    <div class="cap-card-header">
+                        <h2 class="cap-card-title">⚡ Operational Profile & Workloads</h2>
+                    </div>
+                    <ul class="capability-checklist" id="capabilities-list">
+                        <!-- Populated dynamically -->
+                    </ul>
+                </div>
+
+                <!-- Silicon Efficiency & Packaging Blueprint -->
+                <div class="cap-card">
+                    <div class="cap-card-header">
+                        <h2 class="cap-card-title">🔬 Silicon Architecture Blueprint</h2>
+                    </div>
+                    <table class="inspector-specs-table" style="font-size: 14px;">
+                        <tbody>
+                            <tr>
+                                <td>Foundry & Node:</td>
+                                <td id="p-foundry">TSMC 3nm (N3B)</td>
+                            </tr>
+                            <tr>
+                                <td>Packaging:</td>
+                                <td id="p-packaging">TSMC InFO-PoP</td>
+                            </tr>
+                            <tr>
+                                <td>Transistor Density:</td>
+                                <td id="p-density">183.0 MTr/mm²</td>
+                            </tr>
+                            <tr>
+                                <td>Energy Efficiency:</td>
+                                <td id="p-efficiency" style="color: var(--accent-green);">3.5 TOPS / Watt</td>
+                            </tr>
+                            <tr>
+                                <td>Memory Bus Width:</td>
+                                <td id="p-bus">128-bit (Quad-channel)</td>
+                            </tr>
+                            <tr>
+                                <td>Ridge Point (FLOPs/B):</td>
+                                <td id="p-ridge" style="color: var(--accent-cyan);">84.0 FLOPs/Byte</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="role-highlight-box" style="margin-top: 8px;">
+                        📌 <b>Hardware-Software Co-Design Takeaway:</b> Operational intensity above the ridge point achieves 100% compute core saturation; below it, execution is strictly bandwidth throttled.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- VIEW 3: ROOFLINE & CO-DESIGN ANALYZER                       -->
+        <!-- ============================================================ -->
+        <section class="view-content" id="view-roofline">
+            <div class="roofline-grid">
+                <div class="plot-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h2 style="font-size: 16px; font-weight: 700; color: #fff;">📊 Theoretical Roofline Model Curve</h2>
+                        <span id="roofline-tag" style="font-size: 12px; font-weight: 700;" class="status-badge status-fit">Compute-Bound</span>
+                    </div>
+                    <div id="roofline-chart"></div>
+                </div>
+
+                <div class="controls-card">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #fff;">⚙️ Workload Intensity Tuner</h3>
+                    
+                    <div class="control-row">
+                        <span class="control-header">Workload Preset:</span>
+                        <div class="workload-preset-pills">
+                            <button class="preset-pill active" data-preset="llm-gen">LLM Decode (Memory-Bound)</button>
+                            <button class="preset-pill" data-preset="gemm">Standard GEMM (Balanced)</button>
+                            <button class="preset-pill" data-preset="prefill">Prompt Prefill (Compute-Bound)</button>
+                            <button class="preset-pill" data-preset="flash">FlashAttention</button>
+                        </div>
+                    </div>
+
+                    <div class="control-row">
+                        <div class="control-header">
+                            <span>Operational Intensity:</span>
+                            <span class="control-val" id="ctrl-intensity-val">64.0 FLOPs/B</span>
+                        </div>
+                        <input type="range" id="ctrl-intensity" min="0.1" max="1000" step="0.5" value="64">
+                    </div>
+
+                    <div class="control-row">
+                        <div class="control-header">
+                            <span>Matrix Dimension (M=N=K):</span>
+                            <span class="control-val" id="ctrl-matrix-val">4096</span>
+                        </div>
+                        <input type="range" id="ctrl-matrix" min="512" max="16384" step="512" value="4096">
+                    </div>
+
+                    <div class="control-row">
+                        <div class="control-header">
+                            <span>Precision:</span>
+                        </div>
+                        <select id="ctrl-precision" class="chip-select" style="padding: 7px 10px; font-size: 13px;">
+                            <option value="bf16">BF16 / FP16 (2 Bytes/element)</option>
+                            <option value="fp8">FP8 (1 Byte/element)</option>
+                            <option value="int8">INT8 (1 Byte/element)</option>
+                            <option value="fp32">FP32 (4 Bytes/element)</option>
+                        </select>
+                    </div>
+
+                    <div id="co-design-diagnostic" class="diagnostic-card diag-compute">
+                        <!-- Dynamic diagnostic message -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- VIEW 4: TILE MEMORY FLOW & SRAM PIPELINE                     -->
+        <!-- ============================================================ -->
+        <section class="view-content" id="view-tiles">
+            <div class="tile-flow-grid">
+                <div class="tile-pipeline-card">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #fff;">🧱 Physical Memory Hierarchy & Tile Flow</h3>
+                    <p style="font-size: 13px; color: var(--text-muted);">
+                        How matrix computation tiles (Tm × Tn × Tk) travel from Off-Chip DRAM through On-Chip SRAM scratchpads into Execution Units.
+                    </p>
+                    <div class="memory-hierarchy-diagram">
+                        <div class="tier-box tier-hbm">
+                            <div>
+                                <h4 style="font-weight: 700; font-size: 14px;">1. Off-Chip DRAM / HBM</h4>
+                                <div style="font-size: 12px; color: #cbd5e1;" id="tier-mem-desc">8 GB LPDDR5X @ 51.2 GB/s</div>
+                            </div>
+                            <span style="font-family: var(--font-mono); font-weight: 700;">Latency: ~100ns</span>
+                        </div>
+
+                        <div class="tier-connector">⬇ Data Reload Multiplier: <span id="tier-reload" style="color: var(--accent-cyan); font-weight: bold; margin-left: 4px;">1.4x</span></div>
+
+                        <div class="tier-box tier-l2">
+                            <div>
+                                <h4 style="font-weight: 700; font-size: 14px;">2. Shared L2 / System Cache (SLC)</h4>
+                                <div style="font-size: 12px; color: #cbd5e1;" id="tier-cache-desc">24 MB Shared SRAM</div>
+                            </div>
+                            <span style="font-family: var(--font-mono); font-weight: 700;">Latency: ~15ns</span>
+                        </div>
+
+                        <div class="tier-connector">⬇ High-Bandwidth Crossbar (400+ GB/s)</div>
+
+                        <div class="tier-box tier-sram">
+                            <div>
+                                <h4 style="font-weight: 700; font-size: 14px;">3. On-Chip Fast SRAM Scratchpad</h4>
+                                <div style="font-size: 12px; color: #cbd5e1;" id="tier-sram-desc">128 KB per Compute Core</div>
+                            </div>
+                            <span style="font-family: var(--font-mono); font-weight: 700;" id="tier-sram-status">Capacity: OK</span>
+                        </div>
+
+                        <div class="tier-connector">⬇ Register File Streaming (1-cycle)</div>
+
+                        <div class="tier-box tier-compute">
+                            <div>
+                                <h4 style="font-weight: 700; font-size: 14px;">4. Systolic Array & Tensor Engines</h4>
+                                <div style="font-size: 12px; color: #cbd5e1;" id="tier-cores-desc">6 GPU Cores + 16 NPU Cores</div>
+                            </div>
+                            <span style="font-family: var(--font-mono); font-weight: 700;" id="tier-attainable">Attainable: 4.3 TF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tile-pipeline-card">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #fff;">📐 Tile Geometry & Multi-Buffering Config</h3>
+                    
+                    <div class="control-row">
+                        <div class="control-header">
+                            <span>Tile M (Block Rows):</span>
+                            <span class="control-val" id="val-tm">128</span>
+                        </div>
+                        <input type="range" id="input-tm" min="32" max="256" step="32" value="128">
+                    </div>
+
+                    <div class="control-row">
+                        <div class="control-header">
+                            <span>Tile N (Block Columns):</span>
+                            <span class="control-val" id="val-tn">128</span>
+                        </div>
+                        <input type="range" id="input-tn" min="32" max="256" step="32" value="128">
+                    </div>
+
+                    <div class="control-row">
+                        <div class="control-header">
+                            <span>Tile K (Accumulation Depth):</span>
+                            <span class="control-val" id="val-tk">64</span>
+                        </div>
+                        <input type="range" id="input-tk" min="16" max="128" step="16" value="64">
+                    </div>
+
+                    <div class="control-row">
+                        <div class="control-header">
+                            <span>Pipeline Stages:</span>
+                            <span class="control-val" id="val-stages">2 (Double-Buffered)</span>
+                        </div>
+                        <input type="range" id="input-stages" min="1" max="4" step="1" value="2">
+                    </div>
+
+                    <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                            <span>SRAM Required per Core:</span>
+                            <span id="tile-sram-req" style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-cyan);">64.0 KB</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                            <span>Hardware SRAM Limit:</span>
+                            <span id="tile-sram-lim" style="font-family: var(--font-mono); font-weight: 700;">128.0 KB</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px;">
+                            <span>SRAM Buffer Utilization:</span>
+                            <span id="tile-sram-pct" style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-green);">50.0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- VIEW 5: MULTI-CHIP COMPARISON                               -->
+        <!-- ============================================================ -->
+        <section class="view-content" id="view-compare">
+            <div class="compare-table-container">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>Chip Model</th>
+                            <th>Class</th>
+                            <th>Process</th>
+                            <th>TDP</th>
+                            <th>Memory BW</th>
+                            <th>VRAM</th>
+                            <th>Peak BF16/FP16</th>
+                            <th>NPU TOPS</th>
+                            <th>Llama-3 8B Speed</th>
+                        </tr>
+                    </thead>
+                    <tbody id="compare-table-body">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- VIEW 6: CUSTOM CHIP ARCHITECT                               -->
+        <!-- ============================================================ -->
+        <section class="view-content" id="view-architect">
+            <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 20px;">
+                <h2 style="font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 6px;">🛠️ Design & Model a Custom Silicon Chip</h2>
+                <p style="font-size: 13px; color: var(--text-muted);">
+                    Input your custom semiconductor specifications (ASIC, Edge NPU, or RISC-V accelerator) to immediately synthesize its microarchitectural blueprint and roofline performance.
+                </p>
+            </div>
+
+            <form class="custom-architect-form" id="custom-chip-form">
+                <div class="form-group">
+                    <label for="c-name">Chip Name</label>
+                    <input type="text" id="c-name" value="NeuralCore-X1" required>
+                </div>
+                <div class="form-group">
+                    <label for="c-vendor">Vendor / Organization</label>
+                    <input type="text" id="c-vendor" value="OpenSilicon Labs" required>
+                </div>
+                <div class="form-group">
+                    <label for="c-target">Device Target Category</label>
+                    <select id="c-target">
+                        <option value="Mobile Phone">Mobile Phone</option>
+                        <option value="Laptop & PC">Laptop & PC</option>
+                        <option value="Cloud AI Accelerator">Cloud AI Accelerator</option>
+                        <option value="Edge AI ASIC">Edge AI ASIC</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="c-node">Process Node (nm)</label>
+                    <input type="number" id="c-node" value="3.0" step="0.5" required>
+                </div>
+                <div class="form-group">
+                    <label for="c-tdp">Thermal Design Power (Watts)</label>
+                    <input type="number" id="c-tdp" value="15.0" step="0.5" required>
+                </div>
+                <div class="form-group">
+                    <label for="c-bw">Memory Bandwidth (GB/s)</label>
+                    <input type="number" id="c-bw" value="150.0" step="5" required>
+                </div>
+                <div class="form-group">
+                    <label for="c-vram">Memory Capacity (GB)</label>
+                    <input type="number" id="c-vram" value="16.0" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="c-sram">SRAM per Core (KB)</label>
+                    <input type="number" id="c-sram" value="256.0" step="16" required>
+                </div>
+                <div class="form-group">
+                    <label for="c-tflops">Peak BF16/FP16 Compute (TFLOPs)</label>
+                    <input type="number" id="c-tflops" value="25.0" step="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="c-npu">Dedicated NPU (TOPS)</label>
+                    <input type="number" id="c-npu" value="50.0" step="5">
+                </div>
+                <button type="submit" class="btn-architect">⚡ Synthesize Chip Blueprint & Evaluate Co-Design</button>
+            </form>
+        </section>
+
+    </main>
+
+    <!-- App Logic & Silicon Database -->
+    <script>
+        // Comprehensive Hardware Database
+        const HARDWARE_DB = {
+            "apple_a17_pro": {
+                name: "Apple A17 Pro",
+                vendor: "Apple",
+                category: "mobile",
+                target_device: "Mobile Phone (iPhone 15 Pro / Max)",
+                process_node_nm: 3.0,
+                transistor_count_billion: 19.0,
+                die_size_mm2: 103.8,
+                packaging: "TSMC InFO-PoP",
+                memory_type: "LPDDR5X-7500",
+                memory_bus_width_bits: 128,
+                bandwidth_gbs: 51.2,
+                vram_gb: 8.0,
+                sram_per_core_kb: 128.0,
+                l2_cache_mb: 24.0,
+                num_compute_units: 6,
+                peak_bf16_tflops: 4.3,
+                peak_fp8_tflops: 0.0,
+                npu_tops: 35.0,
+                tdp_watts: 10.0,
+                description: "First commercial 3nm smartphone chip with 6-core GPU featuring hardware Ray Tracing and a 35 TOPS Neural Engine.",
+                blueprint_blocks: [
+                    { name: "Apple 6-Core GPU", domain: "compute", area: 26, specs: { "FP32 Peak": "2.15 TFLOPs", "RT Units": "6 Ray Tracing Accelerators" }, desc: "6 Shader Cores with dedicated Hardware Ray Tracing, mesh shading pipelines, and dynamic caching." },
+                    { name: "16-Core Neural Engine (ANE)", domain: "npu", area: 15, specs: { "Throughput": "35 TOPS INT8", "Target": "Apple Intelligence" }, desc: "Dedicated matrix multiply unit running transformer layers and multimodal tokens with near-zero energy consumption." },
+                    { name: "2x 'Everest' CPU P-Cores", domain: "compute", area: 18, specs: { "Clock": "3.78 GHz", "L2 Cache": "16 MB" }, desc: "Ultrawide out-of-order execution cores driving high-single-thread burst performance." },
+                    { name: "4x 'Sawtooth' CPU E-Cores", domain: "compute", area: 9, specs: { "Clock": "2.11 GHz", "L2 Cache": "4 MB" }, desc: "Energy-efficient cores handling background iOS tasks, telemetry, and audio processing." },
+                    { name: "24 MB System Level Cache (SLC)", domain: "cache", area: 12, specs: { "Capacity": "24 MB", "Bandwidth": "400+ GB/s" }, desc: "Ultra-fast on-die SRAM buffer shared across CPU, GPU, and NPU to filter DRAM access." },
+                    { name: "128-bit LPDDR5X Controller", domain: "memory_ctrl", area: 10, specs: { "Speed": "7500 MT/s", "Bandwidth": "51.2 GB/s" }, desc: "Dual 64-bit channels interfacing on-package LPDDR5X unified RAM." },
+                    { name: "Media & Display Engine", domain: "media", area: 6, specs: { "Codecs": "AV1, ProRes HDR", "Display": "120Hz ProMotion" }, desc: "Hardware ProRes encode/decode, AV1 hardware decode, and always-on display driver." },
+                    { name: "USB 3.2 Gen 2 / DisplayPort PHY", domain: "io", area: 4, specs: { "Speed": "10 Gbps", "Protocol": "USB-C" }, desc: "10 Gbps external controller supporting high-speed capture and external monitor video." }
+                ],
+                capabilities: [
+                    "Apple Intelligence on-device execution (local summarization, semantic indexing, image creation)",
+                    "Runs quantized 3B-8B LLMs (Llama-3 8B 4-bit, Gemma-2 2B) locally at 15-22 tokens/sec",
+                    "Hardware-accelerated console gaming with Ray Tracing (Resident Evil 4, Death Stranding)",
+                    "Real-time Photonic Engine computational photography & 4K60 ProRes HDR recording",
+                    "Hardware AV1 video decoding with near-zero battery drain"
+                ]
+            },
+
+            "snapdragon_8_gen3": {
+                name: "Qualcomm Snapdragon 8 Gen 3",
+                vendor: "Qualcomm",
+                category: "mobile",
+                target_device: "Flagship Android (Galaxy S24, OnePlus 12)",
+                process_node_nm: 4.0,
+                transistor_count_billion: 15.0,
+                die_size_mm2: 108.0,
+                packaging: "TSMC 4N InFO-PoP",
+                memory_type: "LPDDR5X-9600",
+                memory_bus_width_bits: 64,
+                bandwidth_gbs: 77.0,
+                vram_gb: 16.0,
+                sram_per_core_kb: 128.0,
+                l2_cache_mb: 12.0,
+                num_compute_units: 6,
+                peak_bf16_tflops: 6.8,
+                peak_fp8_tflops: 0.0,
+                npu_tops: 45.0,
+                tdp_watts: 12.0,
+                description: "Flagship Android SoC with Adreno 750 GPU and Hexagon NPU supporting up to 10B parameter LLMs directly on-device.",
+                blueprint_blocks: [
+                    { name: "Adreno 750 GPU Subsystem", domain: "compute", area: 28, specs: { "FP32": "3.4 TFLOPs", "Tech": "Adreno Ray Tracing" }, desc: "High-performance shader array with Global Illumination and Unreal Engine 5 Lumen support." },
+                    { name: "Hexagon Tensor NPU", domain: "npu", area: 18, specs: { "TOPS": "45 TOPS INT8", "Speed": "<1s Stable Diffusion" }, desc: "Fused scalar, vector, and tensor micro-tile accelerators for Generative AI." },
+                    { name: "Cortex-X4 Prime Core (3.3 GHz)", domain: "compute", area: 14, specs: { "Clock": "3.3 GHz", "L2": "2 MB" }, desc: "Armv9.2 ultra-performance core for burst gaming and app launch." },
+                    { name: "5x Cortex-A720 Cores", domain: "compute", area: 16, specs: { "Clock": "3.0-3.2 GHz", "L2": "5x 512 KB" }, desc: "Heavy multitasking and sustained computational workload cluster." },
+                    { name: "2x Cortex-A520 Cores", domain: "compute", area: 6, specs: { "Clock": "2.3 GHz", "L2": "Shared 1 MB" }, desc: "Low power background efficiency cluster." },
+                    { name: "12 MB Qualcomm System Cache", domain: "cache", area: 8, specs: { "Capacity": "12 MB" }, desc: "Low latency interconnect buffer reducing DRAM access." },
+                    { name: "Quad-Channel LPDDR5X Controller", domain: "memory_ctrl", area: 6, specs: { "Bandwidth": "77 GB/s", "Speed": "9600 MT/s" }, desc: "4x 16-bit high-speed channels interfacing LPDDR5X memory." },
+                    { name: "Spectra Triple ISP & X75 5G", domain: "media", area: 4, specs: { "Camera": "200 MP", "5G": "10 Gbps peak" }, desc: "18-bit cognitive ISP with real-time semantic segmentation." }
+                ],
+                capabilities: [
+                    "Sub-1-second on-device Stable Diffusion 1.5 image generation via Hexagon NPU",
+                    "Runs Llama-3 8B INT4 quantized LLM at 18-22 tokens/sec",
+                    "Unreal Engine 5 Lumen & Ray Tracing with hardware global illumination at 60 FPS",
+                    "8K30 HDR video capture with simultaneous 64MP photo capture",
+                    "Snapdragon X75 5G Modem-RF subsystem with 10 Gbps peak download"
+                ]
+            },
+
+            "google_tensor_g4": {
+                name: "Google Tensor G4",
+                vendor: "Google",
+                category: "mobile",
+                target_device: "Google Pixel 9 / Pixel 9 Pro",
+                process_node_nm: 4.0,
+                transistor_count_billion: 14.0,
+                die_size_mm2: 110.0,
+                packaging: "Samsung 4LPP+",
+                memory_type: "LPDDR5X",
+                memory_bus_width_bits: 64,
+                bandwidth_gbs: 68.0,
+                vram_gb: 16.0,
+                sram_per_core_kb: 128.0,
+                l2_cache_mb: 8.0,
+                num_compute_units: 7,
+                peak_bf16_tflops: 3.6,
+                peak_fp8_tflops: 0.0,
+                npu_tops: 37.0,
+                tdp_watts: 10.0,
+                description: "Google custom silicon co-designed with Google DeepMind specifically to run Gemini Nano with multimodal inputs.",
+                blueprint_blocks: [
+                    { name: "Google EdgeTPU Gen 3", domain: "npu", area: 24, specs: { "TOPS": "37 TOPS INT8", "Target": "Gemini Nano" }, desc: "Custom systolic matrix multiply unit tailored for Gemini Nano multimodality." },
+                    { name: "Arm Mali-G715 GPU (7 Cores)", domain: "compute", area: 24, specs: { "FP32": "1.8 TFLOPs", "Cores": "7" }, desc: "7-core graphics and compute engine with variable rate shading." },
+                    { name: "Tri-Cluster CPU (1+3+4)", domain: "compute", area: 26, specs: { "P-Core": "Cortex-X4", "L3": "8 MB" }, desc: "1x Cortex-X4 (3.1 GHz), 3x Cortex-A720 (2.6 GHz), 4x Cortex-A520 (1.9 GHz)." },
+                    { name: "8 MB System Level Cache", domain: "cache", area: 10, specs: { "Capacity": "8 MB" }, desc: "Shared on-die cache for EdgeTPU and GPU." },
+                    { name: "LPDDR5X Memory Controller", domain: "memory_ctrl", area: 8, specs: { "Bandwidth": "68 GB/s" }, desc: "Dual-channel high-speed memory controller." },
+                    { name: "Google ISP & Titan M2", domain: "media", area: 8, specs: { "Security": "Titan M2", "AI ISP": "4K60 HDR" }, desc: "Computational photography pipeline and hardware cryptographic security enclave." }
+                ],
+                capabilities: [
+                    "Native on-device execution of Google Gemini Nano with Multimodality (text, vision, audio)",
+                    "Magic Editor, Best Take, Audio Magic Eraser, and Zoom Enhance",
+                    "Live Whisper-derived real-time call screening and live speech translation",
+                    "Titan M2 hardware security enclave for tamper-resistant identity protection"
+                ]
+            },
+
+            "mediatek_dimensity_9300": {
+                name: "MediaTek Dimensity 9300",
+                vendor: "MediaTek",
+                category: "mobile",
+                target_device: "Flagship Mobile Phone",
+                process_node_nm: 4.0,
+                transistor_count_billion: 16.0,
+                die_size_mm2: 112.0,
+                packaging: "TSMC 4N InFO",
+                memory_type: "LPDDR5T-9600",
+                memory_bus_width_bits: 64,
+                bandwidth_gbs: 96.0,
+                vram_gb: 16.0,
+                sram_per_core_kb: 128.0,
+                l2_cache_mb: 10.0,
+                num_compute_units: 12,
+                peak_bf16_tflops: 9.2,
+                peak_fp8_tflops: 0.0,
+                npu_tops: 46.0,
+                tdp_watts: 12.5,
+                description: "All-Big-Core smartphone processor with 12-core Immortalis GPU and hardware LoRA generative AI APU 790.",
+                blueprint_blocks: [
+                    { name: "Immortalis-G720 MC12 GPU", domain: "compute", area: 30, specs: { "FP32": "4.6 TFLOPs", "RT": "Hardware Ray Tracing" }, desc: "12-core raytracing GPU with Deferred Vertex Shading." },
+                    { name: "MediaTek APU 790 NPU", domain: "npu", area: 22, specs: { "NPU TOPS": "46 TOPS", "LLM": "Up to 33B parameters" }, desc: "Generative AI Transformer Engine with hardware LoRA fusion acceleration." },
+                    { name: "All-Big-Core CPU Array", domain: "compute", area: 26, specs: { "Big Cores": "8 Big Cores", "L3": "8 MB" }, desc: "4x Cortex-X4 (up to 3.25 GHz) + 4x Cortex-A720 (2.0 GHz) with zero small efficiency cores." },
+                    { name: "10 MB System-Level Cache", domain: "cache", area: 8, specs: { "Capacity": "10 MB" }, desc: "Ultra-wide low-latency cache buffer." },
+                    { name: "LPDDR5T Memory Controller", domain: "memory_ctrl", area: 8, specs: { "Bandwidth": "96 GB/s" }, desc: "Ultra-fast 9600 Mbps memory interface reaching 96 GB/s." },
+                    { name: "Imagiq 990 ISP", domain: "media", area: 6, specs: { "Resolution": "320 MP", "Video": "8K30 HDR" }, desc: "Standalone 18-bit RAW ISP supporting 320MP camera sensors." }
+                ],
+                capabilities: [
+                    "World's first mobile SoC supporting on-device LoRA (Low-Rank Adaptation) fine-tuning fusion",
+                    "Accelerates 7B/13B parameter LLMs at up to 22 tokens/sec",
+                    "Hardware console-grade ray tracing at 60 FPS with global illumination",
+                    "Sub-1-second generative image synthesis using Stable Diffusion"
+                ]
+            },
+
+            "apple_m4": {
+                name: "Apple M4",
+                vendor: "Apple",
+                category: "laptop",
+                target_device: "Laptop & Tablet PC (MacBook / iPad Pro)",
+                process_node_nm: 3.0,
+                transistor_count_billion: 28.0,
+                die_size_mm2: 165.0,
+                packaging: "TSMC 3nm InFO",
+                memory_type: "Unified LPDDR5X-7500",
+                memory_bus_width_bits: 128,
+                bandwidth_gbs: 120.0,
+                vram_gb: 32.0,
+                sram_per_core_kb: 256.0,
+                l2_cache_mb: 32.0,
+                num_compute_units: 10,
+                peak_bf16_tflops: 8.6,
+                peak_fp8_tflops: 0.0,
+                npu_tops: 38.0,
+                tdp_watts: 22.0,
+                description: "Apple 2nd-gen 3nm Apple Silicon chip with 10-core GPU featuring Dynamic Caching and a 38 TOPS Neural Engine.",
+                blueprint_blocks: [
+                    { name: "Apple 10-Core GPU", domain: "compute", area: 32, specs: { "FP32": "4.3 TFLOPs", "Tech": "Dynamic Caching" }, desc: "10-core GPU with Dynamic Caching, Hardware Ray Tracing, and Mesh Shading." },
+                    { name: "16-Core Neural Engine (ANE)", domain: "npu", area: 15, specs: { "TOPS": "38 TOPS INT8" }, desc: "38 TOPS dedicated AI processor for Apple Intelligence and local transformers." },
+                    { name: "4x Performance CPU Cores", domain: "compute", area: 18, specs: { "Clock": "4.4 GHz", "L2": "16 MB" }, desc: "Next-generation P-cores with 16MB shared L2 cache and ultra-wide decode." },
+                    { name: "6x Efficiency CPU Cores", domain: "compute", area: 10, specs: { "Clock": "2.8 GHz", "L2": "6 MB" }, desc: "Enhanced E-cores with 6MB shared L2 cache for sustained efficiency." },
+                    { name: "32 MB System Level Cache (SLC)", domain: "cache", area: 11, specs: { "Capacity": "32 MB", "Bandwidth": "800+ GB/s" }, desc: "High-speed shared cache linking CPU, GPU, and NPU directly." },
+                    { name: "128-bit Unified Memory Controller", domain: "memory_ctrl", area: 8, specs: { "Bandwidth": "120 GB/s", "Bus": "128-bit" }, desc: "Zero-copy unified memory fabric running at 120 GB/s." },
+                    { name: "Next-Gen Media Engine", domain: "media", area: 6, specs: { "Codecs": "AV1, ProRes RAW, HEVC" }, desc: "Hardware decode/encode for 8K H.264, HEVC, ProRes, and AV1 video." }
+                ],
+                capabilities: [
+                    "Zero-copy Unified Memory: CPU, GPU, and NPU share the same 32GB pool without PCI transfers",
+                    "Runs Llama-3 8B (Q4_K_M) locally at 28-32 tokens/sec via MLX or llama.cpp",
+                    "Hardware Ray Tracing in Blender, Octane X, and Metal-native games",
+                    "Multistream 8K ProRes 422 video editing in Final Cut Pro",
+                    "Apple Intelligence on-device privacy-first AI workflows"
+                ]
+            },
+
+            "apple_m3_max": {
+                name: "Apple M3 Max",
+                vendor: "Apple",
+                category: "laptop",
+                target_device: "High-End Workstation Laptop (MacBook Pro 16)",
+                process_node_nm: 3.0,
+                transistor_count_billion: 92.0,
+                die_size_mm2: 470.0,
+                packaging: "TSMC 3nm InFO",
+                memory_type: "Unified LPDDR5X",
+                memory_bus_width_bits: 512,
+                bandwidth_gbs: 400.0,
+                vram_gb: 128.0,
+                sram_per_core_kb: 256.0,
+                l2_cache_mb: 64.0,
+                num_compute_units: 40,
+                peak_bf16_tflops: 32.4,
+                peak_fp8_tflops: 0.0,
+                npu_tops: 18.0,
+                tdp_watts: 80.0,
+                description: "Extreme workstation laptop chip with 92 Billion transistors, 40-core GPU, and up to 128 GB Unified Memory at 400 GB/s.",
+                blueprint_blocks: [
+                    { name: "Apple 40-Core GPU", domain: "compute", area: 45, specs: { "FP32": "16.2 TFLOPs", "FP16": "32.4 TFLOPs" }, desc: "40 Shader cores with Dynamic Caching & Hardware Ray Tracing." },
+                    { name: "16-Core Neural Engine", domain: "npu", area: 8, specs: { "Throughput": "18 TOPS" }, desc: "Matrix coprocessor for ML inference." },
+                    { name: "12x Performance CPU Cores", domain: "compute", area: 18, specs: { "Clock": "4.05 GHz", "L2": "48 MB" }, desc: "3 clusters of 4 P-cores with 48MB total L2 cache." },
+                    { name: "4x Efficiency CPU Cores", domain: "compute", area: 5, specs: { "Clock": "2.75 GHz" }, desc: "Background task efficiency cluster." },
+                    { name: "64 MB Unified System Cache", domain: "cache", area: 10, specs: { "Capacity": "64 MB" }, desc: "Interconnected SRAM on-die buffer." },
+                    { name: "512-bit Unified Memory Subsystem", domain: "memory_ctrl", area: 14, specs: { "Bandwidth": "400 GB/s", "Bus": "512-bit" }, desc: "Massive memory bus delivering 400 GB/s across 128GB unified RAM." }
+                ],
+                capabilities: [
+                    "Can host and run Llama-3 70B (4-bit quantized) entirely in local memory at 12-14 tokens/sec",
+                    "128 GB unified VRAM allows loading multi-billion parameter models impossible on consumer GPUs",
+                    "Real-time 3D rendering with hardware raytracing and complex particle simulations",
+                    "Compiles massive codebases in parallel across 16 CPU cores"
+                ]
+            },
+
+            "intel_lunar_lake_288v": {
+                name: "Intel Core Ultra 7 288V",
+                vendor: "Intel",
+                category: "laptop",
+                target_device: "Copilot+ Thin & Light Laptop",
+                process_node_nm: 3.0,
+                transistor_count_billion: 18.0,
+                die_size_mm2: 140.0,
+                packaging: "Intel Foveros 3D Multi-Tile",
+                memory_type: "On-Package LPDDR5X-8533",
+                memory_bus_width_bits: 128,
+                bandwidth_gbs: 137.0,
+                vram_gb: 32.0,
+                sram_per_core_kb: 128.0,
+                l2_cache_mb: 16.0,
+                num_compute_units: 8,
+                peak_bf16_tflops: 16.8,
+                peak_fp8_tflops: 0.0,
+                npu_tops: 48.0,
+                tdp_watts: 25.0,
+                description: "Intel Lunar Lake flagship processor with 48 TOPS NPU, Battlemage Xe2 GPU, and on-package memory delivering over 20 hours battery life.",
+                blueprint_blocks: [
+                    { name: "Intel NPU 4.0", domain: "npu", area: 22, specs: { "TOPS": "48 TOPS INT8", "Target": "Copilot+ PC" }, desc: "48 TOPS dedicated neural processing unit with 6 neural compute engines." },
+                    { name: "Intel Xe2 Battlemage GPU", domain: "compute", area: 34, specs: { "Peak": "67 TOPS INT8 / 8.4 TF FP32", "RT Units": "8" }, desc: "8 2nd-gen Xe2-cores with 64 vector engines and 8 ray tracing units." },
+                    { name: "4x 'Lion Cove' P-Cores", domain: "compute", area: 18, specs: { "Clock": "5.0 GHz", "L2": "10 MB" }, desc: "High IPC P-cores without Hyper-Threading for maximum efficiency." },
+                    { name: "4x 'Skymont' E-Cores", domain: "compute", area: 8, specs: { "Clock": "3.7 GHz", "L2": "4 MB" }, desc: "Sub-cluster handling everyday productivity and background tasks." },
+                    { name: "16 MB Memory-Side Cache", domain: "cache", area: 8, specs: { "Capacity": "16 MB" }, desc: "System-level cache filtering memory requests before DRAM." },
+                    { name: "On-Package LPDDR5X Memory", domain: "memory_ctrl", area: 10, specs: { "Bandwidth": "137 GB/s", "Speed": "8533 MT/s" }, desc: "Dual-channel on-package RAM delivering 137 GB/s." }
+                ],
+                capabilities: [
+                    "Microsoft Copilot+ PC certified (exceeds the 40 TOPS NPU requirement with 48 TOPS)",
+                    "Runs local LLMs (Llama-3 8B 4-bit) at 24-26 tokens/sec via OpenVINO",
+                    "On-package memory reduces trace capacitance, enabling 20+ hours of real-world battery life",
+                    "Hardware-accelerated XeSS super-resolution and real-time Ray Tracing"
+                ]
+            },
+
+            "amd_ryzen_ai_9_hx370": {
+                name: "AMD Ryzen AI 9 HX 370",
+                vendor: "AMD",
+                category: "laptop",
+                target_device: "High-Performance AI Laptop PC",
+                process_node_nm: 4.0,
+                transistor_count_billion: 17.5,
+                die_size_mm2: 232.0,
+                packaging: "TSMC 4N Monolithic",
+                memory_type: "LPDDR5X-7500",
+                memory_bus_width_bits: 128,
+                bandwidth_gbs: 120.0,
+                vram_gb: 32.0,
+                sram_per_core_kb: 128.0,
+                l2_cache_mb: 24.0,
+                num_compute_units: 16,
+                peak_bf16_tflops: 15.6,
+                peak_fp8_tflops: 0.0,
+                npu_tops: 50.0,
+                tdp_watts: 35.0,
+                description: "AMD Strix Point processor with 12 Zen 5 CPU cores, 16 RDNA 3.5 CUs, and a 50 TOPS XDNA 2 NPU with Block FP16 support.",
+                blueprint_blocks: [
+                    { name: "AMD XDNA 2 NPU", domain: "npu", area: 20, specs: { "TOPS": "50 TOPS", "Precision": "Block FP16" }, desc: "50 TOPS spatial array NPU with native Block FP16 mathematical precision support." },
+                    { name: "Radeon 890M GPU (16 CUs)", domain: "compute", area: 32, specs: { "FP32": "7.8 TFLOPs", "Clock": "2.9 GHz" }, desc: "16 RDNA 3.5 Compute Units (1024 stream processors)." },
+                    { name: "4x Zen 5 Performance Cores", domain: "compute", area: 18, specs: { "Clock": "5.1 GHz", "L3": "16 MB" }, desc: "Full-width Zen 5 cores with 16MB L3 cache." },
+                    { name: "8x Zen 5c Compact Cores", domain: "compute", area: 15, specs: { "Clock": "3.3 GHz", "L3": "8 MB" }, desc: "Compact Zen 5c cores with 8MB L3 cache." },
+                    { name: "Dual-Channel LPDDR5X Controller", domain: "memory_ctrl", area: 10, specs: { "Bandwidth": "120 GB/s" }, desc: "128-bit memory bus operating at 7500 MT/s." },
+                    { name: "AMD Media & Display Engine", domain: "media", area: 5, specs: { "Display": "4x 4K120 or 2x 8K" }, desc: "AV1 hardware decode/encode with FreeSync and multi-monitor output." }
+                ],
+                capabilities: [
+                    "Industry-first Block FP16 support on NPU: 16-bit accuracy at 8-bit computational efficiency",
+                    "Copilot+ PC certified with total platform AI compute exceeding 80 TOPS",
+                    "Smooth 1080p eSports and AAA gaming on integrated Radeon 890M graphics",
+                    "Seamless acceleration across ONNX Runtime, DirectML, and ROCm"
+                ]
+            },
+
+            "nvidia_rtx_4060_mobile": {
+                name: "NVIDIA GeForce RTX 4060 Laptop",
+                vendor: "NVIDIA",
+                category: "laptop",
+                target_device: "Gaming & AI Creator Laptop",
+                process_node_nm: 4.0,
+                transistor_count_billion: 18.9,
+                die_size_mm2: 156.0,
+                packaging: "TSMC 4N Monolithic",
+                memory_type: "GDDR6",
+                memory_bus_width_bits: 128,
+                bandwidth_gbs: 256.0,
+                vram_gb: 8.0,
+                sram_per_core_kb: 128.0,
+                l2_cache_mb: 32.0,
+                num_compute_units: 24,
+                peak_bf16_tflops: 60.5,
+                peak_fp8_tflops: 121.0,
+                npu_tops: 0.0,
+                tdp_watts: 115.0,
+                description: "Mainstream Ada Lovelace laptop GPU featuring 24 SMs, 96 4th-Gen Tensor Cores, and DLSS 3 Frame Generation.",
+                blueprint_blocks: [
+                    { name: "24x Ada Lovelace SMs", domain: "compute", area: 52, specs: { "FP32": "15.1 TFLOPs", "CUDA Cores": "3072" }, desc: "Streaming Multiprocessors with 3072 CUDA Cores and 24 RT Cores." },
+                    { name: "96x 4th-Gen Tensor Cores", domain: "tensor", area: 16, specs: { "FP8": "121 TFLOPs", "FP16": "60.5 TFLOPs" }, desc: "FP8/FP16 matrix accelerators with FP8 Transformer Engine support." },
+                    { name: "32 MB High-Speed L2 Cache", domain: "cache", area: 14, specs: { "Capacity": "32 MB" }, desc: "16x larger L2 cache than predecessor, drastically reducing GDDR6 bus traffic." },
+                    { name: "128-bit GDDR6 Memory Controller", domain: "memory_ctrl", area: 10, specs: { "Bandwidth": "256 GB/s", "VRAM": "8 GB" }, desc: "Dual 64-bit channels running at 16 Gbps." },
+                    { name: "8th-Gen NVENC with AV1", domain: "media", area: 5, specs: { "Codecs": "AV1, HEVC, H.264" }, desc: "Hardware AV1 encoder delivering 40% higher efficiency than H.264." },
+                    { name: "PCIe 4.0 x8 Host Interface", domain: "io", area: 3, specs: { "Speed": "16 GB/s" }, desc: "High-speed connection to laptop host CPU." }
+                ],
+                capabilities: [
+                    "PyTorch and CUDA native development on laptop (Triton, TensorRT, vLLM)",
+                    "Runs Llama-3 8B 4-bit at 55-60 tokens/sec via TensorRT-LLM",
+                    "DLSS 3 AI Frame Generation for high FPS raytraced gaming",
+                    "Stable Diffusion 1.5/XL fast image generation with xFormers and TensorRT"
+                ]
+            },
+
+            "nvidia_rtx_4090": {
+                name: "NVIDIA GeForce RTX 4090",
+                vendor: "NVIDIA",
+                category: "laptop",
+                target_device: "Desktop Workstation & Enthusiast PC",
+                process_node_nm: 4.0,
+                transistor_count_billion: 76.3,
+                die_size_mm2: 608.5,
+                packaging: "TSMC 4N Monolithic",
+                memory_type: "GDDR6X",
+                memory_bus_width_bits: 384,
+                bandwidth_gbs: 1008.0,
+                vram_gb: 24.0,
+                sram_per_core_kb: 128.0,
+                l2_cache_mb: 72.0,
+                num_compute_units: 128,
+                peak_bf16_tflops: 330.0,
+                peak_fp8_tflops: 660.0,
+                npu_tops: 0.0,
+                tdp_watts: 450.0,
+                description: "Flagship Consumer GPU with 4th Gen Tensor Cores and GDDR6X memory.",
+                blueprint_blocks: [
+                    { name: "128x Ada Lovelace SMs", domain: "compute", area: 60, specs: { "CUDA Cores": "16,384", "FP32": "82.6 TFLOPs" }, desc: "16,384 CUDA Cores with 3rd-Gen RT Cores and Shader Execution Reordering." },
+                    { name: "512x 4th-Gen Tensor Cores", domain: "tensor", area: 16, specs: { "FP8": "660 TFLOPs", "FP16": "330 TFLOPs" }, desc: "FP8 Transformer Engine accelerators." },
+                    { name: "72 MB Ultra-Large L2 Cache", domain: "cache", area: 12, specs: { "Capacity": "72 MB" }, desc: "Keeps high-frequency working sets on-chip to save memory bandwidth." },
+                    { name: "384-bit GDDR6X Memory Controller", domain: "memory_ctrl", area: 8, specs: { "Bandwidth": "1,008 GB/s", "VRAM": "24 GB" }, desc: "Micron GDDR6X running at 21 Gbps (1,008 GB/s)." },
+                    { name: "Dual 8th-Gen NVENC with AV1", domain: "media", area: 4, specs: { "AV1": "Dual 8K60 Encoders" }, desc: "Dual encoders for simultaneous 8K60 AV1 livestreaming & recording." }
+                ],
+                capabilities: [
+                    "Premise workstation LLM inference: Llama-3 8B at 110+ tokens/sec and 70B (4-bit) at 15 tok/sec",
+                    "4K Ultra 144+ FPS AAA gaming with full Path Tracing and DLSS 3.5 Ray Reconstruction",
+                    "Stable Diffusion generation at over 40 images/min with TensorRT acceleration"
+                ]
+            },
+
+            "nvidia_h100_sxm": {
+                name: "NVIDIA H100 SXM5",
+                vendor: "NVIDIA",
+                category: "cloud",
+                target_device: "Cloud & AI Supercomputer",
+                process_node_nm: 4.0,
+                transistor_count_billion: 80.0,
+                die_size_mm2: 814.0,
+                packaging: "TSMC CoWoS-S 2.5D",
+                memory_type: "HBM3",
+                memory_bus_width_bits: 5120,
+                bandwidth_gbs: 3350.0,
+                vram_gb: 80.0,
+                sram_per_core_kb: 228.0,
+                l2_cache_mb: 50.0,
+                num_compute_units: 132,
+                peak_bf16_tflops: 989.0,
+                peak_fp8_tflops: 1978.0,
+                npu_tops: 0.0,
+                tdp_watts: 700.0,
+                description: "NVIDIA Hopper Architecture Flagship Data Center GPU with 4th Gen Tensor Cores & TMA.",
+                blueprint_blocks: [
+                    { name: "132x Hopper SMs", domain: "compute", area: 55, specs: { "SM Count": "132", "SRAM/SM": "228 KB" }, desc: "Streaming Multiprocessors with DPX instruction set and asynchronous TMA engines." },
+                    { name: "528x 4th-Gen Tensor Cores", domain: "tensor", area: 18, specs: { "BF16 Peak": "989 TFLOPs", "FP8 Peak": "1,978 TFLOPs" }, desc: "Transformer Engine tensor cores with FP8 FP16 BF16 mixed-precision." },
+                    { name: "50 MB High-Bandwidth L2 Cache", domain: "cache", area: 8, specs: { "Capacity": "50 MB", "Bandwidth": "12 TB/s" }, desc: "Unified cache with asynchronous crossbar routing." },
+                    { name: "5x HBM3 Memory Stacks (CoWoS)", domain: "memory_ctrl", area: 12, specs: { "Bandwidth": "3,350 GB/s (3.35 TB/s)", "Capacity": "80 GB" }, desc: "5120-bit silicon interposer memory interface." },
+                    { name: "4th-Gen NVLink Engine", domain: "interconnect", area: 7, specs: { "Bandwidth": "900 GB/s" }, desc: "900 GB/s bidirectional multi-GPU clustering fabric." }
+                ],
+                capabilities: [
+                    "Large Language Model Training: GPT-4, Llama-3 70B/405B pretraining & fine-tuning",
+                    "Transformer Engine dynamically switches between FP8 and FP16 for 2-3x speedup",
+                    "Asynchronous TMA (Tensor Memory Accelerator) bypasses register files directly to Shared Memory",
+                    "High-throughput vLLM & TensorRT-LLM datacenter inference serving"
+                ]
+            },
+
+            "nvidia_b200": {
+                name: "NVIDIA Blackwell B200",
+                vendor: "NVIDIA",
+                category: "cloud",
+                target_device: "Hyperscale AI Supercluster",
+                process_node_nm: 4.0,
+                transistor_count_billion: 208.0,
+                die_size_mm2: 1628.0,
+                packaging: "TSMC CoWoS-L (10 TB/s NV-HBI)",
+                memory_type: "HBM3e",
+                memory_bus_width_bits: 8192,
+                bandwidth_gbs: 8000.0,
+                vram_gb: 192.0,
+                sram_per_core_kb: 256.0,
+                l2_cache_mb: 128.0,
+                num_compute_units: 160,
+                peak_bf16_tflops: 2250.0,
+                peak_fp8_tflops: 4500.0,
+                npu_tops: 0.0,
+                tdp_watts: 1000.0,
+                description: "NVIDIA Blackwell Dual-Die GPU with 2nd Gen Transformer Engine & 5th Gen Tensor Cores.",
+                blueprint_blocks: [
+                    { name: "Dual-Die Silicon Array (160 SMs)", domain: "compute", area: 54, specs: { "SMs": "160", "Transistors": "208 Billion" }, desc: "Twin dies linked seamlessly via 10 TB/s NV-HBI interconnect." },
+                    { name: "5th-Gen Tensor Cores (FP4 Engine)", domain: "tensor", area: 20, specs: { "FP8": "4,500 TFLOPs", "FP4": "9,000 TFLOPs" }, desc: "2nd-Gen Transformer Engine with hardware native FP4 and FP8 precision." },
+                    { name: "128 MB Shared L2 Cache", domain: "cache", area: 8, specs: { "Capacity": "128 MB" }, desc: "Massive on-die cache keeping active tiles on-chip." },
+                    { name: "8x HBM3e Memory Stacks", domain: "memory_ctrl", area: 12, specs: { "Bandwidth": "8,000 GB/s (8.0 TB/s)", "VRAM": "192 GB" }, desc: "World-leading 8.0 TB/s memory bandwidth with 192 GB capacity." },
+                    { name: "5th-Gen NVLink Interconnect", domain: "interconnect", area: 6, specs: { "Bandwidth": "1,800 GB/s" }, desc: "1.8 TB/s bidirectional interconnect for NVL72 rack-scale systems." }
+                ],
+                capabilities: [
+                    "Serves trillion-parameter MoE (Mixture of Experts) models in real time",
+                    "Native 4-bit Floating Point (FP4) quantization doubles inference throughput vs FP8",
+                    "NVLink 72 allows 72 Blackwell GPUs to act as a single 130 TB/s unified GPU",
+                    "Runs 405B parameter models with unprecedented tokens/second per Watt"
+                ]
+            },
+
+            "amd_mi300x": {
+                name: "AMD Instinct MI300X",
+                vendor: "AMD",
+                category: "cloud",
+                target_device: "Hyperscale AI Cloud",
+                process_node_nm: 5.0,
+                transistor_count_billion: 153.0,
+                die_size_mm2: 1017.0,
+                packaging: "TSMC 3D Chiplet Stacking",
+                memory_type: "HBM3",
+                memory_bus_width_bits: 8192,
+                bandwidth_gbs: 5300.0,
+                vram_gb: 192.0,
+                sram_per_core_kb: 128.0,
+                l2_cache_mb: 256.0,
+                num_compute_units: 304,
+                peak_bf16_tflops: 1307.0,
+                peak_fp8_tflops: 2614.0,
+                npu_tops: 0.0,
+                tdp_watts: 750.0,
+                description: "AMD flagship generative AI accelerator featuring 192 GB HBM3 at 5.3 TB/s and 304 Compute Units.",
+                blueprint_blocks: [
+                    { name: "8x XCD Accelerator Dies (304 CUs)", domain: "compute", area: 55, specs: { "CUs": "304", "BF16": "1,307 TFLOPs" }, desc: "304 CDNA 3 Compute Units stacked in 3D over base dies." },
+                    { name: "Matrix Core Accelerators", domain: "tensor", area: 18, specs: { "FP8 Peak": "2,614 TFLOPs" }, desc: "Dedicated matrix multiply engines supporting FP8, BF16, and INT8." },
+                    { name: "256 MB AMD Infinity Cache", domain: "cache", area: 12, specs: { "Capacity": "256 MB", "Bandwidth": "17 TB/s" }, desc: "4 base IOD dies providing massive shared high-speed SRAM cache." },
+                    { name: "8x HBM3 Memory Stacks", domain: "memory_ctrl", area: 10, specs: { "Bandwidth": "5,300 GB/s (5.3 TB/s)", "VRAM": "192 GB" }, desc: "192 GB HBM3 memory running at 5.3 TB/s bandwidth." },
+                    { name: "Infinity Fabric Links", domain: "interconnect", area: 5, specs: { "Bandwidth": "896 GB/s" }, desc: "Coherent multi-GPU interconnect at 896 GB/s." }
+                ],
+                capabilities: [
+                    "192 GB memory capacity fits 70B parameter models in 16-bit without multi-GPU sharding",
+                    "5.3 TB/s memory bandwidth provides class-leading token generation throughput in memory-bound phases",
+                    "Full open-source ROCm software stack with native PyTorch and vLLM integration"
+                ]
+            },
+
+            "google_tpu_v5p": {
+                name: "Google TPU v5p",
+                vendor: "Google",
+                category: "cloud",
+                target_device: "Google Cloud AI Supercomputer",
+                process_node_nm: 4.0,
+                transistor_count_billion: 45.0,
+                die_size_mm2: 650.0,
+                packaging: "TSMC CoWoS 2.5D",
+                memory_type: "HBM3",
+                memory_bus_width_bits: 4096,
+                bandwidth_gbs: 1600.0,
+                vram_gb: 95.0,
+                sram_per_core_kb: 32768.0,
+                l2_cache_mb: 0.0,
+                num_compute_units: 2,
+                peak_bf16_tflops: 459.0,
+                peak_fp8_tflops: 918.0,
+                npu_tops: 0.0,
+                tdp_watts: 300.0,
+                description: "Google TPU v5p with high-bandwidth ICI (Inter-Chip Interconnect) and 459 BF16 TFLOPs.",
+                blueprint_blocks: [
+                    { name: "8x Matrix Multiply Units (MXUs)", domain: "tensor", area: 42, specs: { "BF16 Peak": "459 TFLOPs", "Arch": "Systolic Array" }, desc: "Systolic 128x128 2D matrix multiply arrays running at 1.75 GHz." },
+                    { name: "2x Vector Processing Units (VPUs)", domain: "compute", area: 18, specs: { "Precision": "FP32 / BF16" }, desc: "General-purpose SIMD vector units for activations (GELU, Softmax, RMSNorm)." },
+                    { name: "64 MB Software-Managed VMEM", domain: "cache", area: 20, specs: { "Capacity": "64 MB Total", "SRAM/Core": "32 MB" }, desc: "Direct software-controlled scratchpad memory bypassing cache misses." },
+                    { name: "HBM3 Memory Controller", domain: "memory_ctrl", area: 12, specs: { "Bandwidth": "1,600 GB/s", "Capacity": "95 GB" }, desc: "95 GB HBM3 memory running at 1.6 TB/s." },
+                    { name: "Optical Interconnect (ICI)", domain: "interconnect", area: 8, specs: { "Speed": "4,800 Gbps", "Topology": "3D Torus" }, desc: "4,800 Gbps 3D Torus networking fabric interconnecting up to 8,960 chips." }
+                ],
+                capabilities: [
+                    "Trained Google Gemini 1.5 Pro and Gemini Ultra foundation models",
+                    "Huge 32 MB VMEM scratchpad per core enables massive tile sizes with zero reload penalty",
+                    "Scales up to 8,960 TPU chips in a single optical pod with near-linear scaling"
+                ]
+            },
+
+            "google_tpu_v5e": {
+                name: "Google TPU v5e",
+                vendor: "Google",
+                category: "cloud",
+                target_device: "Google Cloud Cost-Efficient AI",
+                process_node_nm: 5.0,
+                transistor_count_billion: 22.0,
+                die_size_mm2: 340.0,
+                packaging: "TSMC CoWoS 2.5D",
+                memory_type: "HBM2e",
+                memory_bus_width_bits: 2048,
+                bandwidth_gbs: 819.0,
+                vram_gb: 16.0,
+                sram_per_core_kb: 16384.0,
+                l2_cache_mb: 0.0,
+                num_compute_units: 1,
+                peak_bf16_tflops: 197.0,
+                peak_fp8_tflops: 0.0,
+                npu_tops: 0.0,
+                tdp_watts: 150.0,
+                description: "Google TPU v5e designed for cost-efficient LLM training and high-throughput inference.",
+                blueprint_blocks: [
+                    { name: "4x Systolic Matrix Units (MXUs)", domain: "tensor", area: 45, specs: { "BF16": "197 TFLOPs", "INT8": "394 TOPs" }, desc: "128x128 systolic matrix engines." },
+                    { name: "16 MB On-Chip VMEM Scratchpad", domain: "cache", area: 25, specs: { "Capacity": "16 MB" }, desc: "Fast on-die vector memory." },
+                    { name: "HBM2e Memory Controller", domain: "memory_ctrl", area: 18, specs: { "Bandwidth": "819 GB/s" }, desc: "16 GB HBM2e at 819 GB/s." },
+                    { name: "Inter-Chip Interconnect (ICI)", domain: "interconnect", area: 12, specs: { "Bandwidth": "1,600 Gbps" }, desc: "2D Torus network interconnecting 256 pods." }
+                ],
+                capabilities: [
+                    "Cost-effective inference for Gemma, LLaMA, and BERT at ultra-low price per million tokens",
+                    "High power efficiency: 197 TFLOPs at only 150 Watts TDP"
+                ]
+            },
+
+            "custom_open_tpu_130nm": {
+                name: "OpenTPU-130 (SkyWater 130nm)",
+                vendor: "Open Silicon",
+                category: "edge",
+                target_device: "Open-Source Silicon / TinyTapeout Edge ASIC",
+                process_node_nm: 130.0,
+                transistor_count_billion: 0.005,
+                die_size_mm2: 10.0,
+                packaging: "QFN-64 Open Source",
+                memory_type: "HyperRAM / QSPI",
+                memory_bus_width_bits: 16,
+                bandwidth_gbs: 0.8,
+                vram_gb: 0.032,
+                sram_per_core_kb: 64.0,
+                l2_cache_mb: 0.0,
+                num_compute_units: 1,
+                peak_bf16_tflops: 0.05,
+                peak_fp8_tflops: 0.0,
+                npu_tops: 0.05,
+                tdp_watts: 0.5,
+                description: "Open-Source Silicon Matrix Multiply Accelerator targeted for SkyWater 130nm / TinyTapeout / Efabless.",
+                blueprint_blocks: [
+                    { name: "16x16 Weight-Stationary Systolic Array", domain: "tensor", area: 55, specs: { "GOPs": "51.2 GOPs", "Freq": "100 MHz" }, desc: "256 8-bit Multiply-Accumulate (MAC) processing elements." },
+                    { name: "64 KB OpenRAM Scratchpad", domain: "cache", area: 25, specs: { "Capacity": "64 KB", "Type": "OpenRAM" }, desc: "SkyWater 130nm open-source SRAM macro for activation tiling." },
+                    { name: "HyperRAM / Octal SPI Interface", domain: "memory_ctrl", area: 12, specs: { "Bandwidth": "800 MB/s" }, desc: "Low-pin-count off-chip memory interface running at 800 MB/s." },
+                    { name: "RISC-V Control Core (VexRiscv)", domain: "compute", area: 8, specs: { "Arch": "RV32I" }, desc: "Lightweight RV32I controller executing command queues." }
+                ],
+                capabilities: [
+                    "Fully open-source tapeout verifiable via OpenLane and SkyWater 130nm PDK",
+                    "Ultra-low power (500 mW) edge keyword spotting and vibration anomaly detection",
+                    "Educational model for hardware-software co-design & systolic dataflow verification"
+                ]
+            }
+        };
+
+        // App State
+        let currentChipKey = "apple_a17_pro";
+        let detectedChipKey = null;
+        let activeFilter = "all";
+        let activeView = "blueprint";
+
+        // Workload State
+        let currentIntensity = 64.0;
+        let currentMatrixSize = 4096;
+        let currentPrecision = "bf16";
+        let currentTileM = 128;
+        let currentTileN = 128;
+        let currentTileK = 64;
+        let currentStages = 2;
+
+        // Initialize App
+        function initApp() {
+            populateChipSelect();
+            renderChipHero(HARDWARE_DB[currentChipKey]);
+            renderBlueprint(HARDWARE_DB[currentChipKey]);
+            renderCapabilities(HARDWARE_DB[currentChipKey]);
+            renderRooflineChart();
+            renderTileSimulation();
+            renderCompareTable();
+            setupEventListeners();
+            autoDetectHardware();
+        }
+
+        // Populate Select Dropdown
+        function populateChipSelect() {
+            const select = document.getElementById("chip-select");
+            select.innerHTML = "";
+            for (const [key, chip] of Object.entries(HARDWARE_DB)) {
+                if (activeFilter === "all" || chip.category === activeFilter) {
+                    const opt = document.createElement("option");
+                    opt.value = key;
+                    opt.textContent = `${chip.name} (${chip.vendor}) - ${chip.target_device}`;
+                    if (key === currentChipKey) opt.selected = true;
+                    select.appendChild(opt);
+                }
+            }
+        }
+
+        // Render Hero Overview
+        function renderChipHero(chip) {
+            document.getElementById("hero-target").textContent = chip.target_device;
+            document.getElementById("hero-node").textContent = `${chip.process_node_nm}nm Node`;
+            document.getElementById("hero-tdp").textContent = `${chip.tdp_watts}W TDP`;
+            document.getElementById("hero-name").textContent = chip.name;
+            document.getElementById("hero-vendor").textContent = `(${chip.vendor})`;
+            document.getElementById("hero-desc").textContent = chip.description;
+
+            document.getElementById("m-bw").textContent = `${chip.bandwidth_gbs >= 1000 ? (chip.bandwidth_gbs/1000).toFixed(1) + ' TB/s' : chip.bandwidth_gbs.toFixed(0) + ' GB/s'}`;
+            document.getElementById("m-mem-type").textContent = `${chip.vram_gb} GB ${chip.memory_type} (${chip.memory_bus_width_bits}-bit)`;
+
+            const peakStr = chip.npu_tops > 0 ? `${chip.npu_tops.toFixed(0)} NPU TOPS` : `${chip.peak_bf16_tflops >= 1000 ? (chip.peak_bf16_tflops/1000).toFixed(1) + ' PFLOPs' : chip.peak_bf16_tflops.toFixed(1) + ' TFLOPs'}`;
+            document.getElementById("m-compute").textContent = peakStr;
+            document.getElementById("m-compute-sub").textContent = `${chip.peak_bf16_tflops.toFixed(1)} TF BF16` + (chip.peak_fp8_tflops > 0 ? ` | ${chip.peak_fp8_tflops.toFixed(0)} TF FP8` : "");
+
+            document.getElementById("m-transistors").textContent = chip.transistor_count_billion > 0 ? `${chip.transistor_count_billion} B` : "N/A";
+            document.getElementById("m-die-size").textContent = chip.die_size_mm2 ? `Die Size: ${chip.die_size_mm2} mm²` : "Monolithic";
+
+            const totalSram = (chip.sram_per_core_kb * chip.num_compute_units) / 1024.0 + (chip.l2_cache_mb || 0);
+            document.getElementById("m-sram").textContent = `${totalSram.toFixed(1)} MB`;
+            document.getElementById("m-sram-sub").textContent = `${chip.l2_cache_mb || 0} MB L2/SLC + ${chip.sram_per_core_kb} KB/Core`;
+
+            // Operational specs in Tab 2
+            document.getElementById("p-foundry").textContent = `${chip.vendor === 'Apple' ? 'TSMC' : chip.vendor} ${chip.process_node_nm}nm`;
+            document.getElementById("p-packaging").textContent = chip.packaging || "Monolithic BGA";
+            const density = (chip.transistor_count_billion && chip.die_size_mm2) ? ((chip.transistor_count_billion * 1000) / chip.die_size_mm2).toFixed(1) + " MTr/mm²" : "N/A";
+            document.getElementById("p-density").textContent = density;
+            const topsPerWatt = chip.npu_tops > 0 ? (chip.npu_tops / chip.tdp_watts).toFixed(1) + " TOPS / Watt" : ((chip.peak_bf16_tflops * 1000) / chip.tdp_watts).toFixed(1) + " GFLOPS / Watt";
+            document.getElementById("p-efficiency").textContent = topsPerWatt;
+            document.getElementById("p-bus").textContent = `${chip.memory_bus_width_bits}-bit (${chip.memory_type})`;
+            const ridge = (chip.peak_bf16_tflops * 1000.0) / chip.bandwidth_gbs;
+            document.getElementById("p-ridge").textContent = `${ridge.toFixed(1)} FLOPs/Byte`;
+            document.getElementById("cap-bw-label").textContent = `${chip.bandwidth_gbs} GB/s`;
+        }
+
+        // Render Silicon Blueprint Blocks
+        function renderBlueprint(chip) {
+            const grid = document.getElementById("die-grid");
+            // Clear blocks except corner marks
+            const cornerMarks = grid.querySelectorAll(".die-corner-mark");
+            grid.innerHTML = "";
+            cornerMarks.forEach(c => grid.appendChild(c));
+
+            const blocks = chip.blueprint_blocks;
+            if (!blocks || blocks.length === 0) return;
+
+            // Set grid template dynamically based on block count
+            const cols = blocks.length > 6 ? 4 : 3;
+            grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+            blocks.forEach((b, idx) => {
+                const el = document.createElement("div");
+                el.className = `silicon-block domain-${b.domain} ${idx === 0 ? 'selected' : ''}`;
+                el.innerHTML = `
+                    <div class="block-title">
+                        <span>${b.name}</span>
+                        <span style="font-size: 9px; opacity: 0.8;">${b.area}% die</span>
+                    </div>
+                    <div class="block-spec-mini">${Object.entries(b.specs)[0] ? Object.entries(b.specs)[0].join(': ') : b.domain.toUpperCase()}</div>
+                `;
+                el.addEventListener("click", () => {
+                    document.querySelectorAll(".silicon-block").forEach(item => item.classList.remove("selected"));
+                    el.classList.add("selected");
+                    inspectBlock(b);
+                });
+                grid.appendChild(el);
+            });
+
+            // Inspect the first block by default
+            inspectBlock(blocks[0]);
+        }
+
+        // Inspect Block details in side card
+        function inspectBlock(b) {
+            const domainBadge = document.getElementById("insp-domain");
+            domainBadge.className = `inspector-badge domain-${b.domain}`;
+            domainBadge.textContent = `${b.domain.toUpperCase()} DOMAIN`;
+
+            document.getElementById("insp-name").textContent = b.name;
+            document.getElementById("insp-desc").textContent = b.desc;
+
+            const specsBody = document.getElementById("insp-specs-body");
+            specsBody.innerHTML = "";
+
+            // Add die area
+            const trArea = document.createElement("tr");
+            trArea.innerHTML = `<td>Silicon Die Share:</td><td>${b.area}% of total die</td>`;
+            specsBody.appendChild(trArea);
+
+            for (const [k, v] of Object.entries(b.specs)) {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${k}:</td><td>${v}</td>`;
+                specsBody.appendChild(tr);
+            }
+
+            let roleExplanation = "";
+            if (b.domain === "npu") {
+                roleExplanation = "💡 <b>Role in AI:</b> Directly executes INT8/FP16 matrix multiplications and attention KV projections with extreme energy efficiency.";
+            } else if (b.domain === "compute" || b.domain === "tensor") {
+                roleExplanation = "💡 <b>Role in AI:</b> High-throughput streaming compute cores executing floating point GEMMs, fused activations, and weight unpacking.";
+            } else if (b.domain === "cache") {
+                roleExplanation = "💡 <b>Role in AI:</b> Caches active matrix tiles on-chip, preventing millions of repetitive DRAM reloads and reducing memory wall bottlenecks.";
+            } else if (b.domain === "memory_ctrl") {
+                roleExplanation = "💡 <b>Role in AI:</b> Delivers maximum sustained gigabytes-per-second memory bandwidth, directly setting the token generation speed for large language models.";
+            } else {
+                roleExplanation = "💡 <b>Role in AI:</b> Dedicated hardware engine accelerating non-GEMM workloads like AV1 video decode, display composition, and IO transfers.";
+            }
+            document.getElementById("insp-role").innerHTML = roleExplanation;
+        }
+
+        // Render Capabilities & LLM Matrix
+        function renderCapabilities(chip) {
+            // LLM Models data
+            const models = [
+                { name: "LLaMA-3.1 8B (Instruct)", params: "8.0 Billion", size_int4: 4.8, size_int8: 8.5, size_fp16: 16.0 },
+                { name: "Gemma-2 9B (Google)", params: "9.2 Billion", size_int4: 5.5, size_int8: 9.8, size_fp16: 18.5 },
+                { name: "Mistral 7B v0.3", params: "7.3 Billion", size_int4: 4.2, size_int8: 7.8, size_fp16: 14.6 },
+                { name: "LLaMA-3.1 70B", params: "70.6 Billion", size_int4: 39.0, size_int8: 74.0, size_fp16: 142.0 },
+                { name: "Stable Diffusion XL", params: "3.5 Billion (Diffusion)", size_int4: 2.8, size_int8: 4.5, size_fp16: 7.0 },
+                { name: "Whisper Large v3 (Audio)", params: "1.5 Billion", size_int4: 1.2, size_int8: 1.8, size_fp16: 3.1 }
+            ];
+
+            const tbody = document.getElementById("llm-matrix-body");
+            tbody.innerHTML = "";
+
+            models.forEach(m => {
+                const tr = document.createElement("tr");
+
+                let fitClass = "status-fit";
+                let fitLabel = "Fits in RAM (INT4)";
+                let modelSize = m.size_int4;
+
+                if (m.size_int4 > chip.vram_gb) {
+                    fitClass = "status-oom";
+                    fitLabel = "OOM on Single Device";
+                } else if (m.size_fp16 <= chip.vram_gb) {
+                    fitClass = "status-fit";
+                    fitLabel = "Full Precision (FP16/INT8)";
+                    modelSize = m.size_int8;
+                } else {
+                    fitClass = "status-quant";
+                    fitLabel = "Quantized INT4";
+                    modelSize = m.size_int4;
+                }
+
+                // Tokens/sec in memory-bound decode phase = Memory Bandwidth (GB/s) / Model Size (GB)
+                const tokensPerSec = fitClass === "status-oom" ? 0 : Math.min(250, (chip.bandwidth_gbs / modelSize));
+                const speedStr = fitClass === "status-oom" ? "—" : `~${tokensPerSec.toFixed(1)} tok/s`;
+
+                // TTFT for 1024 tokens prompt (Compute Bound)
+                // Operations = 2 * params * 1024
+                const gigaFlops = 2.0 * parseFloat(m.params) * 1024.0 / 1e9;
+                const ttftMs = fitClass === "status-oom" ? "—" : `${Math.max(8.0, (gigaFlops / (chip.peak_bf16_tflops * 1000)) * 1000).toFixed(0)} ms`;
+
+                tr.innerHTML = `
+                    <td><b>${m.name}</b></td>
+                    <td>${m.params}</td>
+                    <td>${m.size_int4} GB</td>
+                    <td><span class="status-badge ${fitClass}">${fitLabel}</span></td>
+                    <td class="tok-speed">${speedStr}</td>
+                    <td style="font-family: var(--font-mono);">${ttftMs}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Checklist
+            const checkList = document.getElementById("capabilities-list");
+            checkList.innerHTML = "";
+            chip.capabilities.forEach(cap => {
+                const li = document.createElement("li");
+                li.innerHTML = `<span class="check-icon">✓</span> <span>${cap}</span>`;
+                checkList.appendChild(li);
+            });
+        }
+
+        // Render Interactive Roofline Model Chart
+        function renderRooflineChart() {
+            const chip = HARDWARE_DB[currentChipKey];
+            const peakTflops = chip.peak_bf16_tflops;
+            const bwTbs = chip.bandwidth_gbs / 1000.0;
+            const ridge = (peakTflops * 1000.0) / chip.bandwidth_gbs;
+
+            // X values in log space (0.1 to 10000 FLOPs/Byte)
+            const xVals = [0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
+            const yRoofline = xVals.map(x => Math.min(peakTflops, x * bwTbs));
+
+            // Operating Point
+            const attainableTflops = Math.min(peakTflops, currentIntensity * bwTbs);
+            const isComputeBound = currentIntensity >= ridge;
+
+            const traceRoofline = {
+                x: xVals,
+                y: yRoofline,
+                mode: 'lines',
+                name: `${chip.name} Theoretical Limit`,
+                line: { color: '#00e5ff', width: 3 }
+            };
+
+            const tracePoint = {
+                x: [currentIntensity],
+                y: [attainableTflops],
+                mode: 'markers+text',
+                name: 'Current Workload',
+                text: [`${attainableTflops.toFixed(1)} TF (${isComputeBound ? 'Compute-Bound' : 'Memory-Bound'})`],
+                textposition: 'top left',
+                marker: {
+                    size: 14,
+                    color: isComputeBound ? '#10b981' : '#f43f5e',
+                    symbol: 'diamond',
+                    line: { color: '#fff', width: 2 }
+                }
+            };
+
+            const layout = {
+                paper_bgcolor: '#0e131f',
+                plot_bgcolor: '#090d16',
+                xaxis: {
+                    title: 'Operational Intensity (FLOPs / Byte)',
+                    type: 'log',
+                    gridcolor: '#1e293b',
+                    color: '#94a3b8'
+                },
+                yaxis: {
+                    title: 'Throughput (TFLOPs)',
+                    type: 'log',
+                    gridcolor: '#1e293b',
+                    color: '#94a3b8'
+                },
+                margin: { l: 60, r: 30, t: 20, b: 60 },
+                legend: {
+                    font: { color: '#cbd5e1', size: 11 },
+                    bgcolor: 'rgba(15, 23, 42, 0.8)'
+                }
+            };
+
+            Plotly.newPlot('roofline-chart', [traceRoofline, tracePoint], layout, { responsive: true, displayModeBar: false });
+
+            // Diagnostic Box
+            const diagBox = document.getElementById("co-design-diagnostic");
+            const roofTag = document.getElementById("roofline-tag");
+
+            if (isComputeBound) {
+                roofTag.className = "status-badge status-fit";
+                roofTag.textContent = "Compute-Bound";
+                diagBox.className = "diagnostic-card diag-compute";
+                diagBox.innerHTML = `
+                    <b>✅ Workload is Compute-Bound:</b> Operational Intensity (${currentIntensity.toFixed(1)} FLOPs/B) exceeds the hardware ridge point (${ridge.toFixed(1)} FLOPs/B). Matrix execution cores are running at <b>${((attainableTflops/peakTflops)*100).toFixed(1)}%</b> of peak silicon throughput.
+                `;
+            } else {
+                roofTag.className = "status-badge status-oom";
+                roofTag.textContent = "Memory-Bound (Bandwidth Throttled)";
+                diagBox.className = "diagnostic-card diag-memory";
+                diagBox.innerHTML = `
+                    <b>⚠️ Workload is Memory-Bandwidth Bound:</b> Intensity (${currentIntensity.toFixed(1)} FLOPs/B) is below the ridge point (${ridge.toFixed(1)} FLOPs/B). Compute units are idle waiting for DRAM. Attaining only <b>${((attainableTflops/peakTflops)*100).toFixed(1)}%</b> of theoretical compute peak.
+                `;
+            }
+        }
+
+        // Render Tile Memory Flow Simulation
+        function renderTileSimulation() {
+            const chip = HARDWARE_DB[currentChipKey];
+            
+            // Memory desc
+            document.getElementById("tier-mem-desc").textContent = `${chip.vram_gb} GB ${chip.memory_type} @ ${chip.bandwidth_gbs} GB/s`;
+            document.getElementById("tier-cache-desc").textContent = `${chip.l2_cache_mb || 0} MB Shared L2 / SLC Buffer`;
+            document.getElementById("tier-sram-desc").textContent = `${chip.sram_per_core_kb} KB Fast Scratchpad per Core (${chip.num_compute_units} units)`;
+            document.getElementById("tier-cores-desc").textContent = `${chip.num_compute_units} Compute Units | Peak ${chip.peak_bf16_tflops} TFLOPs`;
+
+            // SRAM requirement formula:
+            // Element byte size: BF16 = 2 bytes
+            // SRAM per core = (Tm*Tk + Tk*Tn + Tm*Tn) * byte_size * stages / 1024 (KB)
+            const byteSize = currentPrecision === "fp8" || currentPrecision === "int8" ? 1.0 : (currentPrecision === "fp32" ? 4.0 : 2.0);
+            const tileA = currentTileM * currentTileK * byteSize;
+            const tileB = currentTileK * currentTileN * byteSize;
+            const tileC = currentTileM * currentTileN * byteSize;
+            const sramReqKb = ((tileA + tileB) * currentStages + tileC) / 1024.0;
+            const sramLimitKb = chip.sram_per_core_kb;
+            const sramPct = (sramReqKb / sramLimitKb) * 100.0;
+            const isOverflow = sramReqKb > sramLimitKb;
+
+            document.getElementById("tile-sram-req").textContent = `${sramReqKb.toFixed(1)} KB`;
+            document.getElementById("tile-sram-lim").textContent = `${sramLimitKb.toFixed(1)} KB`;
+            const pctEl = document.getElementById("tile-sram-pct");
+            pctEl.textContent = `${sramPct.toFixed(1)}%`;
+
+            const sramStatusEl = document.getElementById("tier-sram-status");
+            if (isOverflow) {
+                pctEl.style.color = "var(--accent-rose)";
+                sramStatusEl.textContent = "CRITICAL OVERFLOW!";
+                sramStatusEl.style.color = "var(--accent-rose)";
+            } else {
+                pctEl.style.color = "var(--accent-green)";
+                sramStatusEl.textContent = "Capacity: OK";
+                sramStatusEl.style.color = "var(--accent-green)";
+            }
+
+            // Reload Factor
+            const idealHbm = (currentMatrixSize * currentMatrixSize * 3 * byteSize);
+            const totalTiles = (currentMatrixSize / currentTileM) * (currentMatrixSize / currentTileN);
+            const actualHbm = totalTiles * (currentMatrixSize / currentTileK) * (tileA + tileB);
+            const reloadFactor = Math.max(1.0, actualHbm / idealHbm);
+            document.getElementById("tier-reload").textContent = `${reloadFactor.toFixed(2)}x Reload Amplification`;
+        }
+
+        // Render Compare Table
+        function renderCompareTable() {
+            const tbody = document.getElementById("compare-table-body");
+            tbody.innerHTML = "";
+
+            for (const [key, chip] of Object.entries(HARDWARE_DB)) {
+                const tr = document.createElement("tr");
+                const tokSpeed = (chip.bandwidth_gbs / 4.8).toFixed(1);
+                tr.innerHTML = `
+                    <td><b style="color: #fff;">${chip.name}</b> <span style="font-size: 11px; color: var(--text-dim);">(${chip.vendor})</span></td>
+                    <td><span class="chip-class-badge">${chip.target_device.split(' ')[0]}</span></td>
+                    <td>${chip.process_node_nm}nm</td>
+                    <td>${chip.tdp_watts}W</td>
+                    <td style="color: var(--accent-cyan); font-family: var(--font-mono);">${chip.bandwidth_gbs} GB/s</td>
+                    <td>${chip.vram_gb} GB</td>
+                    <td style="font-family: var(--font-mono); color: var(--accent-green);">${chip.peak_bf16_tflops} TF</td>
+                    <td style="font-family: var(--font-mono);">${chip.npu_tops > 0 ? chip.npu_tops + ' TOPS' : '—'}</td>
+                    <td class="tok-speed">~${tokSpeed} tok/s</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        // Setup All Event Listeners
+        function setupEventListeners() {
+            // Category filter tabs
+            document.querySelectorAll("#category-tabs .filter-tab").forEach(tab => {
+                tab.addEventListener("click", () => {
+                    document.querySelectorAll("#category-tabs .filter-tab").forEach(t => t.classList.remove("active"));
+                    tab.classList.add("active");
+                    activeFilter = tab.getAttribute("data-filter");
+                    populateChipSelect();
+                });
+            });
+
+            // Chip select dropdown
+            document.getElementById("chip-select").addEventListener("change", (e) => {
+                currentChipKey = e.target.value;
+                onChipChanged();
+            });
+
+            // View navigation buttons
+            document.querySelectorAll(".view-nav .view-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll(".view-nav .view-btn").forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    activeView = btn.getAttribute("data-view");
+
+                    document.querySelectorAll(".view-content").forEach(content => content.classList.remove("active"));
+                    document.getElementById(`view-${activeView}`).classList.add("active");
+
+                    if (activeView === "roofline") {
+                        setTimeout(() => Plotly.Plots.resize('roofline-chart'), 50);
+                    }
+                });
+            });
+
+            // Roofline Intensity Range Slider
+            const intSlider = document.getElementById("ctrl-intensity");
+            intSlider.addEventListener("input", (e) => {
+                currentIntensity = parseFloat(e.target.value);
+                document.getElementById("ctrl-intensity-val").textContent = `${currentIntensity.toFixed(1)} FLOPs/B`;
+                renderRooflineChart();
+            });
+
+            // Matrix Dimension Slider
+            const matSlider = document.getElementById("ctrl-matrix");
+            matSlider.addEventListener("input", (e) => {
+                currentMatrixSize = parseInt(e.target.value);
+                document.getElementById("ctrl-matrix-val").textContent = `${currentMatrixSize}`;
+                renderTileSimulation();
+            });
+
+            // Precision Selector
+            document.getElementById("ctrl-precision").addEventListener("change", (e) => {
+                currentPrecision = e.target.value;
+                renderTileSimulation();
+            });
+
+            // Preset Pills
+            document.querySelectorAll(".workload-preset-pills .preset-pill").forEach(pill => {
+                pill.addEventListener("click", () => {
+                    document.querySelectorAll(".workload-preset-pills .preset-pill").forEach(p => p.classList.remove("active"));
+                    pill.classList.add("active");
+                    const preset = pill.getAttribute("data-preset");
+                    if (preset === "llm-gen") {
+                        currentIntensity = 1.2;
+                    } else if (preset === "gemm") {
+                        currentIntensity = 64.0;
+                    } else if (preset === "prefill") {
+                        currentIntensity = 180.0;
+                    } else if (preset === "flash") {
+                        currentIntensity = 95.0;
+                    }
+                    intSlider.value = currentIntensity;
+                    document.getElementById("ctrl-intensity-val").textContent = `${currentIntensity.toFixed(1)} FLOPs/B`;
+                    renderRooflineChart();
+                });
+            });
+
+            // Tile Sliders
+            document.getElementById("input-tm").addEventListener("input", (e) => {
+                currentTileM = parseInt(e.target.value);
+                document.getElementById("val-tm").textContent = `${currentTileM}`;
+                renderTileSimulation();
+            });
+            document.getElementById("input-tn").addEventListener("input", (e) => {
+                currentTileN = parseInt(e.target.value);
+                document.getElementById("val-tn").textContent = `${currentTileN}`;
+                renderTileSimulation();
+            });
+            document.getElementById("input-tk").addEventListener("input", (e) => {
+                currentTileK = parseInt(e.target.value);
+                document.getElementById("val-tk").textContent = `${currentTileK}`;
+                renderTileSimulation();
+            });
+            document.getElementById("input-stages").addEventListener("input", (e) => {
+                currentStages = parseInt(e.target.value);
+                document.getElementById("val-stages").textContent = `${currentStages} (${currentStages === 2 ? 'Double-Buffered' : (currentStages === 3 ? 'Triple-Buffered' : 'Single')})`;
+                renderTileSimulation();
+            });
+
+            // Custom Chip Architect Form Submit
+            document.getElementById("custom-chip-form").addEventListener("submit", (e) => {
+                e.preventDefault();
+                const customKey = "custom_" + Date.now();
+                const name = document.getElementById("c-name").value;
+                const vendor = document.getElementById("c-vendor").value;
+                const target = document.getElementById("c-target").value;
+                const node = parseFloat(document.getElementById("c-node").value);
+                const tdp = parseFloat(document.getElementById("c-tdp").value);
+                const bw = parseFloat(document.getElementById("c-bw").value);
+                const vram = parseFloat(document.getElementById("c-vram").value);
+                const sram = parseFloat(document.getElementById("c-sram").value);
+                const tflops = parseFloat(document.getElementById("c-tflops").value);
+                const npu = parseFloat(document.getElementById("c-npu").value) || 0;
+
+                HARDWARE_DB[customKey] = {
+                    name: name,
+                    vendor: vendor,
+                    category: "edge",
+                    target_device: target,
+                    process_node_nm: node,
+                    transistor_count_billion: Math.round(node <= 3 ? 20.0 : 8.0),
+                    die_size_mm2: Math.round(node <= 3 ? 120.0 : 180.0),
+                    packaging: "Custom Advanced Packaging",
+                    memory_type: "LPDDR5X / Custom PHY",
+                    memory_bus_width_bits: 128,
+                    bandwidth_gbs: bw,
+                    vram_gb: vram,
+                    sram_per_core_kb: sram,
+                    l2_cache_mb: 16.0,
+                    num_compute_units: 8,
+                    peak_bf16_tflops: tflops,
+                    peak_fp8_tflops: tflops * 2,
+                    npu_tops: npu,
+                    tdp_watts: tdp,
+                    description: `Custom designed accelerator synthesized via TileLens Architect targeting ${target}.`,
+                    blueprint_blocks: [
+                        { name: "Custom Matrix Core Array", domain: "compute", area: 40, specs: { "Peak Compute": `${tflops} TFLOPs`, "Units": "8 Cores" }, desc: "Synthesized compute cores customized for user workload." },
+                        { name: "Neural Processing Engine", domain: "npu", area: 25, specs: { "Throughput": `${npu} TOPS` }, desc: "Dedicated INT8/FP16 accelerator." },
+                        { name: "On-Chip SRAM Scratchpad", domain: "cache", area: 20, specs: { "Capacity": `${sram} KB/Core` }, desc: "High-speed scratchpad buffer." },
+                        { name: "High-Bandwidth Memory PHY", domain: "memory_ctrl", area: 15, specs: { "Bandwidth": `${bw} GB/s` }, desc: "Memory interface to host DRAM." }
+                    ],
+                    capabilities: [
+                        `Synthesized for ${target} execution`,
+                        `Attains ${tflops} TFLOPs at only ${tdp}W TDP`,
+                        `Memory bandwidth of ${bw} GB/s drives ~${(bw/4.8).toFixed(1)} tokens/sec on 8B LLMs`
+                    ]
+                };
+
+                currentChipKey = customKey;
+                populateChipSelect();
+                onChipChanged();
+
+                // Switch to blueprint view
+                document.querySelector('.view-nav .view-btn[data-view="blueprint"]').click();
+            });
+
+            // Auto-detect button click
+            document.getElementById("btn-detect-device").addEventListener("click", () => {
+                autoDetectHardware(true);
+            });
+
+            // Banner Apply button
+            document.getElementById("btn-apply-detected").addEventListener("click", () => {
+                if (detectedChipKey && HARDWARE_DB[detectedChipKey]) {
+                    currentChipKey = detectedChipKey;
+                    populateChipSelect();
+                    onChipChanged();
+                    document.getElementById("detect-banner").style.display = "none";
+                }
+            });
+        }
+
+        // On Chip Selection Change
+        function onChipChanged() {
+            const chip = HARDWARE_DB[currentChipKey];
+            renderChipHero(chip);
+            renderBlueprint(chip);
+            renderCapabilities(chip);
+            renderRooflineChart();
+            renderTileSimulation();
+            renderCompareTable();
+        }
+
+        // Real-Device Hardware Auto-Detection
+        function autoDetectHardware(forceShowBanner = false) {
+            let renderer = "Generic Display Adapter";
+            let vendor = "Generic";
+
+            try {
+                const canvas = document.createElement("canvas");
+                const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+                if (gl) {
+                    const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+                    if (debugInfo) {
+                        renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || renderer;
+                        vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) || vendor;
+                    }
+                }
+            } catch (e) {
+                console.warn("WebGL detection blocked:", e);
+            }
+
+            const ua = navigator.userAgent.toLowerCase();
+            const cores = navigator.hardwareConcurrency || 8;
+            let matchedKey = "apple_m4"; // Default fallback
+            let detectionLabel = "";
+
+            if (renderer.toLowerCase().includes("apple") || ua.includes("macintosh") || ua.includes("iphone") || ua.includes("ipad")) {
+                if (ua.includes("iphone")) {
+                    matchedKey = "apple_a17_pro";
+                    detectionLabel = `Apple A-Series Bionic / Pro (${renderer})`;
+                } else if (cores >= 16) {
+                    matchedKey = "apple_m3_max";
+                    detectionLabel = `Apple M-Series Max / Ultra (${cores} cores detected)`;
+                } else {
+                    matchedKey = "apple_m4";
+                    detectionLabel = `Apple Silicon M-Series (${renderer})`;
+                }
+            } else if (renderer.toLowerCase().includes("nvidia") || renderer.toLowerCase().includes("geforce") || renderer.toLowerCase().includes("rtx")) {
+                if (renderer.includes("4090")) {
+                    matchedKey = "nvidia_rtx_4090";
+                    detectionLabel = `NVIDIA GeForce RTX 4090 Desktop (${renderer})`;
+                } else if (renderer.includes("4060") || ua.includes("mobile") || ua.includes("laptop")) {
+                    matchedKey = "nvidia_rtx_4060_mobile";
+                    detectionLabel = `NVIDIA RTX 40-Series Laptop GPU (${renderer})`;
+                } else {
+                    matchedKey = "nvidia_rtx_4060_mobile";
+                    detectionLabel = `NVIDIA GeForce GPU (${renderer})`;
+                }
+            } else if (renderer.toLowerCase().includes("adreno") || ua.includes("qualcomm") || ua.includes("snapdragon")) {
+                matchedKey = "snapdragon_8_gen3";
+                detectionLabel = `Qualcomm Snapdragon Platform (${renderer})`;
+            } else if (renderer.toLowerCase().includes("mali") || renderer.toLowerCase().includes("immortalis")) {
+                matchedKey = ua.includes("pixel") ? "google_tensor_g4" : "mediatek_dimensity_9300";
+                detectionLabel = `Mobile ARM GPU (${renderer})`;
+            } else if (renderer.toLowerCase().includes("intel") || renderer.toLowerCase().includes("iris") || renderer.toLowerCase().includes("arc")) {
+                matchedKey = "intel_lunar_lake_288v";
+                detectionLabel = `Intel Core Ultra Platform (${renderer})`;
+            } else if (renderer.toLowerCase().includes("radeon") || renderer.toLowerCase().includes("amd")) {
+                matchedKey = "amd_ryzen_ai_9_hx370";
+                detectionLabel = `AMD Ryzen AI Platform (${renderer})`;
+            } else {
+                matchedKey = "apple_a17_pro";
+                detectionLabel = `Detected Client: ${renderer} (${cores} CPU cores)`;
+            }
+
+            detectedChipKey = matchedKey;
+
+            // Show banner
+            const banner = document.getElementById("detect-banner");
+            document.getElementById("detect-text").innerHTML = `<b>Detected Client Hardware:</b> ${detectionLabel} → Matched: <b>${HARDWARE_DB[matchedKey].name}</b>`;
+            banner.style.display = "flex";
+        }
+
+        // Run when DOM is ready
+        window.addEventListener("DOMContentLoaded", initApp);
+    </script>
+</body>
+</html>

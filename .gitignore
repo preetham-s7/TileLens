@@ -32,6 +32,7 @@ htmlcov/
 
 # Generated HTML dashboards & scratch files
 *.html
+!index.html
 !examples/*.html
 dashboard.html
 comparison.html

@@ -1,206 +1,221 @@
-# 🔍 TileLens
+# TileLens
 
-<div align="center">
-
-**AI Accelerator Hardware-Software Co-Design & Roofline Memory Tile Visualizer**
+**Silicon workbench for chip blueprints, roofline analysis, tile-memory flow, and AI accelerator co-design.**
 
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Target: GPUs & TPUs](https://img.shields.io/badge/Hardware-NVIDIA%20%7C%20Google%20TPU%20%7C%20OpenSilicon-green.svg)](#supported-hardware)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fpreetham-s7%2FTileLens)
+[![Hardware](https://img.shields.io/badge/Hardware-Mobile%20SoCs%20%7C%20Laptops%20%7C%20GPUs%20%7C%20TPUs-green.svg)](#supported-hardware)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-5eead4.svg)](https://tile-lens.vercel.app/)
 
-</div>
+TileLens helps hardware architects, compiler engineers, and AI systems researchers inspect modern processors as full systems: die floorplans, memory hierarchy, compute ceilings, model-fit limits, tile reuse, and custom accelerator tradeoffs.
 
----
+Open the live app: **https://tile-lens.vercel.app/**
 
-## 💡 What is TileLens?
+## Highlights
 
-The semiconductor industry is currently hitting the **"Memory Wall"**: compute capability on modern AI accelerators (GPUs & TPUs) is growing much faster than off-chip memory bandwidth (HBM / DRAM). 
+- **Silicon Workbench UI:** redesigned responsive web app with chip search, vendor filters, compact dashboard navigation, and mobile-friendly controls.
+- **3D Blueprint Inspector:** explore physical package views, 2D floorplans, silicon block grids, and block-level role/spec inspection.
+- **LLM Capability Matrix:** estimate model fit, memory pressure, throughput, and time-to-first-token behavior across supported chips.
+- **Roofline Analyzer:** compare operational intensity against each chip's ridge point to see whether a workload is memory-bound or compute-bound.
+- **Tile Memory Flow:** simulate GEMM tiling, SRAM usage, reload amplification, pipeline stages, and systolic wavefront behavior.
+- **Multi-Chip Compare:** compare mobile SoCs, laptop processors, desktop GPUs, datacenter accelerators, TPUs, and open ASIC profiles.
+- **Custom Chip Architect:** enter ASIC/NPU specs and synthesize a custom profile for blueprint and roofline exploration.
+- **Python + CLI Toolkit:** use the same modeling engine from scripts, terminals, examples, and generated dashboards.
 
-**TileLens** is an open-source hardware-software co-design toolkit designed to help semiconductor architects, ML compiler engineers, and researchers analyze and visualize how matrix computation **Tiles** travel across physical memory hierarchies:
-
-$$\text{Off-Chip HBM / VRAM} \;\longleftrightarrow\; \text{On-Chip SRAM / Shared Memory} \;\longleftrightarrow\; \text{Systolic Array / Tensor Cores}$$
-
-With **TileLens**, you can:
-* ⚡ **Model the Roofline Bound:** Instantly discover whether an AI workload (LLMs, Attention, GEMM) is **Compute-Bound** or **Memory-Bandwidth Bound**.
-* 🧱 **Simulate Tile Memory Flow:** Track SRAM allocation per core/SM, multi-buffering pipeline stages, and HBM data reload amplification factors.
-* 🔍 **Head-to-Head Architecture Comparisons:** Compare how identical matrix tiles perform across **NVIDIA H100/A100/B200**, **Google TPU v4/v5e/v5p**, and custom **SkyWater 130nm ASICs**.
-* 📊 **Export Interactive Visual Dashboards:** Generate standalone HTML dashboards featuring interactive Plotly roofline charts, memory hierarchy diagrams, and diagnostic alerts.
-
----
-
-## 🏛️ System Architecture
+## System Model
 
 ```mermaid
 flowchart LR
-    subgraph Inputs ["1. Workload Specification"]
-        A["GEMM Dimensions (M, N, K)"]
-        B["Tile Config (Tm, Tn, Tk)"]
-        C["Precision (FP32, BF16, FP8, INT8)"]
+    subgraph Inputs ["Workload + Hardware Inputs"]
+        A["GEMM dimensions<br/>M, N, K"]
+        B["Tile geometry<br/>Tm, Tn, Tk"]
+        C["Precision<br/>FP32, BF16, FP8, INT8"]
+        D["Hardware profile<br/>mobile, laptop, GPU, TPU, ASIC"]
     end
 
-    subgraph Core ["2. TileLens Co-Design Engine"]
-        D["Hardware Database\n(H100, TPU v5, B200, ASICs)"]
-        E["Tile Simulator\n(SRAM footprint, Buffering, Reuse)"]
-        F["Roofline Model\n(Arithmetic Intensity vs Ridge Point)"]
-        G["Diagnostic Engine\n(SRAM Overflow, Tail Waves)"]
+    subgraph Engine ["TileLens Co-Design Engine"]
+        E["Hardware database"]
+        F["Tile simulator<br/>SRAM, reuse, stages"]
+        G["Roofline model<br/>intensity vs ridge point"]
+        H["Diagnostics<br/>overflow, bottlenecks, fit"]
     end
 
-    subgraph Outputs ["3. Interfaces & Visuals"]
-        H["Rich Terminal Tables"]
-        I["Plotly Interactive HTML Dashboard"]
-        J["Optimization Recommendations"]
+    subgraph Outputs ["Interfaces"]
+        I["Responsive web workbench"]
+        J["CLI reports"]
+        K["Python API"]
+        L["Exportable HTML dashboards"]
     end
 
-    Inputs --> Core
-    D --> E
-    E --> F
-    F --> G
-    Core --> Outputs
+    Inputs --> Engine
+    D --> E --> F --> G --> H
+    Engine --> Outputs
 ```
 
----
+## Supported Hardware
 
-## ⚡ Supported Hardware Profiles (Mobile, Laptop PCs & Cloud AI)
+TileLens includes profiles for mobile, laptop, workstation, cloud, and open-silicon targets.
 
-| Device | Vendor | Target / Class | Memory Bandwidth | SRAM / Cache | Peak BF16 Compute | NPU Throughput |
-| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
-| **Apple A17 Pro** | Apple | Mobile (iPhone 15 Pro) | 51.2 GB/s LPDDR5X | 24 MB SLC | 4.3 TFLOPs | 35 TOPS (ANE) |
-| **Snapdragon 8 Gen 3** | Qualcomm | Flagship Mobile | 77.0 GB/s LPDDR5X | 12 MB SLC | 6.8 TFLOPs | 45 TOPS (Hexagon) |
-| **Google Tensor G4** | Google | Mobile (Pixel 9 Pro) | 68.0 GB/s LPDDR5X | 8 MB SLC | 3.6 TFLOPs | 37 TOPS (EdgeTPU) |
-| **Dimensity 9300** | MediaTek | Flagship Mobile | 96.0 GB/s LPDDR5T | 10 MB SLC | 9.2 TFLOPs | 46 TOPS (APU 790) |
-| **Apple M4** | Apple | Laptop / iPad Pro | 120.0 GB/s Unified | 32 MB SLC | 8.6 TFLOPs | 38 TOPS (ANE) |
-| **Apple M3 Max** | Apple | Workstation Laptop | 400.0 GB/s Unified | 64 MB SLC | 32.4 TFLOPs | 18 TOPS |
-| **Core Ultra 7 288V** | Intel | Copilot+ Thin Laptop | 137.0 GB/s On-Package | 16 MB MSC | 16.8 TFLOPs | 48 TOPS (NPU 4) |
-| **Ryzen AI 9 HX 370**| AMD | AI Laptop PC | 120.0 GB/s LPDDR5X | 24 MB L3 | 15.6 TFLOPs | 50 TOPS (XDNA 2) |
-| **GeForce RTX 4060** | NVIDIA | Gaming/AI Laptop | 256.0 GB/s GDDR6 | 32 MB L2 | 60.5 TFLOPs | 121 TOPS FP8 |
-| **GeForce RTX 4090** | NVIDIA | Desktop Workstation | 1,008 GB/s GDDR6X | 72 MB L2 | 330 TFLOPs | 660 TOPS FP8 |
-| **NVIDIA B200** | NVIDIA | Hyperscale Dual-Die | 8,000 GB/s HBM3e | 128 MB L2 | 2,250 TFLOPs | 4,500 TOPS FP8 |
-| **NVIDIA H100 SXM** | NVIDIA | Cloud Datacenter | 3,350 GB/s HBM3 | 50 MB L2 | 989 TFLOPs | 1,978 TOPS FP8 |
-| **NVIDIA A100 SXM** | NVIDIA | Cloud Datacenter | 2,039 GB/s HBM2e | 40 MB L2 | 312 TFLOPs | — |
-| **AMD Instinct MI300X**| AMD | Hyperscale Cloud | 5,300 GB/s HBM3 | 256 MB Cache | 1,307 TFLOPs | 2,614 TOPS FP8 |
-| **Google TPU v5p** | Google | TPU v5p Pod | 1,600 GB/s HBM3 | 64 MB VMEM | 459 TFLOPs | 918 TOPS FP8 |
-| **Google TPU v5e** | Google | TPU v5e Pod | 819 GB/s HBM2e | 16 MB VMEM | 197 TFLOPs | 394 TOPS INT8 |
-| **Google TPU v4** | Google | Systolic Array | 1,200 GB/s HBM2 | 32 MB VMEM | 275 TFLOPs | — |
-| **OpenTPU-130** | Open Silicon | SkyWater 130nm ASIC | 800 MB/s HyperRAM | 64 KB OpenRAM | 51.2 GOPs (INT8) | — |
+| Device | Vendor | Class | Memory Bandwidth | On-Chip Memory | Peak BF16 / FP16 | AI / NPU Peak |
+| :--- | :--- | :--- | ---: | ---: | ---: | ---: |
+| Apple A17 Pro | Apple | Mobile | 51.2 GB/s | 24 MB SLC | 4.3 TFLOPs | 35 TOPS |
+| Snapdragon 8 Gen 3 | Qualcomm | Mobile | 77 GB/s | 12 MB SLC | 6.8 TFLOPs | 45 TOPS |
+| Google Tensor G4 | Google | Mobile | 68 GB/s | 8 MB SLC | 3.6 TFLOPs | 37 TOPS |
+| Dimensity 9300 | MediaTek | Mobile | 96 GB/s | 10 MB SLC | 9.2 TFLOPs | 46 TOPS |
+| Apple M4 | Apple | Laptop / Tablet | 120 GB/s | 32 MB SLC | 8.6 TFLOPs | 38 TOPS |
+| Apple M3 Max | Apple | Workstation Laptop | 400 GB/s | 64 MB SLC | 32.4 TFLOPs | 18 TOPS |
+| Intel Core Ultra 7 288V | Intel | AI Laptop | 137 GB/s | 16 MB MSC | 16.8 TFLOPs | 48 TOPS |
+| AMD Ryzen AI 9 HX 370 | AMD | AI Laptop | 120 GB/s | 24 MB L3 | 15.6 TFLOPs | 50 TOPS |
+| GeForce RTX 4060 Laptop | NVIDIA | Laptop GPU | 256 GB/s | 32 MB L2 | 60.5 TFLOPs | 121 TOPS FP8 |
+| GeForce RTX 4090 | NVIDIA | Desktop GPU | 1,008 GB/s | 72 MB L2 | 330 TFLOPs | 660 TOPS FP8 |
+| NVIDIA H100 SXM5 | NVIDIA | Datacenter GPU | 3,350 GB/s | 50 MB L2 | 989 TFLOPs | 1,978 TOPS FP8 |
+| NVIDIA Blackwell B200 | NVIDIA | Datacenter GPU | 8,000 GB/s | 128 MB L2 | 2,250 TFLOPs | 4,500 TOPS FP8 |
+| AMD Instinct MI300X | AMD | Datacenter GPU | 5,300 GB/s | 256 MB cache | 1,307 TFLOPs | 2,614 TOPS FP8 |
+| Google TPU v5p | Google | Cloud TPU | 1,600 GB/s | 64 MB VMEM | 459 TFLOPs | 918 TOPS FP8 |
+| Google TPU v5e | Google | Cloud TPU | 819 GB/s | 16 MB VMEM | 197 TFLOPs | 394 TOPS INT8 |
+| OpenTPU-130 | Open Silicon | SkyWater 130nm ASIC | 800 MB/s | 64 KB OpenRAM | 51.2 GOPs INT8 | Edge ASIC |
 
----
+## Quickstart
 
-## 🚀 Quickstart
+### Run the Web Workbench
 
-### 1. Installation
+The app is a standalone `index.html`, so it can run directly in a browser. For local API-compatible serving and mobile testing on the same network:
 
 ```bash
-# Clone repository
 git clone https://github.com/preetham-s7/TileLens.git
 cd TileLens
-
-# Install in development mode
-pip install -e .
+python -m http.server 8080
 ```
 
-### 2. Universal Web Application (Runs on Any Mobile Phone, Tablet & Laptop PC)
+Then open:
 
-Start the local server so your laptop and any phone on the same Wi-Fi can view the blueprints and operational capabilities:
+- Desktop: `http://127.0.0.1:8080/`
+- Phone on same Wi-Fi: `http://<your-local-ip>:8080/`
+
+You can also install the package and use the CLI server:
 
 ```bash
+pip install -e .
 tilelens serve --port 8080
 ```
-* **Laptop / PC Browser:** Open `http://localhost:8080/index.html` (or double-click `index.html` directly).
-* **Mobile Phones (iPhone / Android):** Open `http://<your-local-ip>:8080/index.html` to auto-detect your phone's chip and view its silicon blueprint!
 
-### 3. Command-Line Interface (CLI)
+### Use the CLI
 
-#### Inspect a Chip's Blueprint & What Else It Does:
 ```bash
-# Mobile chip (Apple A17 Pro)
-tilelens blueprint -d a17
-
-# Laptop processor (Apple M4 or Intel Lunar Lake)
-tilelens blueprint -d m4
-tilelens blueprint -d lunarlake
-
-# Datacenter GPU
-tilelens blueprint -d h100
-```
-
-#### List All Hardware Profiles:
-```bash
+# List supported chips
 tilelens list-hardware
-```
 
-#### Analyze a Matrix Multiplication (GEMM) Kernel:
-```bash
+# Inspect a mobile, laptop, or datacenter chip
+tilelens blueprint -d a17
+tilelens blueprint -d m4
+tilelens blueprint -d h100
+
+# Analyze GEMM tiling on a target device
 tilelens gemm -M 4096 -N 4096 -K 4096 --device h100 --precision bf16 --tile-m 128 --tile-n 128 --tile-k 64
-```
 
-#### Compare Mobile vs Laptop vs Datacenter Performance:
-```bash
+# Compare devices on the same workload
 tilelens compare -M 4096 -N 4096 -K 4096 --devices a17,m4,rtx4060,h100 --precision bf16
+
+# Export an interactive dashboard
+tilelens export-viz --device h100 --output dashboard.html
 ```
 
----
-
-## 🐍 Python API Usage
-
-You can embed TileLens directly into your kernel compiler or PyTorch/Triton scripts:
+## Python API
 
 ```python
-from tilelens import get_hardware, Precision, PerformanceAnalyzer, TileConfig
+from tilelens import Precision, PerformanceAnalyzer, TileConfig, get_hardware
 
-# 1. Select target hardware
-hw = get_hardware("nvidia_h100_sxm")
+hardware = get_hardware("nvidia_h100_sxm")
 
-# 2. Configure tile geometry (e.g. 128x128x64 with 2 pipeline stages)
-tile_cfg = TileConfig(
+tile_config = TileConfig(
     tile_m=128,
     tile_n=128,
     tile_k=64,
     pipeline_stages=2,
-    precision=Precision.BF16
+    precision=Precision.BF16,
 )
 
-# 3. Run co-design analysis for GEMM (M=4096, N=4096, K=4096)
-analyzer = PerformanceAnalyzer(hw)
-report = analyzer.analyze_gemm(4096, 4096, 4096, tile_cfg)
+report = PerformanceAnalyzer(hardware).analyze_gemm(
+    4096,
+    4096,
+    4096,
+    tile_config,
+)
 
-# 4. Print actionable diagnostics
 print(report.summary())
 ```
 
----
+## Core Concepts
 
-## 🔬 Core Semiconductor Concepts
+### Roofline Ridge Point
 
-### 1. Arithmetic Intensity & The Ridge Point
-The **Roofline Model** defines attainable throughput based on memory traffic:
-$$\text{Operational Intensity} = \frac{\text{Total Operations (FLOPs)}}{\text{Total Memory Traffic (Bytes)}}$$
+The roofline model compares useful compute against memory traffic:
 
-The **Hardware Ridge Point** is the threshold where a chip transitions from memory-bound to compute-bound:
-$$\text{Ridge Point} = \frac{\text{Peak Compute Throughput (TFLOPs)}}{\text{Peak Memory Bandwidth (TB/s)}}$$
+```text
+Operational intensity = FLOPs / bytes moved
+Ridge point = peak compute / peak memory bandwidth
+```
 
-* **If Operational Intensity < Ridge Point:** The Tensor Cores / Systolic Arrays stall waiting for memory transfers (**Memory-Bound**).
-* **If Operational Intensity ≥ Ridge Point:** Memory bandwidth is sufficient to saturate all compute units (**Compute-Bound**).
+- Below the ridge point, the workload is memory-bandwidth bound.
+- Above the ridge point, the workload can approach compute saturation.
 
-### 2. Tile Data Reuse Amplification
-When large matrices are decomposed into tiles $(T_M, T_N, T_K)$, on-chip SRAM allows data reuse:
-* Matrix $A$ tiles are reused across $N / T_N$ column blocks.
-* Matrix $B$ tiles are reused across $M / T_M$ row blocks.
+### Tile Reuse and SRAM Pressure
 
-Increasing tile dimensions raises operational intensity, pushing kernels into the compute-bound zone until limited by **physical SRAM capacity per core**.
+Large matrix operations are split into tiles. Larger tiles can improve data reuse and operational intensity, but only if the working set fits in on-chip SRAM or shared memory. TileLens estimates:
 
----
+- input and accumulator SRAM footprint
+- pipeline-stage buffering cost
+- reload amplification from off-chip memory
+- attainable throughput under the selected precision
+- practical bottlenecks and optimization hints
 
-## 🤝 Contributing
+## Project Layout
 
-We welcome contributions from the semiconductor, hardware architecture, and deep learning compiler communities!
-* Add new hardware specifications (AMD Instinct MI300X, Tenstorrent Wormhole, Groq LPU).
-* Add attention kernel modeling (FlashAttention-2/3, Ring Attention).
-* Improve Triton and JAX Pallas trace ingestion.
+```text
+TileLens/
+├── index.html              # Responsive silicon workbench UI
+├── api/index.py            # Vercel API endpoint
+├── tilelens/
+│   ├── core/               # Roofline, tile simulation, validation, analysis
+│   ├── hardware/           # Hardware profiles and lookup aliases
+│   ├── cli/                # Command-line interface
+│   └── viz/                # Dashboard export helpers
+├── tests/                  # Python and dashboard regression tests
+├── examples/               # Example analyses
+├── vercel.json             # Vercel deployment config
+└── pyproject.toml
+```
+
+## Development Checks
+
+```bash
+python -m unittest discover -v
+node tests/test_dashboard.cjs
+git diff --check
+```
+
+## Deployment
+
+The production site is deployed on Vercel:
+
+```text
+https://tile-lens.vercel.app/
+```
+
+The current repository includes `vercel.json` and `api/index.py` for Vercel hosting.
+
+## Contributing
+
+Contributions are welcome from hardware architecture, compiler, and ML systems communities. Good areas to extend:
+
+- new hardware profiles
+- attention kernel models
+- Triton, JAX Pallas, or profiler trace ingestion
+- more packaging/floorplan visualizations
+- validation cases for mobile and datacenter chips
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
----
+## License
 
-## 📄 License
-This project is licensed under the [MIT License](LICENSE).
+TileLens is released under the [MIT License](LICENSE).

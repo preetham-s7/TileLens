@@ -6137,39 +6137,115 @@
                 ictx.beginPath(); ictx.moveTo(0, y); ictx.lineTo(512, y); ictx.stroke();
             }
 
-            ictx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-            ictx.font = 'bold 28px sans-serif';
-            ictx.textAlign = 'center';
-            ictx.fillText(chip.vendor.toUpperCase(), 256, 120);
+            // --- Helper: draw text that auto-scales down to fit maxWidth, never overflows ---
+            const CANVAS_W = 512;
+            const SAFE_MARGIN = 32; // px from each side
+            const MAX_TEXT_W = CANVAS_W - SAFE_MARGIN * 2;
 
-            ictx.font = '800 36px sans-serif';
-            ictx.fillText(chip.name.toUpperCase(), 256, 175);
-
-            ictx.font = 'bold 20px monospace';
-            ictx.fillStyle = 'rgba(30, 41, 59, 0.85)';
-            ictx.fillText(`${chip.process_node_nm}nm FINFET / GAA • ${chip.tdp_watts}W TDP`, 256, 220);
-
-            if (chip.transistor_count_billion > 0) {
-                ictx.font = '18px monospace';
-                ictx.fillText(`${chip.transistor_count_billion} BILLION TRANSISTORS`, 256, 255);
+            function fitText(ctx, text, maxFontSize, minFontSize, fontStyle, maxWidth) {
+                let size = maxFontSize;
+                ctx.font = `${fontStyle} ${size}px sans-serif`;
+                while (ctx.measureText(text).width > maxWidth && size > minFontSize) {
+                    size -= 1;
+                    ctx.font = `${fontStyle} ${size}px sans-serif`;
+                }
+                return size;
             }
 
+            // Wrap text into lines based on maxWidth, returns array of lines
+            function wrapText(ctx, text, maxWidth) {
+                const words = text.split(' ');
+                const lines = [];
+                let current = '';
+                for (const word of words) {
+                    const test = current ? current + ' ' + word : word;
+                    if (ctx.measureText(test).width <= maxWidth) {
+                        current = test;
+                    } else {
+                        if (current) lines.push(current);
+                        current = word;
+                    }
+                }
+                if (current) lines.push(current);
+                return lines;
+            }
+
+            ictx.textAlign = 'center';
+            ictx.textBaseline = 'middle';
+
+            // --- VENDOR NAME (row 1) ---
+            ictx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+            const vendorSize = fitText(ictx, chip.vendor.toUpperCase(), 26, 12, 'bold', MAX_TEXT_W);
+            ictx.font = `bold ${vendorSize}px sans-serif`;
+            ictx.fillText(chip.vendor.toUpperCase(), CANVAS_W / 2, 96);
+
+            // --- CHIP NAME — auto-scale + word-wrap if still too wide (row 2) ---
+            const chipNameUp = chip.name.toUpperCase();
+            let nameSize = fitText(ictx, chipNameUp, 38, 14, '800', MAX_TEXT_W);
+            ictx.font = `800 ${nameSize}px sans-serif`;
+
+            const nameLines = wrapText(ictx, chipNameUp, MAX_TEXT_W);
+            const nameLineH = nameSize * 1.22;
+            // Centre the name block starting from y=150
+            let nameY = 150;
+            if (nameLines.length > 1) {
+                // Compress font a bit more if wrapping produces many lines
+                const maxLines = 3;
+                if (nameLines.length > maxLines) nameSize = fitText(ictx, chipNameUp, nameSize - 4, 12, '800', MAX_TEXT_W);
+                ictx.font = `800 ${nameSize}px sans-serif`;
+            }
+            ictx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+            nameLines.forEach((line, i) => {
+                ictx.fillText(line, CANVAS_W / 2, nameY + i * nameLineH);
+            });
+
+            // Advance y cursor past name block
+            let cursorY = nameY + nameLines.length * nameLineH + 14;
+
+            // --- PROCESS NODE / TDP (row 3) ---
+            const procText = `${chip.process_node_nm}nm FINFET / GAA  •  ${chip.tdp_watts}W TDP`;
+            const procSize = fitText(ictx, procText, 18, 10, 'bold', MAX_TEXT_W);
+            ictx.font = `bold ${procSize}px monospace`;
+            ictx.fillStyle = 'rgba(30, 41, 59, 0.85)';
+            ictx.fillText(procText, CANVAS_W / 2, cursorY);
+            cursorY += procSize * 1.5 + 6;
+
+            // --- TRANSISTOR COUNT (row 4) ---
+            if (chip.transistor_count_billion > 0) {
+                const transText = `${chip.transistor_count_billion} BILLION TRANSISTORS`;
+                const transSize = fitText(ictx, transText, 16, 9, 'normal', MAX_TEXT_W);
+                ictx.font = `${transSize}px monospace`;
+                ictx.fillStyle = 'rgba(30, 41, 59, 0.75)';
+                ictx.fillText(transText, CANVAS_W / 2, cursorY);
+                cursorY += transSize * 1.5 + 6;
+            }
+
+            // Reset baseline for lower decorations
+            ictx.textBaseline = 'alphabetic';
+
+            // --- QR-style corner mark ---
             ictx.fillStyle = '#0f172a';
-            const dmX = 70;
+            const dmX = 50;
             const dmY = 360;
-            const dmS = 70;
+            const dmS = 64;
             ictx.fillRect(dmX, dmY, dmS, dmS);
             ictx.fillStyle = '#ffffff';
-            ictx.fillRect(dmX + 10, dmY + 10, 15, 15);
-            ictx.fillRect(dmX + 45, dmY + 10, 15, 15);
-            ictx.fillRect(dmX + 10, dmY + 45, 15, 15);
-            ictx.fillRect(dmX + 30, dmY + 30, 12, 12);
+            ictx.fillRect(dmX + 9, dmY + 9, 13, 13);
+            ictx.fillRect(dmX + 42, dmY + 9, 13, 13);
+            ictx.fillRect(dmX + 9, dmY + 42, 13, 13);
+            ictx.fillRect(dmX + 28, dmY + 28, 10, 10);
 
-            ictx.font = '14px monospace';
+            // --- Serial and fab lines ---
+            const snText = `S/N: ${chip.name.replace(/\s+/g, '-').toUpperCase()}-2026-X01`;
+            const snSize = fitText(ictx, snText, 13, 8, 'normal', MAX_TEXT_W - 130);
+            ictx.font = `${snSize}px monospace`;
             ictx.textAlign = 'left';
             ictx.fillStyle = 'rgba(15, 23, 42, 0.8)';
-            ictx.fillText(`S/N: ${chip.name.replace(/\s+/g, '-').toUpperCase()}-2026-X01`, 160, 390);
-            ictx.fillText(`FAB: TSMC TAIWAN (DIFFUSION)`, 160, 415);
+            ictx.fillText(snText, 130, 392);
+            const fabText = 'FAB: TSMC TAIWAN (DIFFUSION)';
+            const fabSize = fitText(ictx, fabText, 13, 8, 'normal', MAX_TEXT_W - 130);
+            ictx.font = `${fabSize}px monospace`;
+            ictx.fillText(fabText, 130, 416);
 
             const ihsTex = new THREE.CanvasTexture(ihsCanvas);
             const ihsMat = new THREE.MeshStandardMaterial({

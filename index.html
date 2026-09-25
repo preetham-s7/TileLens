@@ -5557,7 +5557,14 @@
         let microBumpsMesh = null;
         let substrateMesh = null;
         let bgaMesh = null;
-        let photonParticles = null;
+        let photonParticles = null;          // legacy (replaced)
+        let photonDataParticles = null;      // cyan  – data signals
+        let photonPowerParticles = null;     // amber – power/ground
+        let photonClockParticles = null;     // magenta – clock nets
+        let starfieldParticles = null;       // background starfield
+        let radarRingMesh = null;            // animated radar sweep arc
+        let radarAngle = 0;                  // radar sweep angle
+        let blockBreathTime = 0;             // used for block pulsing
         let is3DAutoRotating = true;
         let isExploded = false;
         let explodeProgress = 0.0;
@@ -5819,8 +5826,89 @@
                 }
             }
 
+            // 5. Animated Radar Sweep Arc — stored as radarRingMesh for animation loop
+            try {
+                const radarGeo = new THREE.RingGeometry(0, 32, 64, 1, 0, Math.PI * 0.35);
+                const radarMat = new THREE.MeshBasicMaterial({
+                    color: 0x00e5ff,
+                    transparent: true,
+                    opacity: 0.28,
+                    side: THREE.DoubleSide,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending
+                });
+                radarRingMesh = new THREE.Mesh(radarGeo, radarMat);
+                radarRingMesh.rotation.x = -Math.PI / 2;
+                radarRingMesh.position.y = -6.40;
+                stageGroup.add(radarRingMesh);
+
+                // Trailing glow (wider, more transparent)
+                const radarTrailGeo = new THREE.RingGeometry(0, 32, 64, 1, 0, Math.PI * 0.6);
+                const radarTrailMat = new THREE.MeshBasicMaterial({
+                    color: 0x00e5ff,
+                    transparent: true,
+                    opacity: 0.08,
+                    side: THREE.DoubleSide,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending
+                });
+                const radarTrailMesh = new THREE.Mesh(radarTrailGeo, radarTrailMat);
+                radarTrailMesh.rotation.x = -Math.PI / 2;
+                radarTrailMesh.position.y = -6.41;
+                radarTrailMesh.name = 'radarTrail';
+                stageGroup.add(radarTrailMesh);
+            } catch(e) {}
+
+            // 6. Holographic hex-grid floor disc (canvas texture)
+            try {
+                const hgCanvas = document.createElement('canvas');
+                hgCanvas.width = 512; hgCanvas.height = 512;
+                const hgCtx = hgCanvas.getContext('2d');
+                if (hgCtx) {
+                    hgCtx.clearRect(0, 0, 512, 512);
+                    // Radial fade
+                    const hgFade = hgCtx.createRadialGradient(256,256,20,256,256,240);
+                    hgFade.addColorStop(0, 'rgba(0,229,255,0.12)');
+                    hgFade.addColorStop(0.7,'rgba(0,229,255,0.06)');
+                    hgFade.addColorStop(1,'rgba(0,0,0,0)');
+                    // Hex grid lines
+                    hgCtx.strokeStyle = 'rgba(0,229,255,0.18)';
+                    hgCtx.lineWidth = 0.8;
+                    const hexSize = 28;
+                    const hexH = hexSize * Math.sqrt(3);
+                    for (let row = -6; row <= 6; row++) {
+                        for (let col = -6; col <= 6; col++) {
+                            const cx = 256 + col * hexSize * 1.5;
+                            const cy = 256 + row * hexH + (col % 2 === 0 ? 0 : hexH / 2);
+                            hgCtx.beginPath();
+                            for (let k = 0; k < 6; k++) {
+                                const a = (Math.PI / 180) * (60 * k - 30);
+                                const px = cx + hexSize * Math.cos(a);
+                                const py = cy + hexSize * Math.sin(a);
+                                if (k === 0) hgCtx.moveTo(px, py); else hgCtx.lineTo(px, py);
+                            }
+                            hgCtx.closePath();
+                            hgCtx.stroke();
+                        }
+                    }
+                    // Overlay radial fade mask
+                    hgCtx.fillStyle = hgFade;
+                    hgCtx.fillRect(0, 0, 512, 512);
+
+                    const hgTex = new THREE.CanvasTexture(hgCanvas);
+                    const hgPlane = new THREE.Mesh(
+                        new THREE.PlaneGeometry(76, 76),
+                        new THREE.MeshBasicMaterial({ map: hgTex, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
+                    );
+                    hgPlane.rotation.x = -Math.PI / 2;
+                    hgPlane.position.y = -6.38;
+                    stageGroup.add(hgPlane);
+                }
+            } catch(e) {}
+
             return stageGroup;
         }
+
 
         let camTheta = 0.75;
         let camPhi = 0.95;
@@ -5992,110 +6080,225 @@
             dieBaseMesh.receiveShadow = true;
             dieGroup.add(dieBaseMesh);
 
-            // 3D Extruded Microarchitectural Blocks
+            // 3D Extruded Microarchitectural Blocks — richer textures + taller extrusion
             const rawBoxes = computeFloorplanBoxes(chip.blueprint_blocks, 34, 34);
 
             rawBoxes.forEach(b => {
                 const bw = Math.max(2.0, b.w - 0.4);
                 const bd = Math.max(2.0, b.h - 0.4);
-                const bh = 0.8;
+                // Taller blocks — height relative to die area share
+                const bh = 0.9 + (b.block.area / 100) * 2.2;
                 const bx = (b.x + b.w / 2) - 17;
                 const bz = (b.y + b.h / 2) - 17;
 
                 const blockGeo = new THREE.BoxGeometry(bw, bh, bd);
                 const colorInfo = getDomainColor(b.block.domain);
+                const mainHex = colorInfo.main;
 
                 const bCanvas = document.createElement('canvas');
-                bCanvas.width = 256;
-                bCanvas.height = 256;
+                bCanvas.width = 512;
+                bCanvas.height = 512;
                 const bctx = bCanvas.getContext('2d');
-                bctx.fillStyle = '#0a0e18';
-                bctx.fillRect(0, 0, 256, 256);
 
-                bctx.strokeStyle = colorInfo.main;
-                bctx.lineWidth = 6;
-                bctx.strokeRect(4, 4, 248, 248);
+                // — Dark base gradient —
+                const bgGrad = bctx.createLinearGradient(0, 0, 0, 512);
+                bgGrad.addColorStop(0, '#0d1220');
+                bgGrad.addColorStop(1, '#060910');
+                bctx.fillStyle = bgGrad;
+                bctx.fillRect(0, 0, 512, 512);
 
-                bctx.fillStyle = colorInfo.main;
-                bctx.fillRect(10, 10, 236, 36);
-                bctx.fillStyle = '#000000';
-                bctx.font = 'bold 22px sans-serif';
+                // — Outer neon border —
+                bctx.strokeStyle = mainHex;
+                bctx.lineWidth = 8;
+                bctx.shadowColor = mainHex;
+                bctx.shadowBlur = 18;
+                bctx.strokeRect(6, 6, 500, 500);
+                bctx.shadowBlur = 0;
+
+                // — Domain-color header bar —
+                const hdrGrad = bctx.createLinearGradient(0, 0, 512, 0);
+                hdrGrad.addColorStop(0, mainHex + 'cc');
+                hdrGrad.addColorStop(1, mainHex + '44');
+                bctx.fillStyle = hdrGrad;
+                bctx.fillRect(10, 10, 492, 52);
+
+                // Header text
+                bctx.fillStyle = '#000000cc';
+                bctx.font = 'bold 28px sans-serif';
                 bctx.textAlign = 'center';
-                bctx.fillText(`${b.block.area}% DIE`, 128, 36);
+                bctx.fillText(`${b.block.area}% DIE`, 256, 46);
 
+                // Block name
                 bctx.fillStyle = '#ffffff';
-                bctx.font = 'bold 20px sans-serif';
-                bctx.fillText(b.block.name.slice(0, 18), 128, 90);
+                bctx.font = 'bold 32px sans-serif';
+                bctx.shadowColor = mainHex;
+                bctx.shadowBlur = 14;
+                bctx.fillText(b.block.name.slice(0, 16), 256, 105);
+                bctx.shadowBlur = 0;
 
-                bctx.fillStyle = colorInfo.main;
-                bctx.font = '16px monospace';
-                bctx.fillText(b.block.domain.toUpperCase(), 128, 125);
+                // Domain label
+                bctx.fillStyle = mainHex;
+                bctx.font = 'bold 20px monospace';
+                bctx.fillText(b.block.domain.toUpperCase(), 256, 140);
 
+                // — Domain-specific internal circuit art —
                 if (b.block.domain === 'compute') {
-                    bctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
-                    bctx.lineWidth = 3;
-                    for (let lx = 20; lx < 236; lx += 20) {
-                        bctx.beginPath(); bctx.moveTo(lx, 140); bctx.lineTo(lx, 236); bctx.stroke();
+                    // Transistor array grid (MOSFET symbols)
+                    bctx.strokeStyle = 'rgba(0,229,255,0.35)';
+                    bctx.lineWidth = 2;
+                    for (let lx = 20; lx < 492; lx += 24) {
+                        bctx.beginPath(); bctx.moveTo(lx, 158); bctx.lineTo(lx, 492); bctx.stroke();
                     }
-                } else if (b.block.domain === 'tensor' || b.block.domain === 'npu') {
-                    bctx.fillStyle = colorInfo.main;
-                    for (let dx = 25; dx < 236; dx += 25) {
-                        for (let dy = 145; dy < 236; dy += 25) {
-                            bctx.beginPath(); bctx.arc(dx, dy, 4, 0, Math.PI * 2); bctx.fill();
+                    bctx.strokeStyle = 'rgba(0,229,255,0.2)';
+                    for (let ly = 165; ly < 492; ly += 24) {
+                        bctx.beginPath(); bctx.moveTo(20, ly); bctx.lineTo(492, ly); bctx.stroke();
+                    }
+                    // Gate highlight squares
+                    bctx.fillStyle = 'rgba(0,229,255,0.15)';
+                    for (let gx = 44; gx < 492; gx += 48) {
+                        for (let gy = 189; gy < 492; gy += 48) {
+                            bctx.fillRect(gx, gy, 20, 20);
                         }
                     }
+                } else if (b.block.domain === 'tensor' || b.block.domain === 'npu') {
+                    // Dot-matrix systolic array
+                    bctx.fillStyle = mainHex;
+                    for (let dx = 30; dx < 492; dx += 30) {
+                        for (let dy = 165; dy < 492; dy += 30) {
+                            const pulse = Math.abs(Math.sin((dx + dy) * 0.05)) * 0.6 + 0.2;
+                            bctx.globalAlpha = pulse;
+                            bctx.beginPath(); bctx.arc(dx, dy, 5, 0, Math.PI * 2); bctx.fill();
+                        }
+                    }
+                    bctx.globalAlpha = 1;
+                    // Connecting lines
+                    bctx.strokeStyle = mainHex + '30';
+                    bctx.lineWidth = 1;
+                    for (let dx = 30; dx < 462; dx += 30) {
+                        bctx.beginPath(); bctx.moveTo(dx, 165); bctx.lineTo(dx+30, 195); bctx.stroke();
+                    }
                 } else if (b.block.domain === 'cache') {
-                    bctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
+                    // SRAM bitcell rows
+                    bctx.strokeStyle = 'rgba(245,158,11,0.4)';
+                    bctx.lineWidth = 2.5;
+                    for (let dy = 165; dy < 492; dy += 18) {
+                        bctx.beginPath(); bctx.moveTo(20, dy); bctx.lineTo(492, dy); bctx.stroke();
+                    }
+                    // Word-line columns
+                    bctx.strokeStyle = 'rgba(245,158,11,0.2)';
+                    bctx.lineWidth = 1.5;
+                    for (let dx = 40; dx < 492; dx += 56) {
+                        bctx.beginPath(); bctx.moveTo(dx, 160); bctx.lineTo(dx, 492); bctx.stroke();
+                    }
+                    // Sense amp dots
+                    bctx.fillStyle = 'rgba(245,158,11,0.6)';
+                    for (let dx = 40; dx < 492; dx += 56) {
+                        bctx.beginPath(); bctx.arc(dx, 165, 5, 0, Math.PI * 2); bctx.fill();
+                    }
+                } else if (b.block.domain === 'memory' || b.block.domain === 'io') {
+                    // Pad ring pattern
+                    bctx.strokeStyle = mainHex + '55';
                     bctx.lineWidth = 2;
-                    for (let dy = 140; dy < 240; dy += 16) {
-                        bctx.beginPath(); bctx.moveTo(20, dy); bctx.lineTo(236, dy); bctx.stroke();
+                    bctx.strokeRect(20, 160, 472, 332);
+                    bctx.strokeRect(44, 184, 424, 284);
+                    // Pad dots
+                    bctx.fillStyle = mainHex;
+                    for (let px = 30; px < 492; px += 36) {
+                        bctx.beginPath(); bctx.arc(px, 172, 6, 0, Math.PI * 2); bctx.fill();
+                        bctx.beginPath(); bctx.arc(px, 480, 6, 0, Math.PI * 2); bctx.fill();
+                    }
+                    for (let py = 185; py < 480; py += 36) {
+                        bctx.beginPath(); bctx.arc(20, py, 6, 0, Math.PI * 2); bctx.fill();
+                        bctx.beginPath(); bctx.arc(492, py, 6, 0, Math.PI * 2); bctx.fill();
+                    }
+                } else {
+                    // Generic trace pattern
+                    bctx.strokeStyle = mainHex + '40';
+                    bctx.lineWidth = 2;
+                    for (let tr = 0; tr < 6; tr++) {
+                        const ty = 170 + tr * 54;
+                        bctx.beginPath();
+                        bctx.moveTo(20, ty); bctx.lineTo(160, ty);
+                        bctx.lineTo(160, ty + 27); bctx.lineTo(350, ty + 27);
+                        bctx.lineTo(350, ty); bctx.lineTo(492, ty);
+                        bctx.stroke();
                     }
                 }
 
                 const bTex = new THREE.CanvasTexture(bCanvas);
                 const blockMat = new THREE.MeshStandardMaterial({
-                    color: 0x141e2e,
+                    color: 0x0e1623,
                     map: bTex,
-                    metalness: 0.85,
-                    roughness: 0.22,
-                    emissive: new THREE.Color(colorInfo.main),
-                    emissiveIntensity: 0.22
+                    metalness: 0.92,
+                    roughness: 0.14,
+                    emissive: new THREE.Color(mainHex),
+                    emissiveIntensity: 0.38,
+                    emissiveMap: bTex
                 });
 
                 const blockMesh = new THREE.Mesh(blockGeo, blockMat);
-                blockMesh.position.set(bx, 0.8, bz);
+                blockMesh.position.set(bx, bh / 2 + 0.4, bz);
                 blockMesh.castShadow = true;
                 blockMesh.receiveShadow = true;
                 blockMesh.userData = {
                     block: b.block,
-                    originalY: 0.8,
-                    originalEmissive: 0.22,
+                    originalY: bh / 2 + 0.4,
+                    originalEmissive: 0.38,
                     mat: blockMat,
-                    color: colorInfo.main
+                    color: mainHex,
+                    breathPhase: Math.random() * Math.PI * 2,
+                    breathAmp: 0.08 + Math.random() * 0.1
                 };
                 dieGroup.add(blockMesh);
                 dieBlockMeshes.push(blockMesh);
             });
 
-            // Flowing 3D Interconnect Photon Particles
-            const particleCount = 40;
-            const pGeo = new THREE.BufferGeometry();
-            const pPositions = new Float32Array(particleCount * 3);
-            for (let i = 0; i < particleCount * 3; i += 3) {
-                pPositions[i] = (Math.random() - 0.5) * 30;
-                pPositions[i + 1] = 1.3;
-                pPositions[i + 2] = (Math.random() - 0.5) * 30;
+            // ── Tricolor Photon Highway Particle Systems ──────────────────────────────
+            // Data (cyan), Power (amber), Clock (magenta) — 200 each = 600 total
+            function makePhotonSystem(count, color, yBase) {
+                const geo = new THREE.BufferGeometry();
+                const pos = new Float32Array(count * 3);
+                const vel = new Float32Array(count * 3); // packed: vx, vy, vz
+                for (let i = 0; i < count; i++) {
+                    const i3 = i * 3;
+                    // Start on random axis-aligned paths
+                    const onXAxis = Math.random() < 0.5;
+                    if (onXAxis) {
+                        pos[i3    ] = (Math.random() - 0.5) * 34;
+                        pos[i3 + 1] = yBase + Math.random() * 0.3;
+                        pos[i3 + 2] = (Math.round(Math.random() * 6) - 3) * 5;
+                        vel[i3    ] = (Math.random() < 0.5 ? 1 : -1) * (0.12 + Math.random() * 0.18);
+                        vel[i3 + 1] = 0;
+                        vel[i3 + 2] = 0;
+                    } else {
+                        pos[i3    ] = (Math.round(Math.random() * 6) - 3) * 5;
+                        pos[i3 + 1] = yBase + Math.random() * 0.3;
+                        pos[i3 + 2] = (Math.random() - 0.5) * 34;
+                        vel[i3    ] = 0;
+                        vel[i3 + 1] = 0;
+                        vel[i3 + 2] = (Math.random() < 0.5 ? 1 : -1) * (0.12 + Math.random() * 0.18);
+                    }
+                }
+                geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+                geo.__photonVel = vel; // attach velocity to geo for animation
+                const mat = new THREE.PointsMaterial({
+                    color: color,
+                    size: 0.55,
+                    transparent: true,
+                    opacity: 0.92,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false,
+                    sizeAttenuation: true
+                });
+                return new THREE.Points(geo, mat);
             }
-            pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
-            const pMat = new THREE.PointsMaterial({
-                color: 0x00e5ff,
-                size: 1.2,
-                transparent: true,
-                opacity: 0.9,
-                blending: THREE.AdditiveBlending
-            });
-            photonParticles = new THREE.Points(pGeo, pMat);
-            dieGroup.add(photonParticles);
+
+            photonDataParticles  = makePhotonSystem(200, 0x00e5ff, 1.55);
+            photonPowerParticles = makePhotonSystem(200, 0xfbbf24, 1.35);
+            photonClockParticles = makePhotonSystem(200, 0xd946ef, 1.75);
+            dieGroup.add(photonDataParticles, photonPowerParticles, photonClockParticles);
+            // Keep legacy ref null (replaced)
+            photonParticles = null;
 
             dieBaseMesh = dieGroup;
             dieBaseMesh.position.y = 0.0;
@@ -6345,17 +6548,60 @@
             if (substrateMesh) substrateMesh.position.y = -3.0;
             if (bgaMesh) bgaMesh.position.y = -5.8 - explodeProgress * 6;
 
-            if (photonParticles && photonParticles.geometry) {
-                const pos = photonParticles.geometry.attributes.position.array;
-                for (let i = 0; i < pos.length; i += 3) {
-                    pos[i] += (Math.random() - 0.48) * 0.6;
-                    pos[i + 2] += (Math.random() - 0.48) * 0.6;
-                    if (pos[i] > 15) pos[i] = -15;
-                    if (pos[i] < -15) pos[i] = 15;
-                    if (pos[i + 2] > 15) pos[i + 2] = -15;
-                    if (pos[i + 2] < -15) pos[i + 2] = 15;
+            // ── Block breathing — each block pulses up/down based on its own phase ──
+            blockBreathTime += 0.018;
+            if (!isExploded) {
+                dieBlockMeshes.forEach(m => {
+                    if (m.userData && m.userData.breathPhase !== undefined) {
+                        const breathOffset = Math.sin(blockBreathTime + m.userData.breathPhase) * m.userData.breathAmp;
+                        m.position.y = m.userData.originalY + breathOffset;
+                        // Pulse emissive in sync with breath
+                        if (m.userData.mat && m !== hovered3DMesh) {
+                            m.userData.mat.emissiveIntensity = m.userData.originalEmissive + Math.abs(breathOffset) * 0.8;
+                        }
+                    }
+                });
+            }
+
+            // ── Tricolor photon highways — particles travel straight along X or Z ──
+            function animatePhotonSystem(pts) {
+                if (!pts || !pts.geometry) return;
+                const pos = pts.geometry.attributes.position.array;
+                const vel = pts.geometry.__photonVel;
+                if (!vel) return;
+                const n = pos.length / 3;
+                for (let i = 0; i < n; i++) {
+                    const i3 = i * 3;
+                    pos[i3    ] += vel[i3    ];
+                    pos[i3 + 2] += vel[i3 + 2];
+                    // Wrap at die boundary
+                    if (pos[i3    ] >  17) pos[i3    ] = -17;
+                    if (pos[i3    ] < -17) pos[i3    ] =  17;
+                    if (pos[i3 + 2] >  17) pos[i3 + 2] = -17;
+                    if (pos[i3 + 2] < -17) pos[i3 + 2] =  17;
                 }
-                photonParticles.geometry.attributes.position.needsUpdate = true;
+                pts.geometry.attributes.position.needsUpdate = true;
+            }
+            animatePhotonSystem(photonDataParticles);
+            animatePhotonSystem(photonPowerParticles);
+            animatePhotonSystem(photonClockParticles);
+
+            // ── Radar sweep ring — rotate around Y on stage ──
+            if (radarRingMesh) {
+                radarAngle += 0.022;
+                radarRingMesh.rotation.z = radarAngle;
+                // Find trail mesh and rotate it slightly behind
+                if (turntableStageGroup) {
+                    turntableStageGroup.children.forEach(c => {
+                        if (c.name === 'radarTrail') c.rotation.z = radarAngle - 0.25;
+                    });
+                }
+            }
+
+            // ── Starfield slow drift ──
+            if (starfieldParticles && starfieldParticles.geometry) {
+                starfieldParticles.rotation.y += 0.00015;
+                starfieldParticles.rotation.x += 0.00005;
             }
 
             if (raycaster3D && pointerNdc.x !== -999) {
@@ -6370,9 +6616,9 @@
                             hovered3DMesh.userData.mat.emissiveIntensity = hovered3DMesh.userData.originalEmissive;
                         }
                         hovered3DMesh = hit;
-                        hovered3DMesh.position.y = hovered3DMesh.userData.originalY + 0.9;
+                        hovered3DMesh.position.y = hovered3DMesh.userData.originalY + 1.2;
                         if (hovered3DMesh.userData && hovered3DMesh.userData.mat) {
-                            hovered3DMesh.userData.mat.emissiveIntensity = 0.85;
+                            hovered3DMesh.userData.mat.emissiveIntensity = 1.1;
                         }
 
                         const block = hit.userData.block;
@@ -6418,11 +6664,47 @@
             const height = container.clientHeight || 440;
 
             scene3D = new THREE.Scene();
-            scene3D.fog = new THREE.FogExp2(0x060912, 0.005);
+            scene3D.fog = new THREE.FogExp2(0x060912, 0.004);
 
-            camera3D = new THREE.PerspectiveCamera(40, width / height, 0.5, 500);
+            camera3D = new THREE.PerspectiveCamera(40, width / height, 0.5, 600);
             camera3D.position.set(0, 48, 72);
             camera3D.lookAt(0, 0, 0);
+
+            // ── 2000-star Starfield background ────────────────────────────────────
+            try {
+                const sfCount = 2000;
+                const sfGeo = new THREE.BufferGeometry();
+                const sfPos = new Float32Array(sfCount * 3);
+                const sfCol = new Float32Array(sfCount * 3); // per-star color
+                for (let i = 0; i < sfCount; i++) {
+                    const i3 = i * 3;
+                    // Distribute on a sphere shell radius 280–420
+                    const r = 280 + Math.random() * 140;
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi   = Math.acos(2 * Math.random() - 1);
+                    sfPos[i3    ] = r * Math.sin(phi) * Math.cos(theta);
+                    sfPos[i3 + 1] = r * Math.cos(phi);
+                    sfPos[i3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+                    // Tint: mostly white, some cyan/amber
+                    const tint = Math.random();
+                    if (tint < 0.08) { sfCol[i3]=0.0; sfCol[i3+1]=0.9; sfCol[i3+2]=1.0; }         // cyan
+                    else if (tint < 0.14) { sfCol[i3]=1.0; sfCol[i3+1]=0.75; sfCol[i3+2]=0.14; }  // amber
+                    else { sfCol[i3]=0.8+Math.random()*0.2; sfCol[i3+1]=0.8+Math.random()*0.2; sfCol[i3+2]=0.9+Math.random()*0.1; }
+                }
+                sfGeo.setAttribute('position', new THREE.BufferAttribute(sfPos, 3));
+                sfGeo.setAttribute('color',    new THREE.BufferAttribute(sfCol, 3));
+                starfieldParticles = new THREE.Points(sfGeo, new THREE.PointsMaterial({
+                    size: 0.6,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.75,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false,
+                    sizeAttenuation: true
+                }));
+                scene3D.add(starfieldParticles);
+            } catch(e) {}
+
 
             try {
                 renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TileLens: Chip Blueprint & Hardware Co-Design Inspector</title>
+    <link rel="icon" type="image/png" href="assets/logo.png">
     <meta name="description" content="Inspect chip blueprints, microarchitectures, and operational capabilities across Mobile SoCs, Laptop PCs, and Cloud AI Accelerators.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -111,22 +112,25 @@
             gap: 14px;
         }
 
-        .logo-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: var(--radius-sm);
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-            display: flex;
+        .brand-link {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            box-shadow: var(--glow-cyan);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none;
+            line-height: 0;
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), filter 0.25s ease;
         }
 
-        .logo-icon:hover {
-            transform: scale(1.08) rotate(4deg);
+        .brand-link:hover {
+            transform: scale(1.03);
+            filter: drop-shadow(0 0 12px rgba(234, 179, 8, 0.45));
+        }
+
+        .brand-logo {
+            height: 38px;
+            width: auto;
+            max-height: 42px;
+            display: block;
+            object-fit: contain;
         }
 
         .brand-title {
@@ -1658,6 +1662,9 @@
                 gap: 12px;
                 flex-wrap: wrap;
             }
+            .brand-logo {
+                height: 32px;
+            }
             .brand-title {
                 font-size: 16px;
             }
@@ -1729,11 +1736,10 @@
     <!-- Header Navigation -->
     <header>
         <div class="brand-group">
-            <div class="logo-icon">🔍</div>
-            <div class="brand-title">
-                TileLens
-                <span class="brand-tag">Silicon & Co-Design</span>
-            </div>
+            <a href="#" class="brand-link" aria-label="TileLens Home">
+                <img src="assets/logo.png" alt="TileLens" class="brand-logo">
+            </a>
+            <span class="brand-tag">Silicon & Co-Design</span>
         </div>
         <div class="header-actions">
             <button class="btn-detect" id="btn-detect-device" aria-label="Auto-Detect My Chip" title="Probe browser WebGL/WebGPU to identify your hardware">

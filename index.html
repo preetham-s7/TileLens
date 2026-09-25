@@ -2159,23 +2159,16 @@
             <a href="#" class="brand-link" aria-label="TileLens Home">
                 <img src="assets/logo.png" alt="TileLens" class="brand-logo">
             </a>
-            <span class="brand-tag">v2.4 Co-Design</span>
+            <span class="brand-tag">v2.4</span>
         </div>
 
-        <nav class="header-nav-links" aria-label="Quick Section Navigation">
-            <button type="button" class="header-nav-link active" data-target-view="blueprint">Silicon 3D</button>
-            <button type="button" class="header-nav-link" data-target-view="capabilities">LLM Matrix</button>
-            <button type="button" class="header-nav-link" data-target-view="roofline">Roofline</button>
-            <button type="button" class="header-nav-link" data-target-view="tiles">Tile SRAM</button>
-            <button type="button" class="header-nav-link" data-target-view="compare">Compare</button>
-            <button type="button" class="header-nav-link" data-target-view="architect">Synthesize ASIC</button>
+        <nav class="header-nav-links" aria-label="Quick Navigation">
+            <button type="button" class="header-nav-link active" data-target-view="blueprint">3D Blueprint</button>
+            <button type="button" class="header-nav-link" data-target-view="roofline">Benchmarks</button>
+            <button type="button" class="header-nav-link" data-target-view="architect">ASIC Studio</button>
         </nav>
 
         <div class="header-actions">
-            <div class="header-engine-status" title="Three.js WebGL and Systolic Co-Design active">
-                <span class="engine-live-dot"></span>
-                <span>60 FPS WebGL</span>
-            </div>
             <button class="btn-detect" id="btn-detect-device" aria-label="Auto-Detect My Chip" title="Probe browser WebGL/WebGPU to identify your hardware">
                 <span class="pulse-dot"></span>
                 <span class="detect-full-label">Auto-Detect My Chip</span>
@@ -5960,7 +5953,10 @@
                     if (targetContent) targetContent.classList.add("active");
 
                     document.querySelectorAll('.header-nav-link').forEach(link => {
-                        link.classList.toggle('active', link.getAttribute('data-target-view') === activeView);
+                        const target = link.getAttribute('data-target-view');
+                        const isMatch = (target === activeView) || 
+                            (target === 'roofline' && (activeView === 'capabilities' || activeView === 'roofline' || activeView === 'tiles' || activeView === 'compare'));
+                        link.classList.toggle('active', isMatch);
                     });
 
                     if (activeView === "roofline") {

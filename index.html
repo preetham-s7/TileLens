@@ -35,11 +35,20 @@
             --glow-purple: 0 0 24px rgba(192, 132, 252, 0.25);
             --glow-green: 0 0 20px rgba(52, 211, 153, 0.25);
             --card-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            --shadow-elevated: 0 20px 60px -28px rgba(0, 0, 0, 0.9), 0 10px 30px -18px rgba(0, 0, 0, 0.75);
+            --shadow-soft: 0 12px 34px -24px rgba(0, 0, 0, 0.82);
+            --surface-tint: rgba(15, 23, 42, 0.72);
+            --surface-tint-strong: rgba(15, 23, 42, 0.92);
+            --border-quiet: rgba(148, 163, 184, 0.16);
+            --border-control: rgba(148, 163, 184, 0.28);
+            --focus-ring: 0 0 0 4px rgba(0, 229, 255, 0.14);
+            --motion-fast: 150ms ease;
+            --motion-medium: 220ms cubic-bezier(0.16, 1, 0.3, 1);
             --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
             --radius-sm: 8px;
             --radius-md: 12px;
-            --radius-lg: 18px;
+            --radius-lg: 14px;
             --header-h: 70px;
         }
 
@@ -2302,6 +2311,261 @@
 
         .detect-short-label { display: none; }
 
+        /* Professional polish layer */
+        html {
+            color-scheme: dark;
+            scroll-padding-block-start: calc(var(--header-h) + 16px);
+        }
+
+        body {
+            background-image:
+                radial-gradient(circle at 18% 0%, rgba(0, 229, 255, 0.045) 0%, transparent 36%),
+                radial-gradient(circle at 82% 18%, rgba(192, 132, 252, 0.04) 0%, transparent 34%),
+                linear-gradient(180deg, #06080e 0%, #090e18 46%, #06080e 100%);
+            background-attachment: fixed;
+        }
+
+        header {
+            background: rgba(6, 10, 18, 0.88);
+            border-bottom-color: var(--border-quiet);
+            box-shadow: 0 12px 32px -28px #000;
+        }
+
+        .brand-group, .header-actions, .selector-row-primary,
+        .selector-row-secondary, .hero-header-row, .chart-header {
+            min-inline-size: 0;
+        }
+
+        .brand-title, .chip-title, .site-hero-title,
+        .cap-card-title, .section-title {
+            letter-spacing: 0;
+            text-wrap: balance;
+        }
+
+        .chip-selector-bar, .chip-hero, .blueprint-stage, .blueprint-inspector,
+        .cap-card, .plot-card, .controls-card, .tile-pipeline-card,
+        .custom-architect-form, .compare-table-container {
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)),
+                var(--surface-tint);
+            border-color: var(--border-quiet);
+            box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.055);
+        }
+
+        .chip-hero, .blueprint-stage, .plot-card {
+            box-shadow: var(--shadow-elevated), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .chip-selector-bar {
+            gap: 14px;
+        }
+
+        .header-nav-link, .filter-tab, .vendor-pill, .view-btn, .preset-pill,
+        .btn-detect, .banner-btn, .btn-hero-action, .btn-architect,
+        .die-toggle-btn, .die-mode-btn, .hud-3d-btn,
+        .chip-search-clear, .silicon-block {
+            transition:
+                background-color var(--motion-fast),
+                border-color var(--motion-fast),
+                color var(--motion-fast),
+                box-shadow var(--motion-fast),
+                transform var(--motion-medium);
+        }
+
+        .header-nav-link {
+            min-block-size: 36px;
+            padding-block: 8px;
+        }
+
+        .filter-tab, .vendor-pill, .view-btn, .preset-pill {
+            background: rgba(15, 23, 42, 0.68);
+            border-color: var(--border-control);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+        }
+
+        .vendor-pill {
+            min-block-size: 40px;
+            padding-block: 8px;
+        }
+
+        .die-toggle-btn, .die-mode-btn, .hud-3d-btn {
+            min-block-size: 40px;
+            border-color: var(--border-control);
+            background: rgba(15, 23, 42, 0.76);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .filter-tab:hover, .vendor-pill:hover, .view-btn:hover, .preset-pill:hover {
+            transform: translateY(-1px);
+            background: rgba(30, 41, 59, 0.82);
+            border-color: rgba(148, 163, 184, 0.42);
+        }
+
+        .filter-tab.active, .view-btn.active, .preset-pill.active {
+            color: #e0fbff;
+            background: linear-gradient(180deg, rgba(0, 229, 255, 0.18), rgba(56, 189, 248, 0.09));
+            border-color: rgba(0, 229, 255, 0.58);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px -20px rgba(0, 229, 255, 0.8);
+        }
+
+        .chip-search-input, .chip-select, .form-group input, .form-group select {
+            background-color: rgba(2, 6, 23, 0.78);
+            border-color: var(--border-control);
+            border-radius: var(--radius-sm);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            min-block-size: 44px;
+        }
+
+        .chip-search-input::placeholder, .form-group input::placeholder {
+            color: rgba(148, 163, 184, 0.68);
+        }
+
+        .chip-search-input:hover, .chip-select:hover,
+        .form-group input:hover, .form-group select:hover {
+            border-color: rgba(148, 163, 184, 0.48);
+            background-color: rgba(15, 23, 42, 0.84);
+        }
+
+        .chip-search-input:focus, .chip-select:focus, .form-group select:focus,
+        .form-group input:focus {
+            border-color: rgba(0, 229, 255, 0.72);
+            box-shadow: var(--focus-ring), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        .chip-select, .form-group select {
+            background-position: right 14px center;
+            padding-inline: 14px 40px;
+        }
+
+        .btn-hero-action {
+            min-block-size: 42px;
+        }
+
+        .metric-box {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(8, 13, 24, 0.96));
+            border-color: var(--border-quiet);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+        }
+
+        .metric-box:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 30px -24px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .metric-label, .select-label, .control-header,
+        .vendor-filter-label, .chip-label, .spec-label {
+            color: #a7b4c7;
+        }
+
+        .metric-value, .tok-speed, .control-val {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .cap-card-header, .chart-header {
+            border-color: var(--border-quiet);
+        }
+
+        .cap-card, .controls-card, .blueprint-inspector {
+            gap: 18px;
+        }
+
+        .status-badge {
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .llm-table, .compare-table, .inspector-specs-table {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .llm-table th {
+            background: rgba(8, 13, 24, 0.96);
+            color: #9fb0c7;
+        }
+
+        .llm-table td, .llm-table th {
+            border-bottom-color: rgba(148, 163, 184, 0.14);
+        }
+
+        .llm-table tr:hover td {
+            background: rgba(14, 165, 233, 0.055);
+        }
+
+        .inspector-specs-table td {
+            padding-block: 10px;
+        }
+
+        .role-highlight-box {
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.1), rgba(14, 165, 233, 0.035));
+            border-color: rgba(14, 165, 233, 0.28);
+        }
+
+        input[type="range"] {
+            accent-color: var(--accent-cyan);
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 7px;
+            background: linear-gradient(90deg, rgba(0, 229, 255, 0.44), rgba(30, 41, 59, 0.92));
+            border-color: rgba(148, 163, 184, 0.18);
+        }
+
+        input[type="range"]::-moz-range-track {
+            height: 7px;
+            background: linear-gradient(90deg, rgba(0, 229, 255, 0.44), rgba(30, 41, 59, 0.92));
+            border-color: rgba(148, 163, 184, 0.18);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            box-shadow: 0 0 0 5px rgba(0, 229, 255, 0.11), 0 5px 14px rgba(0, 0, 0, 0.45);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            box-shadow: 0 0 0 5px rgba(0, 229, 255, 0.11), 0 5px 14px rgba(0, 0, 0, 0.45);
+        }
+
+        button:focus-visible, select:focus-visible, input:focus-visible,
+        [tabindex="0"]:focus-visible {
+            outline: 2px solid rgba(125, 249, 255, 0.95);
+            outline-offset: 3px;
+            box-shadow: var(--focus-ring);
+        }
+
+        .table-scroll, .compare-table-container {
+            scrollbar-gutter: stable;
+        }
+
+        .silicon-block {
+            border-color: rgba(148, 163, 184, 0.2);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .silicon-block:hover {
+            transform: translateY(-2px);
+        }
+
+        @supports (container-type: inline-size) {
+            .cap-card, .plot-card, .controls-card, .blueprint-stage, .blueprint-inspector {
+                container-type: inline-size;
+            }
+
+            @container (max-width: 420px) {
+                .cap-card-header, .chart-header, .control-header {
+                    align-items: flex-start;
+                    flex-direction: column;
+                }
+            }
+        }
+
+        @media (pointer: coarse) {
+            .filter-tab, .vendor-pill, .view-btn, .preset-pill,
+            .btn-detect, .banner-btn, .btn-hero-action, .btn-architect,
+            .die-toggle-btn, .die-mode-btn, .hud-3d-btn,
+            .chip-search-input, .chip-select, .form-group input, .form-group select {
+                min-block-size: 48px;
+            }
+        }
+
         /* Responsive Breakpoints */
         @media (max-width: 1100px) {
             .header-nav-links { display: none; }
@@ -2453,6 +2717,636 @@
             .hero-metrics-grid { grid-template-columns: minmax(0, 1fr); }
         }
 
+        /* Full website redesign: TileLens Silicon Workbench */
+        :root {
+            --bg-base: #080a0d;
+            --bg-surface: #0d1117;
+            --bg-surface-elevated: #121821;
+            --bg-card: #111821;
+            --bg-card-hover: #16202c;
+            --bg-glass: rgba(13, 17, 23, 0.92);
+            --border: rgba(148, 163, 184, 0.18);
+            --border-light: rgba(255, 255, 255, 0.07);
+            --border-highlight: rgba(94, 234, 212, 0.42);
+            --text-main: #edf2f7;
+            --text-muted: #a3afbf;
+            --text-dim: #6f7b8d;
+            --accent-cyan: #5eead4;
+            --accent-blue: #60a5fa;
+            --accent-purple: #a78bfa;
+            --accent-green: #86efac;
+            --accent-amber: #facc15;
+            --accent-rose: #fb7185;
+            --glow-cyan: 0 12px 34px -22px rgba(94, 234, 212, 0.9);
+            --glow-purple: 0 12px 34px -24px rgba(167, 139, 250, 0.65);
+            --glow-green: 0 12px 30px -22px rgba(134, 239, 172, 0.78);
+            --card-shadow: 0 20px 60px -38px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+            --shadow-elevated: 0 28px 80px -48px rgba(0, 0, 0, 0.96), 0 10px 26px -22px rgba(0, 0, 0, 0.9);
+            --shadow-soft: 0 16px 42px -34px rgba(0, 0, 0, 0.9);
+            --surface-tint: #101720;
+            --surface-tint-strong: #141d28;
+            --border-quiet: rgba(148, 163, 184, 0.16);
+            --border-control: rgba(148, 163, 184, 0.26);
+            --focus-ring: 0 0 0 4px rgba(94, 234, 212, 0.14);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 10px;
+            --header-h: 64px;
+        }
+
+        html {
+            scrollbar-gutter: stable;
+            scroll-padding-block-start: calc(var(--header-h) + 84px);
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image:
+                linear-gradient(rgba(148, 163, 184, 0.032) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 163, 184, 0.032) 1px, transparent 1px),
+                linear-gradient(180deg, #080a0d 0%, #0b1118 54%, #080a0d 100%);
+            background-size: 44px 44px, 44px 44px, 100% 100%;
+            background-attachment: fixed;
+            color: var(--text-main);
+        }
+
+        header {
+            min-height: var(--header-h);
+            height: var(--header-h);
+            padding-inline: clamp(16px, 3vw, 40px);
+            background: rgba(8, 10, 13, 0.9);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+            box-shadow: 0 12px 32px -28px #000;
+        }
+
+        .brand-group {
+            gap: 10px;
+        }
+
+        .brand-logo {
+            height: 34px;
+        }
+
+        .brand-tag, .footer-brand-tag {
+            background: rgba(94, 234, 212, 0.08);
+            border-color: rgba(94, 234, 212, 0.24);
+            color: var(--accent-cyan);
+            box-shadow: none;
+        }
+
+        .header-nav-links {
+            background: rgba(15, 23, 32, 0.78);
+            border: 1px solid var(--border-quiet);
+            border-radius: var(--radius-md);
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .header-nav-link {
+            min-block-size: 36px;
+            border-radius: 5px;
+            padding: 7px 12px;
+            color: var(--text-muted);
+        }
+
+        .header-nav-link.active {
+            color: #07110f;
+            background: var(--accent-cyan);
+            box-shadow: none;
+        }
+
+        .btn-detect, .btn-github {
+            min-block-size: 40px;
+            border-radius: var(--radius-md);
+            background: #121a24;
+            border-color: var(--border-control);
+            color: var(--text-main);
+            box-shadow: none;
+        }
+
+        .btn-detect:hover, .btn-github:hover {
+            background: #172232;
+            border-color: rgba(94, 234, 212, 0.5);
+            box-shadow: var(--glow-cyan);
+        }
+
+        #detect-banner {
+            margin: 12px auto 0;
+            max-width: min(1520px, calc(100% - 32px));
+            border: 1px solid rgba(134, 239, 172, 0.22);
+            border-radius: var(--radius-md);
+            background: linear-gradient(90deg, rgba(20, 83, 45, 0.34), rgba(20, 83, 45, 0.14));
+        }
+
+        .app-container {
+            max-width: 1520px;
+            padding: clamp(16px, 2.6vw, 34px);
+            gap: 18px;
+        }
+
+        .site-hero-section {
+            padding: 0;
+            text-align: start;
+        }
+
+        .site-hero-content {
+            max-width: none;
+            width: 100%;
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+            align-items: end;
+            gap: 22px 30px;
+            padding: clamp(22px, 3vw, 34px);
+            border: 1px solid var(--border-quiet);
+            border-radius: var(--radius-lg);
+            background:
+                linear-gradient(135deg, rgba(94, 234, 212, 0.075), transparent 34%),
+                linear-gradient(180deg, #101720, #0d131b);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .site-hero-badge, .site-hero-title, .site-hero-subtitle, .site-hero-actions {
+            grid-column: 1;
+            justify-self: start;
+        }
+
+        .site-hero-badge {
+            padding: 0;
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+            color: var(--accent-cyan);
+            letter-spacing: 0.1em;
+        }
+
+        .badge-sparkle {
+            animation: none;
+        }
+
+        .site-hero-title {
+            font-size: clamp(34px, 4vw, 58px);
+            line-height: 1.02;
+            max-width: 760px;
+            letter-spacing: -0.035em;
+        }
+
+        .text-gradient-cyan-amber {
+            background: linear-gradient(90deg, #f8fafc 0%, #5eead4 54%, #facc15 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .site-hero-subtitle {
+            max-width: 720px;
+            color: #bcc7d6;
+            font-size: 15.5px;
+        }
+
+        .site-hero-actions {
+            justify-content: flex-start;
+            gap: 10px;
+        }
+
+        .hero-cta-btn {
+            min-block-size: 44px;
+            border-radius: var(--radius-md);
+            padding-inline: 16px;
+            box-shadow: none;
+        }
+
+        .hero-cta-btn.primary {
+            color: #06100e;
+            background: var(--accent-cyan);
+            border-color: transparent;
+            box-shadow: 0 16px 34px -26px rgba(94, 234, 212, 0.9);
+        }
+
+        .hero-cta-btn.secondary, .hero-cta-btn.tertiary {
+            background: rgba(15, 23, 32, 0.76);
+            border-color: var(--border-control);
+            backdrop-filter: none;
+        }
+
+        .site-hero-stats-bar {
+            grid-column: 2;
+            grid-row: 1 / span 4;
+            align-self: stretch;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+
+        .hero-stat-divider {
+            display: none;
+        }
+
+        .hero-stat-item {
+            align-items: flex-start;
+            justify-content: flex-end;
+            min-block-size: 112px;
+            padding: 16px;
+            border: 1px solid var(--border-quiet);
+            border-radius: var(--radius-md);
+            background: rgba(8, 13, 20, 0.64);
+        }
+
+        .hero-stat-value {
+            font-size: clamp(17px, 2.1vw, 24px);
+            color: var(--text-main);
+        }
+
+        .hero-stat-label {
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .chip-selector-bar, .chip-hero, .blueprint-stage, .blueprint-inspector,
+        .cap-card, .plot-card, .controls-card, .tile-pipeline-card,
+        .custom-architect-form, .compare-table-container {
+            background: linear-gradient(180deg, #111923, #0f151d);
+            border: 1px solid var(--border-quiet);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: none;
+        }
+
+        .chip-selector-bar {
+            position: relative;
+            padding: 16px;
+            border-inline-start: 3px solid var(--accent-cyan);
+        }
+
+        .selector-row-primary, .selector-row-secondary {
+            gap: 12px;
+        }
+
+        .filter-tabs, .vendor-filter-group {
+            gap: 6px;
+        }
+
+        .filter-tab, .vendor-pill, .view-btn, .preset-pill,
+        .die-toggle-btn, .die-mode-btn, .hud-3d-btn {
+            min-block-size: 40px;
+            border-radius: var(--radius-md);
+            background: #0d141d;
+            border-color: var(--border-control);
+            color: var(--text-muted);
+            box-shadow: none;
+        }
+
+        .filter-tab:hover, .vendor-pill:hover, .view-btn:hover, .preset-pill:hover,
+        .die-toggle-btn:hover, .die-mode-btn:hover, .hud-3d-btn:hover {
+            color: var(--text-main);
+            background: #16202c;
+            border-color: rgba(94, 234, 212, 0.34);
+            transform: translateY(-1px);
+        }
+
+        .filter-tab.active, .vendor-pill.active, .view-btn.active, .preset-pill.active,
+        .die-toggle-btn.active, .die-mode-btn.active, .hud-3d-btn.active {
+            color: #06100e;
+            background: var(--accent-cyan);
+            border-color: transparent;
+            box-shadow: none;
+        }
+
+        .chip-search-input, .chip-select, .form-group input, .form-group select {
+            min-block-size: 46px;
+            background-color: #080d13;
+            border-color: var(--border-control);
+            border-radius: var(--radius-md);
+            color: var(--text-main);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+        }
+
+        .chip-search-input:focus, .chip-select:focus, .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: var(--focus-ring);
+        }
+
+        .chip-hero {
+            overflow: clip;
+            padding: clamp(20px, 2.3vw, 30px);
+        }
+
+        .chip-hero::before {
+            opacity: 0.42;
+            background: linear-gradient(90deg, var(--vendor-accent, var(--accent-cyan)), transparent 70%);
+        }
+
+        .chip-title {
+            font-size: clamp(26px, 3vw, 42px);
+            line-height: 1.06;
+        }
+
+        .chip-desc {
+            max-width: 980px;
+            color: #bec8d5;
+        }
+
+        .metric-box {
+            min-block-size: 132px;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            background: #0c121a;
+            border-color: var(--border-quiet);
+        }
+
+        .metric-box::before {
+            height: 3px;
+        }
+
+        .metric-value {
+            font-size: clamp(20px, 2.2vw, 28px);
+        }
+
+        .view-nav {
+            position: sticky;
+            top: calc(var(--header-h) + 10px);
+            z-index: 60;
+            display: grid;
+            grid-template-columns: repeat(6, minmax(max-content, 1fr));
+            gap: 6px;
+            padding: 8px;
+            border: 1px solid var(--border-quiet);
+            border-radius: var(--radius-lg);
+            background: rgba(8, 10, 13, 0.9);
+            box-shadow: 0 18px 38px -34px rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(18px);
+            overflow-x: auto;
+        }
+
+        .view-btn {
+            justify-content: center;
+            padding-inline: 12px;
+        }
+
+        .view-content.active {
+            display: block;
+        }
+
+        .blueprint-layout, .roofline-grid {
+            gap: 18px;
+        }
+
+        .blueprint-stage, .plot-card {
+            min-inline-size: 0;
+        }
+
+        .stage-header, .die-graphics-controls, .cap-card-header, .chart-header {
+            gap: 10px;
+            border-color: var(--border-quiet);
+        }
+
+        .stage-title, .cap-card-title, .chart-header h2,
+        .controls-card h3, .tile-pipeline-card h3 {
+            color: var(--text-main);
+            letter-spacing: 0;
+        }
+
+        .die-canvas-container {
+            min-height: 540px;
+            border-radius: var(--radius-md);
+            background:
+                linear-gradient(rgba(94, 234, 212, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(94, 234, 212, 0.035) 1px, transparent 1px),
+                #060a0f;
+            background-size: 32px 32px, 32px 32px, 100% 100%;
+            border-color: rgba(148, 163, 184, 0.18);
+        }
+
+        .blueprint-inspector {
+            top: calc(var(--header-h) + 80px);
+            padding: 20px;
+        }
+
+        .inspector-badge {
+            border-radius: var(--radius-sm);
+        }
+
+        .role-highlight-box, .diagnostic-card {
+            border-radius: var(--radius-md);
+            background: rgba(94, 234, 212, 0.075);
+            border-color: rgba(94, 234, 212, 0.22);
+        }
+
+        .capabilities-grid {
+            gap: 18px;
+        }
+
+        .cap-card, .controls-card, .tile-pipeline-card {
+            padding: 20px;
+        }
+
+        .llm-table th, .compare-table th {
+            background: #0a1017;
+            color: #c2ccd9;
+            border-bottom-color: rgba(148, 163, 184, 0.22);
+        }
+
+        .llm-table td, .compare-table td,
+        .inspector-specs-table td {
+            border-bottom-color: rgba(148, 163, 184, 0.13);
+        }
+
+        .llm-table tr:hover td, .compare-table tr:hover td {
+            background: rgba(94, 234, 212, 0.045);
+        }
+
+        .status-badge {
+            border-radius: var(--radius-sm);
+        }
+
+        .tile-flow-grid {
+            gap: 18px;
+        }
+
+        .tier-box {
+            border-radius: var(--radius-md);
+            box-shadow: none;
+        }
+
+        .tier-box:hover {
+            transform: translateY(-1px);
+        }
+
+        .custom-architect-form {
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+            padding: 20px;
+        }
+
+        .form-group label {
+            color: #c0cad8;
+        }
+
+        .btn-architect {
+            min-block-size: 50px;
+            border-radius: var(--radius-md);
+            color: #06100e;
+            background: var(--accent-cyan);
+            box-shadow: none;
+        }
+
+        .site-footer {
+            margin-top: 34px;
+            padding: 34px 28px 28px;
+            background: #080a0d;
+            border-top-color: rgba(148, 163, 184, 0.14);
+        }
+
+        .footer-grid {
+            grid-template-columns: minmax(260px, 1.3fr) repeat(3, minmax(180px, 1fr));
+            gap: 24px;
+        }
+
+        .footer-bottom {
+            border-top-color: rgba(148, 163, 184, 0.12);
+        }
+
+        @supports (container-type: inline-size) {
+            .site-hero-content, .chip-hero, .blueprint-stage, .cap-card,
+            .plot-card, .controls-card, .tile-pipeline-card {
+                container-type: inline-size;
+            }
+        }
+
+        @media (max-width: 1180px) {
+            .site-hero-content {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .site-hero-stats-bar {
+                grid-column: 1;
+                grid-row: auto;
+                width: 100%;
+            }
+
+            .view-nav {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 720px) {
+            header {
+                height: auto;
+                padding-block: 10px;
+            }
+
+            .app-container {
+                padding: 12px;
+                gap: 14px;
+            }
+
+            .site-hero-content {
+                padding: 18px;
+            }
+
+            .site-hero-stats-bar {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .hero-stat-item {
+                min-block-size: 82px;
+            }
+
+            .site-hero-actions {
+                width: 100%;
+            }
+
+            .hero-cta-btn {
+                flex: 1 1 100%;
+                justify-content: center;
+            }
+
+            .view-nav {
+                position: static;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .die-canvas-container {
+                min-height: 320px;
+            }
+
+            .filter-tabs, .vendor-filter-group {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                inline-size: 100%;
+                max-inline-size: 100%;
+                overflow: visible;
+            }
+
+            .chip-search-wrap, .chip-dropdown-group {
+                flex: 0 1 auto;
+            }
+
+            .vendor-filter-label {
+                grid-column: 1 / -1;
+            }
+
+            .filter-tab, .vendor-pill {
+                inline-size: 100%;
+                justify-content: center;
+                min-inline-size: 0;
+                white-space: normal;
+            }
+
+            .footer-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .footer-col, .footer-links, .footer-links li,
+            .footer-links li a, .footer-links li span {
+                min-inline-size: 0;
+                max-inline-size: 100%;
+                overflow-wrap: anywhere;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .site-hero-title {
+                font-size: 32px;
+            }
+
+            .view-nav {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .filter-tab, .vendor-pill, .view-btn, .preset-pill,
+            .die-toggle-btn, .die-mode-btn, .hud-3d-btn {
+                min-block-size: 44px;
+                white-space: normal;
+            }
+        }
+
+        input[type="range"] {
+            min-block-size: 40px;
+        }
+
+        .systolic-controls {
+            flex-wrap: wrap;
+        }
+
+        .systolic-btn {
+            min-block-size: 40px;
+            border-radius: var(--radius-md);
+            background: #0d141d;
+            border-color: var(--border-control);
+            box-shadow: none;
+        }
+
+        @media (pointer: coarse) {
+            input[type="range"], .systolic-btn {
+                min-block-size: 48px;
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation: none !important; transition: none !important; }
         }
@@ -2471,9 +3365,9 @@
         </div>
 
         <nav class="header-nav-links" aria-label="Quick Navigation">
-            <button type="button" class="header-nav-link active" data-target-view="blueprint">3D Blueprint</button>
-            <button type="button" class="header-nav-link" data-target-view="roofline">Benchmarks</button>
-            <button type="button" class="header-nav-link" data-target-view="architect">ASIC Studio</button>
+            <button type="button" class="header-nav-link active" data-target-view="blueprint">Blueprint</button>
+            <button type="button" class="header-nav-link" data-target-view="roofline">Roofline</button>
+            <button type="button" class="header-nav-link" data-target-view="architect">Architect</button>
         </nav>
 
         <div class="header-actions">
@@ -2505,26 +3399,26 @@
             <div class="site-hero-content">
                 <div class="site-hero-badge">
                     <span class="badge-sparkle">✦</span>
-                    <span>NEXT-GEN SILICON & CO-DESIGN STUDIO</span>
+                    <span>TILELENS SILICON WORKBENCH</span>
                     <span class="badge-divider">•</span>
                     <span class="badge-highlight">18+ AI & MOBILE PROCESSORS</span>
                 </div>
                 <h1 class="site-hero-title">
-                    Deep Microarchitecture Blueprints <br>
-                    <span class="text-gradient-cyan-amber">& Hardware-Software Co-Design</span>
+                    Inspect chips like a hardware lab.
+                    <span class="text-gradient-cyan-amber">Tune workloads like a compiler team.</span>
                 </h1>
                 <p class="site-hero-subtitle">
-                    Inspect photorealistic 3D semiconductor physical packaging, simulate matrix tile memory hierarchies in real-time, benchmark LLM prefill across Apple M4 Max, NVIDIA Blackwell B200, and Google TPU v5e, and synthesize custom ASICs.
+                    Explore processor floorplans, memory hierarchy, roofline limits, LLM fit, and custom accelerator tradeoffs from one responsive analysis surface.
                 </p>
                 <div class="site-hero-actions">
                     <button type="button" class="hero-cta-btn primary" id="hero-btn-explore-3d">
-                        <span>💎 Explore 3D Silicon</span>
+                        <span>Open Blueprint</span>
                     </button>
                     <button type="button" class="hero-cta-btn secondary" id="hero-btn-roofline">
-                        <span>📊 Operational Roofline</span>
+                        <span>Run Roofline</span>
                     </button>
                     <button type="button" class="hero-cta-btn tertiary" id="hero-btn-llm">
-                        <span>⚡ LLM Inference Matrix</span>
+                        <span>Check LLM Fit</span>
                     </button>
                 </div>
                 <div class="site-hero-stats-bar">
@@ -2670,12 +3564,12 @@
 
         <!-- View Navigation Tabs -->
         <nav class="view-nav" aria-label="Dashboard Views">
-            <button class="view-btn active" data-view="blueprint">💎 3D Silicon Blueprint</button>
-            <button class="view-btn" data-view="capabilities">⚡ Compute & LLM Matrix</button>
-            <button class="view-btn" data-view="roofline">📊 Operational Roofline</button>
-            <button class="view-btn" data-view="tiles">🧱 Tile Memory Flow</button>
-            <button class="view-btn" data-view="compare">⚖️ Multi-Chip Compare</button>
-            <button class="view-btn" data-view="architect">🛠️ Custom Chip Architect</button>
+            <button class="view-btn active" data-view="blueprint">3D Blueprint</button>
+            <button class="view-btn" data-view="capabilities">LLM Matrix</button>
+            <button class="view-btn" data-view="roofline">Roofline</button>
+            <button class="view-btn" data-view="tiles">Tile Flow</button>
+            <button class="view-btn" data-view="compare">Compare</button>
+            <button class="view-btn" data-view="architect">Architect</button>
         </nav>
 
         <!-- ============================================================ -->
@@ -2686,12 +3580,12 @@
                 <div class="blueprint-stage">
                     <div class="stage-header">
                         <div class="stage-title">
-                            <span>🔍 Silicon Die Floorplan & Microarchitecture Blueprint</span>
+                            <span>Silicon Die Floorplan & Microarchitecture Blueprint</span>
                         </div>
                         <div class="die-view-toggles">
-                            <button type="button" class="die-toggle-btn active" id="btn-toggle-3d" title="Photorealistic 3D Silicon Package">💎 3D Package</button>
-                            <button type="button" class="die-toggle-btn" id="btn-toggle-canvas" title="Interactive 2D Metrology Floorplan">🗺️ 2D Canvas</button>
-                            <button type="button" class="die-toggle-btn" id="btn-toggle-grid" title="Classic Block Grid View">🧱 Grid View</button>
+                            <button type="button" class="die-toggle-btn active" id="btn-toggle-3d" title="Photorealistic 3D Silicon Package">3D Package</button>
+                            <button type="button" class="die-toggle-btn" id="btn-toggle-canvas" title="Interactive 2D Metrology Floorplan">2D Canvas</button>
+                            <button type="button" class="die-toggle-btn" id="btn-toggle-grid" title="Classic Block Grid View">Grid View</button>
                             <button type="button" class="die-toggle-btn" id="btn-toggle-widescreen" title="Toggle Cinematic Widescreen Theater Mode">⛶ Widescreen</button>
                         </div>
                     </div>
@@ -2754,7 +3648,7 @@
 
         <!-- ============================================================ -->
         <!-- VIEW 2: WHAT ELSE IT DOES (CAPABILITIES & OPERATIONAL)       -->
-        <!-- ============================================================ */ -->
+        <!-- ============================================================ -->
         <section class="view-content" id="view-capabilities">
             <div class="capabilities-grid">
                 <!-- LLM Compatibility Matrix -->
@@ -3104,7 +3998,7 @@
                     <label for="c-npu">Dedicated NPU (TOPS)</label>
                     <input type="number" id="c-npu" value="50.0" step="5">
                 </div>
-                <button type="submit" class="btn-architect">⚡ Synthesize Chip Blueprint & Evaluate Co-Design</button>
+                <button type="submit" class="btn-architect">Synthesize Blueprint & Evaluate Co-Design</button>
             </form>
         </section>
 

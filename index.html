@@ -665,12 +665,18 @@
 
         /* Chip Selection Toolbar */
         .chip-selector-bar {
-            padding: 14px 20px;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .selector-row-primary {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             justify-content: space-between;
-            gap: 16px;
+            gap: 12px;
         }
 
         .filter-tabs {
@@ -709,13 +715,191 @@
             box-shadow: 0 0 16px rgba(0, 229, 255, 0.25);
         }
 
+        /* Instant Chip Search Box */
+        .chip-search-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            flex: 1 1 260px;
+            max-width: 380px;
+            min-width: 220px;
+        }
+
+        .chip-search-icon {
+            position: absolute;
+            left: 12px;
+            width: 14px;
+            height: 14px;
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.2s ease;
+        }
+
+        .chip-search-input {
+            width: 100%;
+            background: #090e1a;
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            border-radius: 9999px;
+            padding: 8px 34px 8px 34px;
+            color: #fff;
+            font-family: var(--font-sans);
+            font-size: 12.5px;
+            font-weight: 500;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .chip-search-input:focus {
+            border-color: var(--accent-cyan);
+            background: #0c1426;
+            box-shadow: 0 0 16px rgba(0, 229, 255, 0.25);
+        }
+
+        .chip-search-wrap:focus-within .chip-search-icon {
+            color: var(--accent-cyan);
+        }
+
+        .chip-search-clear {
+            position: absolute;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.15s ease;
+        }
+
+        .chip-search-clear:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+
+        /* Selector Row Secondary: Vendor Pills & Active Chip Dropdown */
+        .selector-row-secondary {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(56, 80, 120, 0.25);
+        }
+
+        .vendor-filter-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow-x: auto;
+            max-width: 100%;
+            padding-bottom: 2px;
+        }
+
+        .vendor-filter-label {
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dim);
+            margin-right: 4px;
+            white-space: nowrap;
+        }
+
+        .vendor-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(14, 20, 36, 0.65);
+            border: 1px solid rgba(71, 85, 105, 0.4);
+            color: var(--text-muted);
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .vendor-pill:hover {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-1px);
+        }
+
+        .vendor-pill.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+        }
+
+        .vendor-pill .vendor-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 6px currentColor;
+        }
+
+        .vendor-pill[data-vendor="NVIDIA"].active {
+            color: #76b900;
+            border-color: #76b900;
+            background: rgba(118, 185, 0, 0.14);
+            box-shadow: 0 0 12px rgba(118, 185, 0, 0.3);
+        }
+
+        .vendor-pill[data-vendor="Apple"].active {
+            color: #f1f5f9;
+            border-color: #e2e8f0;
+            background: rgba(226, 232, 240, 0.14);
+            box-shadow: 0 0 12px rgba(226, 232, 240, 0.25);
+        }
+
+        .vendor-pill[data-vendor="AMD"].active {
+            color: #f87171;
+            border-color: #ed1c24;
+            background: rgba(237, 28, 36, 0.14);
+            box-shadow: 0 0 12px rgba(237, 28, 36, 0.3);
+        }
+
+        .vendor-pill[data-vendor="Intel"].active {
+            color: #38bdf8;
+            border-color: #0071c5;
+            background: rgba(0, 113, 197, 0.16);
+            box-shadow: 0 0 12px rgba(0, 113, 197, 0.3);
+        }
+
+        .vendor-pill[data-vendor="Google"].active {
+            color: #60a5fa;
+            border-color: #4285f4;
+            background: rgba(66, 133, 244, 0.14);
+            box-shadow: 0 0 12px rgba(66, 133, 244, 0.3);
+        }
+
+        .vendor-pill[data-vendor="Qualcomm"].active {
+            color: #818cf8;
+            border-color: #3253dc;
+            background: rgba(50, 83, 220, 0.14);
+            box-shadow: 0 0 12px rgba(50, 83, 220, 0.3);
+        }
+
         .chip-dropdown-group {
             display: flex;
             align-items: center;
             gap: 12px;
             flex: 1 1 320px;
             min-inline-size: 0;
-            max-width: 480px;
+            max-width: 460px;
         }
 
         .select-label {
@@ -763,6 +947,9 @@
             gap: 24px;
             position: relative;
             overflow: hidden;
+            border-color: var(--vendor-glow, rgba(56, 80, 120, 0.45));
+            box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.7), 0 0 28px var(--vendor-glow, rgba(0, 229, 255, 0.1));
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
         }
 
         .chip-hero::before {
@@ -771,8 +958,9 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-amber));
+            height: 3px;
+            background: var(--vendor-gradient, linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-amber)));
+            transition: background 0.4s ease;
         }
 
         .hero-left {
@@ -781,11 +969,33 @@
             gap: 12px;
         }
 
+        .hero-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
         .chip-badge-row {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             gap: 8px;
+        }
+
+        .chip-vendor-badge {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 4px 11px;
+            border-radius: 9999px;
+            background: rgba(0, 229, 255, 0.14);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 229, 255, 0.4);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+            transition: all 0.3s ease;
         }
 
         .chip-class-badge {
@@ -811,6 +1021,45 @@
             border: 1px solid rgba(52, 211, 153, 0.35);
             font-family: var(--font-mono);
             box-shadow: 0 0 10px rgba(52, 211, 153, 0.12);
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(18, 26, 46, 0.85);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 13px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+        }
+
+        .btn-hero-action:hover {
+            color: #fff;
+            border-color: var(--vendor-accent, var(--accent-cyan));
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 12px var(--vendor-glow, rgba(0, 229, 255, 0.25));
+            transform: translateY(-1px);
+        }
+
+        .btn-hero-action.success {
+            background: rgba(16, 185, 129, 0.2) !important;
+            border-color: #10b981 !important;
+            color: #34d399 !important;
+            box-shadow: 0 0 14px rgba(16, 185, 129, 0.35) !important;
         }
 
         .chip-title {
@@ -866,19 +1115,26 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--accent-cyan), transparent);
-            opacity: 0.7;
+            background: linear-gradient(90deg, var(--vendor-accent, var(--accent-cyan)), transparent);
+            opacity: 0.8;
             transition: opacity 0.2s ease;
         }
 
         .metric-box:hover {
             transform: translateY(-2px);
-            border-color: rgba(0, 229, 255, 0.5);
-            box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 0 16px rgba(0, 229, 255, 0.15);
+            border-color: var(--vendor-accent, rgba(0, 229, 255, 0.5));
+            box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 0 16px var(--vendor-glow, rgba(0, 229, 255, 0.15));
         }
 
         .metric-box:hover::before {
             opacity: 1;
+        }
+
+        .metric-head-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
         }
 
         .metric-label {
@@ -889,6 +1145,15 @@
             color: var(--text-dim);
         }
 
+        .metric-gauge-val {
+            font-size: 10.5px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+        }
+
         .metric-value {
             font-size: 21px;
             font-weight: 700;
@@ -896,6 +1161,24 @@
             color: #fff;
             letter-spacing: -0.5px;
             font-variant-numeric: tabular-nums;
+        }
+
+        .metric-gauge-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin: 3px 0 2px 0;
+            position: relative;
+        }
+
+        .metric-gauge-fill {
+            height: 100%;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, var(--vendor-accent, var(--accent-cyan)), #38bdf8);
+            box-shadow: 0 0 8px var(--vendor-glow, rgba(0, 229, 255, 0.5));
+            transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1), background 0.4s ease;
         }
 
         .metric-sub {
@@ -2034,6 +2317,31 @@
                 padding: 16px;
                 gap: 16px;
             }
+            .selector-row-primary, .selector-row-secondary {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .chip-search-wrap {
+                max-width: 100%;
+                width: 100%;
+            }
+            .chip-dropdown-group {
+                max-width: 100%;
+                width: 100%;
+            }
+            .hero-header-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .hero-actions {
+                width: 100%;
+            }
+            .btn-hero-action {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
             .chip-hero {
                 grid-template-columns: 1fr;
                 padding: 22px;
@@ -2245,28 +2553,64 @@
 
         <!-- Chip Selector Toolbar -->
         <section class="chip-selector-bar">
-            <div class="filter-tabs" id="category-tabs">
-                <button class="filter-tab active" data-filter="all">All Chips (18)</button>
-                <button class="filter-tab" data-filter="mobile">📱 Mobile Phones</button>
-                <button class="filter-tab" data-filter="laptop">💻 Laptop PCs</button>
-                <button class="filter-tab" data-filter="cloud">☁️ Cloud & Datacenter</button>
-                <button class="filter-tab" data-filter="edge">⚡ Custom & Edge ASIC</button>
+            <div class="selector-row-primary">
+                <div class="filter-tabs" id="category-tabs">
+                    <button type="button" class="filter-tab active" data-filter="all">All Chips (18)</button>
+                    <button type="button" class="filter-tab" data-filter="mobile">📱 Mobile Phones</button>
+                    <button type="button" class="filter-tab" data-filter="laptop">💻 Laptop PCs</button>
+                    <button type="button" class="filter-tab" data-filter="cloud">☁️ Cloud & Datacenter</button>
+                    <button type="button" class="filter-tab" data-filter="edge">⚡ Custom & Edge ASIC</button>
+                </div>
+                <div class="chip-search-wrap">
+                    <svg class="chip-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="chip-search-input" class="chip-search-input" placeholder="Instant search chip, arch, node (e.g. B200, M4, TPU)..." autocomplete="off" spellcheck="false" aria-label="Search silicon chips" />
+                    <button type="button" id="chip-search-clear" class="chip-search-clear" title="Clear search">✕</button>
+                </div>
             </div>
-            <div class="chip-dropdown-group">
-                <label for="chip-select" class="select-label">Select Chip:</label>
-                <select id="chip-select" class="chip-select">
-                    <!-- Populated dynamically via JS -->
-                </select>
+
+            <div class="selector-row-secondary">
+                <div class="vendor-filter-group" id="vendor-tabs" role="group" aria-label="Filter chips by vendor">
+                    <span class="vendor-filter-label">Vendor:</span>
+                    <button type="button" class="vendor-pill active" data-vendor="all">All Vendors</button>
+                    <button type="button" class="vendor-pill" data-vendor="NVIDIA"><span class="vendor-dot" style="background:#76b900"></span>NVIDIA</button>
+                    <button type="button" class="vendor-pill" data-vendor="Apple"><span class="vendor-dot" style="background:#f1f5f9"></span>Apple</button>
+                    <button type="button" class="vendor-pill" data-vendor="AMD"><span class="vendor-dot" style="background:#ed1c24"></span>AMD</button>
+                    <button type="button" class="vendor-pill" data-vendor="Intel"><span class="vendor-dot" style="background:#0071c5"></span>Intel</button>
+                    <button type="button" class="vendor-pill" data-vendor="Google"><span class="vendor-dot" style="background:#4285f4"></span>Google</button>
+                    <button type="button" class="vendor-pill" data-vendor="Qualcomm"><span class="vendor-dot" style="background:#3253dc"></span>Qualcomm</button>
+                </div>
+                <div class="chip-dropdown-group">
+                    <label for="chip-select" class="select-label">Active Chip:</label>
+                    <select id="chip-select" class="chip-select" aria-label="Select chip architecture">
+                        <!-- Populated dynamically via JS -->
+                    </select>
+                </div>
             </div>
         </section>
 
         <!-- Hero Overview Card -->
-        <section class="chip-hero">
+        <section class="chip-hero" id="chip-hero-card">
             <div class="hero-left">
-                <div class="chip-badge-row">
-                    <span class="chip-class-badge" id="hero-target">Mobile Phone</span>
-                    <span class="chip-node-badge" id="hero-node">3nm TSMC</span>
-                    <span class="chip-class-badge" id="hero-tdp" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3);">10W TDP</span>
+                <div class="hero-header-row">
+                    <div class="chip-badge-row">
+                        <span class="chip-class-badge" id="hero-target">Mobile Phone</span>
+                        <span class="chip-vendor-badge" id="hero-vendor-badge">Apple</span>
+                        <span class="chip-node-badge" id="hero-node">3nm TSMC</span>
+                        <span class="chip-class-badge" id="hero-tdp" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3);">10W TDP</span>
+                    </div>
+                    <div class="hero-actions">
+                        <button type="button" class="btn-hero-action" id="btn-copy-specs" title="Copy full hardware spec sheet markdown to clipboard">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                            <span class="btn-text">Copy Specs</span>
+                        </button>
+                        <button type="button" class="btn-hero-action" id="btn-share-chip" title="Copy shareable URL link for this chip blueprint">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+                            <span class="btn-text">Share Blueprint</span>
+                        </button>
+                    </div>
                 </div>
                 <h1 class="chip-title">
                     <span id="hero-name">Apple A17 Pro</span>
@@ -2277,23 +2621,47 @@
                 </p>
                 <div class="hero-metrics-grid">
                     <div class="metric-box">
-                        <span class="metric-label">Memory Bandwidth</span>
+                        <div class="metric-head-row">
+                            <span class="metric-label">Memory Bandwidth</span>
+                            <span class="metric-gauge-val" id="m-bw-gauge-pct">1% of 8 TB/s</span>
+                        </div>
                         <span class="metric-value" id="m-bw">51.2 GB/s</span>
+                        <div class="metric-gauge-track" title="Bandwidth relative to 8.0 TB/s max peak">
+                            <div class="metric-gauge-fill" id="m-bw-gauge" style="width: 1%;"></div>
+                        </div>
                         <span class="metric-sub" id="m-mem-type">8 GB LPDDR5X (128-bit)</span>
                     </div>
                     <div class="metric-box">
-                        <span class="metric-label">Peak Compute / NPU</span>
+                        <div class="metric-head-row">
+                            <span class="metric-label">Peak Compute / NPU</span>
+                            <span class="metric-gauge-val" id="m-compute-gauge-pct">1% of 4.5 PF</span>
+                        </div>
                         <span class="metric-value" id="m-compute" style="color: var(--accent-green);">35.0 TOPS</span>
+                        <div class="metric-gauge-track" title="Compute relative to 4,500 TFLOPs BF16 peak">
+                            <div class="metric-gauge-fill" id="m-compute-gauge" style="width: 1%;"></div>
+                        </div>
                         <span class="metric-sub" id="m-compute-sub">4.3 TF FP16 | 35 NPU</span>
                     </div>
                     <div class="metric-box">
-                        <span class="metric-label">Transistor Count</span>
+                        <div class="metric-head-row">
+                            <span class="metric-label">Transistor Count</span>
+                            <span class="metric-gauge-val" id="m-trans-gauge-pct">9% of 208B</span>
+                        </div>
                         <span class="metric-value" id="m-transistors">19.0 B</span>
+                        <div class="metric-gauge-track" title="Transistors relative to 208 Billion peak">
+                            <div class="metric-gauge-fill" id="m-trans-gauge" style="width: 9%;"></div>
+                        </div>
                         <span class="metric-sub" id="m-die-size">Die Size: 103.8 mm²</span>
                     </div>
                     <div class="metric-box">
-                        <span class="metric-label">On-Chip Fast SRAM</span>
+                        <div class="metric-head-row">
+                            <span class="metric-label">On-Chip Fast SRAM</span>
+                            <span class="metric-gauge-val" id="m-sram-gauge-pct">10% of 256MB</span>
+                        </div>
                         <span class="metric-value" id="m-sram" style="color: var(--accent-cyan);">24.8 MB</span>
+                        <div class="metric-gauge-track" title="On-chip SRAM cache relative to 256 MB peak">
+                            <div class="metric-gauge-fill" id="m-sram-gauge" style="width: 10%;"></div>
+                        </div>
                         <span class="metric-sub" id="m-sram-sub">24 MB SLC + 128KB/Core</span>
                     </div>
                 </div>
@@ -3416,7 +3784,69 @@
         let currentChipKey = "apple_a17_pro";
         let detectedChipKey = null;
         let activeFilter = "all";
+        let activeVendorFilter = "all";
+        let chipSearchQuery = "";
         let activeView = "blueprint";
+
+        // Vendor Theme System for Silicon Valley Peak Tier Presentation
+        const VENDOR_THEMES = {
+            "NVIDIA": {
+                color: "#76b900",
+                glow: "rgba(118, 185, 0, 0.4)",
+                gradient: "linear-gradient(90deg, #76b900, #a3e635, #00e5ff)",
+                badgeBg: "rgba(118, 185, 0, 0.15)",
+                badgeBorder: "rgba(118, 185, 0, 0.45)"
+            },
+            "Apple": {
+                color: "#f1f5f9",
+                glow: "rgba(226, 232, 240, 0.35)",
+                gradient: "linear-gradient(90deg, #f8fafc, #94a3b8, #38bdf8)",
+                badgeBg: "rgba(241, 245, 249, 0.12)",
+                badgeBorder: "rgba(241, 245, 249, 0.35)"
+            },
+            "AMD": {
+                color: "#ed1c24",
+                glow: "rgba(237, 28, 36, 0.4)",
+                gradient: "linear-gradient(90deg, #ed1c24, #f87171, #fb923c)",
+                badgeBg: "rgba(237, 28, 36, 0.15)",
+                badgeBorder: "rgba(237, 28, 36, 0.45)"
+            },
+            "Intel": {
+                color: "#0071c5",
+                glow: "rgba(0, 113, 197, 0.4)",
+                gradient: "linear-gradient(90deg, #0071c5, #38bdf8, #00e5ff)",
+                badgeBg: "rgba(0, 113, 197, 0.18)",
+                badgeBorder: "rgba(0, 113, 197, 0.45)"
+            },
+            "Google": {
+                color: "#4285f4",
+                glow: "rgba(66, 133, 244, 0.4)",
+                gradient: "linear-gradient(90deg, #4285f4, #34a853, #fbbc05, #ea4335)",
+                badgeBg: "rgba(66, 133, 244, 0.15)",
+                badgeBorder: "rgba(66, 133, 244, 0.45)"
+            },
+            "Qualcomm": {
+                color: "#3253dc",
+                glow: "rgba(50, 83, 220, 0.4)",
+                gradient: "linear-gradient(90deg, #3253dc, #60a5fa, #c084fc)",
+                badgeBg: "rgba(50, 83, 220, 0.16)",
+                badgeBorder: "rgba(50, 83, 220, 0.45)"
+            },
+            "Tenstorrent": {
+                color: "#f59e0b",
+                glow: "rgba(245, 158, 11, 0.4)",
+                gradient: "linear-gradient(90deg, #f59e0b, #fbbf24, #10b981)",
+                badgeBg: "rgba(245, 158, 11, 0.15)",
+                badgeBorder: "rgba(245, 158, 11, 0.4)"
+            },
+            "Open Silicon": {
+                color: "#10b981",
+                glow: "rgba(16, 185, 129, 0.4)",
+                gradient: "linear-gradient(90deg, #10b981, #34d399, #06b6d4)",
+                badgeBg: "rgba(16, 185, 129, 0.15)",
+                badgeBorder: "rgba(16, 185, 129, 0.4)"
+            }
+        };
 
         // Workload State
         let currentIntensity = 64.0;
@@ -3429,6 +3859,19 @@
 
         // Initialize App
         function initApp() {
+            // Check for shared chip in URL parameters (?chip=...)
+            if (typeof window !== 'undefined' && window.location && window.location.search) {
+                try {
+                    const params = new URLSearchParams(window.location.search);
+                    const sharedChip = params.get('chip');
+                    if (sharedChip && HARDWARE_DB[sharedChip]) {
+                        currentChipKey = sharedChip;
+                    }
+                } catch (e) {
+                    console.warn("URL query parameter parsing skipped:", e);
+                }
+            }
+
             updatePrecisionOptions();
             populateChipSelect();
             renderChipHero(HARDWARE_DB[currentChipKey]);
@@ -3442,12 +3885,32 @@
             initGraphicsEngines();
         }
 
-        // Populate Select Dropdown
+        // Populate Select Dropdown with Multi-Factor Filtering
         function populateChipSelect() {
             const select = document.getElementById("chip-select");
+            if (!select) return;
             select.innerHTML = "";
+
+            const query = (chipSearchQuery || "").trim().toLowerCase();
+            let matchCount = 0;
+            let hasCurrentChip = false;
+            let firstKey = null;
+
             for (const [key, chip] of Object.entries(HARDWARE_DB)) {
-                if (activeFilter === "all" || chip.category === activeFilter) {
+                const matchesCategory = (activeFilter === "all" || chip.category === activeFilter);
+                const matchesVendor = (activeVendorFilter === "all" || (chip.vendor && chip.vendor.toLowerCase() === activeVendorFilter.toLowerCase()));
+
+                let matchesQuery = true;
+                if (query) {
+                    const haystack = `${chip.name} ${chip.vendor} ${chip.target_device} ${chip.process_node_nm}nm ${chip.category} ${chip.description}`.toLowerCase();
+                    matchesQuery = haystack.includes(query);
+                }
+
+                if (matchesCategory && matchesVendor && matchesQuery) {
+                    matchCount++;
+                    if (!firstKey) firstKey = key;
+                    if (key === currentChipKey) hasCurrentChip = true;
+
                     const opt = document.createElement("option");
                     opt.value = key;
                     opt.textContent = `${chip.name} (${chip.vendor}) - ${chip.target_device}`;
@@ -3455,49 +3918,157 @@
                     select.appendChild(opt);
                 }
             }
+
+            if (matchCount === 0) {
+                const opt = document.createElement("option");
+                opt.value = "";
+                opt.textContent = "No matching chips found";
+                opt.disabled = true;
+                opt.selected = true;
+                select.appendChild(opt);
+            } else if (!hasCurrentChip && firstKey) {
+                currentChipKey = firstKey;
+                select.value = firstKey;
+                if (typeof onChipChanged === 'function') {
+                    onChipChanged();
+                }
+            }
         }
 
-        // Render Hero Overview
+        // Render Hero Overview with Dynamic Vendor Accents and Visual Capacity Gauges
         function renderChipHero(chip) {
-            document.getElementById("hero-target").textContent = chip.target_device;
-            document.getElementById("hero-node").textContent = `${chip.process_node_nm}nm Node`;
-            document.getElementById("hero-tdp").textContent = `${chip.tdp_watts}W TDP`;
-            document.getElementById("hero-name").textContent = chip.name;
-            document.getElementById("hero-vendor").textContent = `(${chip.vendor})`;
-            document.getElementById("hero-desc").textContent = chip.description;
+            const getEl = id => document.getElementById(id);
+            if (!chip) return;
 
-            document.getElementById("m-bw").textContent = `${chip.bandwidth_gbs >= 1000 ? (chip.bandwidth_gbs/1000).toFixed(1) + ' TB/s' : chip.bandwidth_gbs.toFixed(0) + ' GB/s'}`;
-            document.getElementById("m-mem-type").textContent = `${chip.vram_gb} GB ${chip.memory_type} (${chip.memory_bus_width_bits}-bit)`;
+            const heroTarget = getEl("hero-target");
+            if (heroTarget) heroTarget.textContent = chip.target_device;
 
+            const heroNode = getEl("hero-node");
+            if (heroNode) heroNode.textContent = `${chip.process_node_nm}nm Node`;
+
+            const heroTdp = getEl("hero-tdp");
+            if (heroTdp) heroTdp.textContent = `${chip.tdp_watts}W TDP`;
+
+            const heroName = getEl("hero-name");
+            if (heroName) heroName.textContent = chip.name;
+
+            const heroVendor = getEl("hero-vendor");
+            if (heroVendor) heroVendor.textContent = `(${chip.vendor})`;
+
+            const heroDesc = getEl("hero-desc");
+            if (heroDesc) heroDesc.textContent = chip.description;
+
+            // Vendor Theme Accent Application
+            const theme = VENDOR_THEMES[chip.vendor] || {
+                color: "#00e5ff",
+                glow: "rgba(0, 229, 255, 0.35)",
+                gradient: "linear-gradient(90deg, #00e5ff, #8b5cf6, #f59e0b)",
+                badgeBg: "rgba(0, 229, 255, 0.15)",
+                badgeBorder: "rgba(0, 229, 255, 0.4)"
+            };
+
+            const heroCard = getEl("chip-hero-card");
+            if (heroCard && heroCard.style) {
+                if (typeof heroCard.style.setProperty === 'function') {
+                    heroCard.style.setProperty("--vendor-accent", theme.color);
+                    heroCard.style.setProperty("--vendor-glow", theme.glow);
+                    heroCard.style.setProperty("--vendor-gradient", theme.gradient);
+                } else {
+                    heroCard.style['--vendor-accent'] = theme.color;
+                    heroCard.style['--vendor-glow'] = theme.glow;
+                    heroCard.style['--vendor-gradient'] = theme.gradient;
+                }
+            }
+
+            const vendorBadge = getEl("hero-vendor-badge");
+            if (vendorBadge) {
+                vendorBadge.textContent = chip.vendor;
+                if (vendorBadge.style) {
+                    vendorBadge.style.color = theme.color;
+                    vendorBadge.style.background = theme.badgeBg;
+                    vendorBadge.style.borderColor = theme.badgeBorder;
+                    vendorBadge.style.boxShadow = `0 0 10px ${theme.glow}`;
+                }
+            }
+
+            // Memory Bandwidth & Capacity Gauge
+            const mBw = getEl("m-bw");
+            if (mBw) mBw.textContent = `${chip.bandwidth_gbs >= 1000 ? (chip.bandwidth_gbs/1000).toFixed(1) + ' TB/s' : chip.bandwidth_gbs.toFixed(0) + ' GB/s'}`;
+            const mMemType = getEl("m-mem-type");
+            if (mMemType) mMemType.textContent = `${chip.vram_gb} GB ${chip.memory_type} (${chip.memory_bus_width_bits}-bit)`;
+
+            const bwPct = Math.min(100, Math.max(2, (chip.bandwidth_gbs / 8000.0) * 100));
+            const bwGauge = getEl("m-bw-gauge");
+            if (bwGauge && bwGauge.style) bwGauge.style.width = `${bwPct.toFixed(1)}%`;
+            const bwGaugePct = getEl("m-bw-gauge-pct");
+            if (bwGaugePct) bwGaugePct.textContent = `${bwPct.toFixed(0)}% of 8 TB/s`;
+
+            // Compute & NPU Gauge
             const peakStr = chip.npu_tops > 0 ? `${chip.npu_tops.toFixed(0)} NPU TOPS` : `${chip.peak_bf16_tflops >= 1000 ? (chip.peak_bf16_tflops/1000).toFixed(1) + ' PFLOPs' : chip.peak_bf16_tflops.toFixed(1) + ' TFLOPs'}`;
-            document.getElementById("m-compute").textContent = peakStr;
-            document.getElementById("m-compute-sub").textContent = `${chip.peak_bf16_tflops.toFixed(1)} TF BF16` + (chip.peak_fp8_tflops > 0 ? ` | ${chip.peak_fp8_tflops.toFixed(0)} TF FP8` : "");
+            const mCompute = getEl("m-compute");
+            if (mCompute) mCompute.textContent = peakStr;
+            const mComputeSub = getEl("m-compute-sub");
+            if (mComputeSub) mComputeSub.textContent = `${chip.peak_bf16_tflops.toFixed(1)} TF BF16` + (chip.peak_fp8_tflops > 0 ? ` | ${chip.peak_fp8_tflops.toFixed(0)} TF FP8` : "");
 
-            document.getElementById("m-transistors").textContent = chip.transistor_count_billion > 0 ? `${chip.transistor_count_billion} B` : "N/A";
-            document.getElementById("m-die-size").textContent = chip.die_size_mm2 ? `Die Size: ${chip.die_size_mm2} mm²` : "Monolithic";
+            const computeVal = chip.npu_tops > 0 ? chip.npu_tops : chip.peak_bf16_tflops;
+            const compPct = Math.min(100, Math.max(2, (computeVal / 4500.0) * 100));
+            const compGauge = getEl("m-compute-gauge");
+            if (compGauge && compGauge.style) compGauge.style.width = `${compPct.toFixed(1)}%`;
+            const compGaugePct = getEl("m-compute-gauge-pct");
+            if (compGaugePct) compGaugePct.textContent = `${compPct.toFixed(0)}% of 4.5 PF`;
 
+            // Transistor Count Gauge
+            const mTrans = getEl("m-transistors");
+            if (mTrans) mTrans.textContent = chip.transistor_count_billion > 0 ? `${chip.transistor_count_billion} B` : "N/A";
+            const mDieSize = getEl("m-die-size");
+            if (mDieSize) mDieSize.textContent = chip.die_size_mm2 ? `Die Size: ${chip.die_size_mm2} mm²` : "Monolithic";
+
+            const transVal = chip.transistor_count_billion || 0;
+            const transPct = Math.min(100, Math.max(2, (transVal / 208.0) * 100));
+            const transGauge = getEl("m-trans-gauge");
+            if (transGauge && transGauge.style) transGauge.style.width = `${transPct.toFixed(1)}%`;
+            const transGaugePct = getEl("m-trans-gauge-pct");
+            if (transGaugePct) transGaugePct.textContent = `${transPct.toFixed(0)}% of 208B`;
+
+            // Fast On-Chip SRAM Gauge
             const totalSram = (chip.sram_per_core_kb * chip.num_compute_units) / 1024.0 + (chip.l2_cache_mb || 0);
-            document.getElementById("m-sram").textContent = `${totalSram.toFixed(1)} MB`;
-            document.getElementById("m-sram-sub").textContent = `${chip.l2_cache_mb || 0} MB L2/SLC + ${chip.sram_per_core_kb} KB/Core`;
+            const mSram = getEl("m-sram");
+            if (mSram) mSram.textContent = `${totalSram.toFixed(1)} MB`;
+            const mSramSub = getEl("m-sram-sub");
+            if (mSramSub) mSramSub.textContent = `${chip.l2_cache_mb || 0} MB L2/SLC + ${chip.sram_per_core_kb} KB/Core`;
+
+            const sramPct = Math.min(100, Math.max(2, (totalSram / 256.0) * 100));
+            const sramGauge = getEl("m-sram-gauge");
+            if (sramGauge && sramGauge.style) sramGauge.style.width = `${sramPct.toFixed(1)}%`;
+            const sramGaugePct = getEl("m-sram-gauge-pct");
+            if (sramGaugePct) sramGaugePct.textContent = `${sramPct.toFixed(0)}% of 256MB`;
 
             // Operational specs in Tab 2
-            document.getElementById("p-foundry").textContent = `${chip.vendor === 'Apple' ? 'TSMC' : chip.vendor} ${chip.process_node_nm}nm`;
-            document.getElementById("p-packaging").textContent = chip.packaging || "Monolithic BGA";
+            const pFoundry = getEl("p-foundry");
+            if (pFoundry) pFoundry.textContent = `${chip.vendor === 'Apple' ? 'TSMC' : chip.vendor} ${chip.process_node_nm}nm`;
+            const pPackaging = getEl("p-packaging");
+            if (pPackaging) pPackaging.textContent = chip.packaging || "Monolithic BGA";
             const density = (chip.transistor_count_billion && chip.die_size_mm2) ? ((chip.transistor_count_billion * 1000) / chip.die_size_mm2).toFixed(1) + " MTr/mm²" : "N/A";
-            document.getElementById("p-density").textContent = density;
+            const pDensity = getEl("p-density");
+            if (pDensity) pDensity.textContent = density;
             const topsPerWatt = chip.npu_tops > 0 ? (chip.npu_tops / chip.tdp_watts).toFixed(1) + " TOPS / Watt" : ((chip.peak_bf16_tflops * 1000) / chip.tdp_watts).toFixed(1) + " GFLOPS / Watt";
-            document.getElementById("p-efficiency").textContent = topsPerWatt;
-            document.getElementById("p-bus").textContent = `${chip.memory_bus_width_bits}-bit (${chip.memory_type})`;
+            const pEfficiency = getEl("p-efficiency");
+            if (pEfficiency) pEfficiency.textContent = topsPerWatt;
+            const pBus = getEl("p-bus");
+            if (pBus) pBus.textContent = `${chip.memory_bus_width_bits}-bit (${chip.memory_type})`;
             const ridge = (chip.peak_bf16_tflops * 1000.0) / chip.bandwidth_gbs;
-            document.getElementById("p-ridge").textContent = `${ridge.toFixed(1)} FLOPs/Byte`;
-            document.getElementById("cap-bw-label").textContent = `${chip.bandwidth_gbs} GB/s`;
+            const pRidge = getEl("p-ridge");
+            if (pRidge) pRidge.textContent = `${ridge.toFixed(1)} FLOPs/Byte`;
+            const capBwLabel = getEl("cap-bw-label");
+            if (capBwLabel) capBwLabel.textContent = `${chip.bandwidth_gbs} GB/s`;
         }
 
         // Render Silicon Blueprint Blocks
         function renderBlueprint(chip) {
             const grid = document.getElementById("die-grid");
+            if (!grid) return;
             // Clear blocks except corner marks
-            const cornerMarks = grid.querySelectorAll(".die-corner-mark");
+            const cornerMarks = grid.querySelectorAll ? grid.querySelectorAll(".die-corner-mark") : [];
             grid.innerHTML = "";
             cornerMarks.forEach(c => grid.appendChild(c));
 
@@ -3506,7 +4077,13 @@
 
             // Set grid template dynamically based on block count
             const cols = blocks.length > 6 ? 4 : 3;
-            grid.style.setProperty('--die-columns', cols);
+            if (grid.style) {
+                if (typeof grid.style.setProperty === 'function') {
+                    grid.style.setProperty('--die-columns', cols);
+                } else {
+                    grid.style['--die-columns'] = cols;
+                }
+            }
 
             blocks.forEach((b, idx) => {
                 const el = document.createElement("button");
@@ -5909,6 +6486,76 @@
             }
         }
 
+        // Format Spec Sheet Markdown for Clipboard Export
+        function formatChipSpecSheet(chip) {
+            if (!chip) return "";
+            const totalSram = (chip.sram_per_core_kb * chip.num_compute_units) / 1024.0 + (chip.l2_cache_mb || 0);
+            const ridge = (chip.peak_bf16_tflops * 1000.0) / chip.bandwidth_gbs;
+            const peakComputeStr = chip.npu_tops > 0 ? `${chip.npu_tops} TOPS NPU` : `${chip.peak_bf16_tflops} TFLOPs BF16`;
+            const caps = (chip.capabilities || []).map(c => `  - ${c}`).join('\n');
+            const shareUrl = (typeof window !== 'undefined' && window.location) 
+                ? `${window.location.origin}${window.location.pathname}?chip=${encodeURIComponent(currentChipKey)}`
+                : `https://tilelens.dev/?chip=${encodeURIComponent(currentChipKey)}`;
+
+            return `# 🔬 TileLens Silicon Blueprint: ${chip.name} (${chip.vendor})
+**Target Domain**: ${chip.target_device}
+**Process Technology**: ${chip.process_node_nm}nm | Packaging: ${chip.packaging || 'Monolithic BGA'} | TDP: ${chip.tdp_watts}W
+
+### Microarchitectural Specifications:
+- **Memory Bandwidth**: ${chip.bandwidth_gbs >= 1000 ? (chip.bandwidth_gbs/1000).toFixed(1) + ' TB/s' : chip.bandwidth_gbs + ' GB/s'}
+- **Memory Subsystem**: ${chip.vram_gb} GB ${chip.memory_type} (${chip.memory_bus_width_bits}-bit)
+- **Peak AI Compute**: ${peakComputeStr} (BF16: ${chip.peak_bf16_tflops} TF, FP8: ${chip.peak_fp8_tflops || 0} TF)
+- **Transistor Budget**: ${chip.transistor_count_billion || 'N/A'} Billion | Die Size: ${chip.die_size_mm2 || 'N/A'} mm²
+- **On-Chip Fast SRAM**: ${totalSram.toFixed(1)} MB (${chip.l2_cache_mb || 0} MB L2/SLC + ${chip.sram_per_core_kb} KB/Core)
+- **Operational Roofline Ridge**: ${ridge.toFixed(1)} FLOPs/Byte
+
+### Key Capabilities & Workloads:
+${caps}
+
+🔗 View Blueprint on TileLens: ${shareUrl}
+`;
+        }
+
+        // Resilient Clipboard Utility
+        function copyTextToClipboard(text, onSuccess, onError) {
+            if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+                navigator.clipboard.writeText(text).then(() => {
+                    if (onSuccess) onSuccess();
+                }).catch(err => {
+                    console.warn("Clipboard API failed, using fallback:", err);
+                    fallbackCopyText(text, onSuccess, onError);
+                });
+            } else {
+                fallbackCopyText(text, onSuccess, onError);
+            }
+        }
+
+        function fallbackCopyText(text, onSuccess, onError) {
+            try {
+                if (typeof document === 'undefined' || !document.createElement) {
+                    if (onSuccess) onSuccess();
+                    return;
+                }
+                const ta = document.createElement("textarea");
+                ta.value = text;
+                ta.style.position = "fixed";
+                ta.style.left = "-9999px";
+                if (document.body && document.body.appendChild) {
+                    document.body.appendChild(ta);
+                    ta.focus();
+                    ta.select();
+                    if (typeof document.execCommand === 'function') {
+                        document.execCommand('copy');
+                    }
+                    document.body.removeChild(ta);
+                }
+                if (onSuccess) onSuccess();
+            } catch (e) {
+                if (onError) onError(e);
+                else if (onSuccess) onSuccess();
+            }
+        }
+
         function initGraphicsEngines() {
             if (typeof window === 'undefined' || typeof document === 'undefined') return;
             initSiliconCanvas();
@@ -5934,6 +6581,98 @@
                     populateChipSelect();
                 });
             });
+
+            // Instant Chip Search Input
+            const searchInput = document.getElementById("chip-search-input");
+            const clearSearchBtn = document.getElementById("chip-search-clear");
+            if (searchInput) {
+                searchInput.addEventListener("input", (e) => {
+                    chipSearchQuery = (e.target && e.target.value) ? e.target.value : "";
+                    if (clearSearchBtn) {
+                        clearSearchBtn.style.display = chipSearchQuery ? "inline-flex" : "none";
+                    }
+                    populateChipSelect();
+                });
+            }
+            if (clearSearchBtn) {
+                clearSearchBtn.addEventListener("click", () => {
+                    if (searchInput) searchInput.value = "";
+                    chipSearchQuery = "";
+                    clearSearchBtn.style.display = "none";
+                    populateChipSelect();
+                    if (searchInput && typeof searchInput.focus === 'function') searchInput.focus();
+                });
+            }
+
+            // Vendor filter pills
+            document.querySelectorAll("#vendor-tabs .vendor-pill").forEach(pill => {
+                pill.addEventListener("click", () => {
+                    document.querySelectorAll("#vendor-tabs .vendor-pill").forEach(p => p.classList.remove("active"));
+                    pill.classList.add("active");
+                    activeVendorFilter = pill.getAttribute("data-vendor") || "all";
+                    populateChipSelect();
+                });
+            });
+
+            // Spec Sheet Export and Blueprint Share Buttons
+            const btnCopySpecs = document.getElementById("btn-copy-specs");
+            if (btnCopySpecs) {
+                btnCopySpecs.addEventListener("click", () => {
+                    const chip = HARDWARE_DB[currentChipKey];
+                    if (!chip) return;
+                    const specText = formatChipSpecSheet(chip);
+                    copyTextToClipboard(specText, () => {
+                        if (btnCopySpecs.classList && btnCopySpecs.classList.add) {
+                            btnCopySpecs.classList.add("success");
+                        }
+                        const textSpan = (btnCopySpecs.querySelector && typeof btnCopySpecs.querySelector === 'function')
+                            ? btnCopySpecs.querySelector(".btn-text")
+                            : null;
+                        const origText = textSpan ? textSpan.textContent : "Copy Specs";
+                        if (textSpan) textSpan.textContent = "✓ Specs Copied!";
+                        setTimeout(() => {
+                            if (btnCopySpecs.classList && btnCopySpecs.classList.remove) {
+                                btnCopySpecs.classList.remove("success");
+                            }
+                            if (textSpan) textSpan.textContent = origText;
+                        }, 2200);
+                    });
+                });
+            }
+
+            const btnShareChip = document.getElementById("btn-share-chip");
+            if (btnShareChip) {
+                btnShareChip.addEventListener("click", () => {
+                    const shareUrl = (typeof window !== 'undefined' && window.location)
+                        ? `${window.location.origin}${window.location.pathname}?chip=${encodeURIComponent(currentChipKey)}`
+                        : `https://tilelens.dev/?chip=${encodeURIComponent(currentChipKey)}`;
+
+                    if (typeof window !== 'undefined' && window.history && typeof window.history.replaceState === 'function') {
+                        try {
+                            window.history.replaceState(null, '', `?chip=${encodeURIComponent(currentChipKey)}`);
+                        } catch (e) {
+                            console.warn("Could not update history state:", e);
+                        }
+                    }
+
+                    copyTextToClipboard(shareUrl, () => {
+                        if (btnShareChip.classList && btnShareChip.classList.add) {
+                            btnShareChip.classList.add("success");
+                        }
+                        const textSpan = (btnShareChip.querySelector && typeof btnShareChip.querySelector === 'function')
+                            ? btnShareChip.querySelector(".btn-text")
+                            : null;
+                        const origText = textSpan ? textSpan.textContent : "Share Blueprint";
+                        if (textSpan) textSpan.textContent = "✓ Link Copied!";
+                        setTimeout(() => {
+                            if (btnShareChip.classList && btnShareChip.classList.remove) {
+                                btnShareChip.classList.remove("success");
+                            }
+                            if (textSpan) textSpan.textContent = origText;
+                        }, 2200);
+                    });
+                });
+            }
 
             // Chip select dropdown
             document.getElementById("chip-select").addEventListener("change", (e) => {

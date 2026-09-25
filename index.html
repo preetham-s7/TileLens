@@ -565,6 +565,25 @@
             grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
             gap: 24px;
             align-items: start;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .blueprint-layout.widescreen-mode {
+            grid-template-columns: 1fr;
+        }
+
+        .blueprint-layout.widescreen-mode .die-canvas-container {
+            min-height: 620px;
+        }
+
+        .blueprint-layout.widescreen-mode .silicon-3d-container {
+            min-height: 620px;
+        }
+
+        .blueprint-layout.widescreen-mode .blueprint-inspector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
         }
 
         .blueprint-stage {
@@ -593,7 +612,7 @@
 
         .die-canvas-container {
             width: 100%;
-            min-height: 380px;
+            min-height: 560px;
             background: #060911;
             border: 1px solid rgba(0, 229, 255, 0.25);
             border-radius: var(--radius-md);
@@ -603,6 +622,7 @@
             align-items: center;
             justify-content: center;
             padding: 16px;
+            transition: min-height 0.3s ease;
             box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.85);
             background-image: 
                 radial-gradient(rgba(0, 229, 255, 0.08) 1px, transparent 1px),
@@ -1807,7 +1827,7 @@
         <!-- VIEW 1: SILICON BLUEPRINT & DIE LAYOUT                       -->
         <!-- ============================================================ -->
         <section class="view-content active" id="view-blueprint">
-            <div class="blueprint-layout">
+            <div class="blueprint-layout" id="blueprint-layout">
                 <div class="blueprint-stage">
                     <div class="stage-header">
                         <div class="stage-title">
@@ -1817,6 +1837,7 @@
                             <button type="button" class="die-toggle-btn active" id="btn-toggle-3d" title="Photorealistic 3D Silicon Package">💎 3D Package</button>
                             <button type="button" class="die-toggle-btn" id="btn-toggle-canvas" title="Interactive 2D Metrology Floorplan">🗺️ 2D Canvas</button>
                             <button type="button" class="die-toggle-btn" id="btn-toggle-grid" title="Classic Block Grid View">🧱 Grid View</button>
+                            <button type="button" class="die-toggle-btn" id="btn-toggle-widescreen" title="Toggle Cinematic Widescreen Theater Mode">⛶ Widescreen</button>
                         </div>
                     </div>
                     <div class="die-graphics-controls">
@@ -1843,6 +1864,8 @@
                         <div id="hud-3d-controls" class="hud-3d-bar">
                             <button type="button" class="hud-3d-btn" id="btn-3d-explode" title="Toggle Exploded Physical Semiconductor Packaging Layers">💥 Explode Stack: <span id="label-explode-state">OFF</span></button>
                             <button type="button" class="hud-3d-btn active" id="btn-3d-rotate" title="Toggle automatic cinematic rotation">🔄 Auto-Rotate</button>
+                            <button type="button" class="hud-3d-btn" id="btn-3d-lighting" title="Cycle cleanroom studio lighting profiles">💡 Lighting: <span id="label-lighting-mode">Cleanroom</span></button>
+                            <button type="button" class="hud-3d-btn" id="btn-3d-theater" title="Toggle Cinematic Widescreen Theater Mode">⛶ Theater View</button>
                             <button type="button" class="hud-3d-btn" id="btn-3d-reset" title="Reset Camera to default isometric angle">🎯 Reset View</button>
                             <button type="button" class="hud-3d-btn" id="btn-3d-wireframe" title="Toggle wireframe mode">🔬 X-Ray Wire</button>
                             <span class="hud-3d-tip">🖱️ Drag: Orbit • Wheel: Zoom • Click Core: Inspect</span>
@@ -4016,9 +4039,19 @@
                 }
             }
 
-            if (btn3D) btn3D.addEventListener('click', () => setDieViewMode('3d'));
+            if (btn3D) btn3D.addEventListener('click', () => {
+                setDieViewMode('3d');
+                if (typeof updateViewport3DSize === 'function') updateViewport3DSize();
+            });
             if (btnCanvas) btnCanvas.addEventListener('click', () => setDieViewMode('2d'));
             if (btnGrid) btnGrid.addEventListener('click', () => setDieViewMode('grid'));
+
+            const btnWsHeader = document.getElementById('btn-toggle-widescreen');
+            if (btnWsHeader) {
+                btnWsHeader.addEventListener('click', () => {
+                    if (typeof toggleWidescreenMode === 'function') toggleWidescreenMode();
+                });
+            }
 
             // Default to 3D if supported, otherwise 2D
             if (typeof THREE !== 'undefined') {
@@ -4388,6 +4421,7 @@
         let camera3D = null;
         let renderer3D = null;
         let packageGroup = null;
+        let turntableStageGroup = null;
         let dieBlockMeshes = [];
         let ihsMesh = null;
         let timMesh = null;
@@ -4402,6 +4436,263 @@
         let targetExplodeProgress = 0.0;
         let isWireframe = false;
         let hovered3DMesh = null;
+        let isWidescreenMode = false;
+
+        let lightingRig3D = {
+            ambient: null,
+            key: null,
+            fill: null,
+            rimCyan: null,
+            rimMagenta: null,
+            camSpecular: null,
+            mode: 'cleanroom'
+        };
+
+        const LIGHTING_MODES = {
+            cleanroom: {
+                name: 'Cleanroom',
+                ambient: { color: 0x334155, intensity: 1.2 },
+                key: { color: 0xffffff, intensity: 2.2, pos: [35, 70, 45] },
+                fill: { color: 0xe2e8f0, intensity: 1.0, pos: [-45, 35, -30] },
+                rimCyan: { color: 0x00f0ff, intensity: 2.5, pos: [-55, 25, 45] },
+                rimMagenta: { color: 0xd946ef, intensity: 1.8, pos: [50, 18, -45] },
+                specular: { color: 0xffffff, intensity: 1.3 }
+            },
+            cyber: {
+                name: 'Cyberpunk',
+                ambient: { color: 0x0f172a, intensity: 0.8 },
+                key: { color: 0x00f5ff, intensity: 2.6, pos: [35, 70, 45] },
+                fill: { color: 0x3b0764, intensity: 1.4, pos: [-45, 35, -30] },
+                rimCyan: { color: 0xf43f5e, intensity: 3.0, pos: [-55, 25, 45] },
+                rimMagenta: { color: 0x10b981, intensity: 2.2, pos: [50, 18, -45] },
+                specular: { color: 0x38bdf8, intensity: 1.6 }
+            },
+            thermal: {
+                name: 'FLIR Thermal',
+                ambient: { color: 0x1c1917, intensity: 0.9 },
+                key: { color: 0xffedd5, intensity: 2.0, pos: [35, 70, 45] },
+                fill: { color: 0x881337, intensity: 1.3, pos: [-45, 35, -30] },
+                rimCyan: { color: 0xf97316, intensity: 2.8, pos: [-55, 25, 45] },
+                rimMagenta: { color: 0x3b82f6, intensity: 2.0, pos: [50, 18, -45] },
+                specular: { color: 0xfbbf24, intensity: 1.4 }
+            }
+        };
+
+        function applyLightingMode(modeKey) {
+            const profile = LIGHTING_MODES[modeKey];
+            if (!profile || !lightingRig3D.key) return;
+            lightingRig3D.mode = modeKey;
+
+            if (lightingRig3D.ambient) {
+                lightingRig3D.ambient.color.setHex(profile.ambient.color);
+                lightingRig3D.ambient.intensity = profile.ambient.intensity;
+            }
+            if (lightingRig3D.key) {
+                lightingRig3D.key.color.setHex(profile.key.color);
+                lightingRig3D.key.intensity = profile.key.intensity;
+                lightingRig3D.key.position.set(profile.key.pos[0], profile.key.pos[1], profile.key.pos[2]);
+            }
+            if (lightingRig3D.fill) {
+                lightingRig3D.fill.color.setHex(profile.fill.color);
+                lightingRig3D.fill.intensity = profile.fill.intensity;
+                lightingRig3D.fill.position.set(profile.fill.pos[0], profile.fill.pos[1], profile.fill.pos[2]);
+            }
+            if (lightingRig3D.rimCyan) {
+                lightingRig3D.rimCyan.color.setHex(profile.rimCyan.color);
+                lightingRig3D.rimCyan.intensity = profile.rimCyan.intensity;
+                lightingRig3D.rimCyan.position.set(profile.rimCyan.pos[0], profile.rimCyan.pos[1], profile.rimCyan.pos[2]);
+            }
+            if (lightingRig3D.rimMagenta) {
+                lightingRig3D.rimMagenta.color.setHex(profile.rimMagenta.color);
+                lightingRig3D.rimMagenta.intensity = profile.rimMagenta.intensity;
+                lightingRig3D.rimMagenta.position.set(profile.rimMagenta.pos[0], profile.rimMagenta.pos[1], profile.rimMagenta.pos[2]);
+            }
+            if (lightingRig3D.camSpecular) {
+                lightingRig3D.camSpecular.color.setHex(profile.specular.color);
+                lightingRig3D.camSpecular.intensity = profile.specular.intensity;
+            }
+
+            const lbl = document.getElementById('label-lighting-mode');
+            if (lbl) lbl.textContent = profile.name;
+        }
+
+        function cycleLightingMode() {
+            const keys = Object.keys(LIGHTING_MODES);
+            const currIdx = keys.indexOf(lightingRig3D.mode);
+            const nextKey = keys[(currIdx + 1) % keys.length];
+            applyLightingMode(nextKey);
+        }
+
+        function toggleWidescreenMode() {
+            isWidescreenMode = !isWidescreenMode;
+            const layout = document.getElementById('blueprint-layout');
+            if (layout) layout.classList.toggle('widescreen-mode', isWidescreenMode);
+
+            const btnWs = document.getElementById('btn-toggle-widescreen');
+            const btnTh = document.getElementById('btn-3d-theater');
+            if (btnWs) btnWs.classList.toggle('active', isWidescreenMode);
+            if (btnTh) {
+                btnTh.classList.toggle('active', isWidescreenMode);
+                btnTh.innerHTML = isWidescreenMode ? '🗗 Standard View' : '⛶ Theater View';
+            }
+
+            updateViewport3DSize();
+            setTimeout(updateViewport3DSize, 120);
+            setTimeout(updateViewport3DSize, 340);
+        }
+
+        function updateViewport3DSize() {
+            if (typeof THREE === 'undefined' || !renderer3D || !camera3D) return;
+            const container = document.getElementById('silicon-3d-viewport');
+            if (!container) return;
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            if (w > 0 && h > 0) {
+                camera3D.aspect = w / h;
+                camera3D.updateProjectionMatrix();
+                renderer3D.setSize(w, h);
+            }
+        }
+
+        function buildTurntableStage() {
+            if (typeof THREE === 'undefined') return null;
+            const stageGroup = new THREE.Group();
+
+            // 1. Heavy Stage Pedestal (Cylinder, Y = -7.1, radius 38, height 1.3)
+            const stageGeo = new THREE.CylinderGeometry(38, 40, 1.3, 64);
+            const stageMat = new THREE.MeshStandardMaterial({
+                color: 0x0a0f1d,
+                metalness: 0.88,
+                roughness: 0.32
+            });
+            const stageMesh = new THREE.Mesh(stageGeo, stageMat);
+            stageMesh.position.y = -7.1;
+            stageMesh.receiveShadow = true;
+            stageGroup.add(stageMesh);
+
+            // 2. Beveled Anodized Outer Rim (Ring, Y = -6.44)
+            const rimGeo = new THREE.RingGeometry(36.8, 38.0, 64);
+            const rimMat = new THREE.MeshStandardMaterial({
+                color: 0x1e293b,
+                metalness: 0.95,
+                roughness: 0.15,
+                side: THREE.DoubleSide
+            });
+            const rimMesh = new THREE.Mesh(rimGeo, rimMat);
+            rimMesh.rotation.x = -Math.PI / 2;
+            rimMesh.position.y = -6.44;
+            stageGroup.add(rimMesh);
+
+            // 3. Precision Metrology Reticle Markings (Concentric Rings)
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: 0x00e5ff,
+                transparent: true,
+                opacity: 0.22,
+                side: THREE.DoubleSide
+            });
+
+            [14, 24, 32].forEach(radius => {
+                const circGeo = new THREE.RingGeometry(radius - 0.08, radius + 0.08, 64);
+                const circMesh = new THREE.Mesh(circGeo, ringMat);
+                circMesh.rotation.x = -Math.PI / 2;
+                circMesh.position.y = -6.435;
+                stageGroup.add(circMesh);
+            });
+
+            // Reticle markings and contact shadow if canvas 2D context is available
+            if (typeof document !== 'undefined' && document.createElement) {
+                try {
+                    const tickCanvas = document.createElement('canvas');
+                    if (tickCanvas && typeof tickCanvas.getContext === 'function') {
+                        tickCanvas.width = 512;
+                        tickCanvas.height = 512;
+                        const tctx = tickCanvas.getContext('2d');
+                        if (tctx) {
+                            tctx.clearRect(0, 0, 512, 512);
+
+                            tctx.strokeStyle = 'rgba(0, 229, 255, 0.35)';
+                            tctx.lineWidth = 1.5;
+
+                            // Crosshair axes
+                            tctx.beginPath();
+                            tctx.moveTo(256, 40); tctx.lineTo(256, 472);
+                            tctx.moveTo(40, 256); tctx.lineTo(472, 256);
+                            tctx.stroke();
+
+                            // Degree radial lines
+                            tctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
+                            tctx.lineWidth = 1.0;
+                            for (let deg = 0; deg < 360; deg += 30) {
+                                const rad = (deg * Math.PI) / 180;
+                                const x1 = 256 + Math.cos(rad) * 160;
+                                const y1 = 256 + Math.sin(rad) * 160;
+                                const x2 = 256 + Math.cos(rad) * 235;
+                                const y2 = 256 + Math.sin(rad) * 235;
+                                tctx.beginPath();
+                                tctx.moveTo(x1, y1);
+                                tctx.lineTo(x2, y2);
+                                tctx.stroke();
+                            }
+
+                            tctx.font = '10px monospace';
+                            tctx.fillStyle = 'rgba(0, 229, 255, 0.45)';
+                            tctx.textAlign = 'center';
+                            tctx.fillText('0° METROLOGY', 256, 30);
+                            tctx.fillText('90°', 485, 260);
+                            tctx.fillText('180° ISO CLASS 1', 256, 495);
+                            tctx.fillText('270°', 25, 260);
+
+                            const tickTex = new THREE.CanvasTexture(tickCanvas);
+                            const tickPlaneGeo = new THREE.PlaneGeometry(68, 68);
+                            const tickPlaneMat = new THREE.MeshBasicMaterial({
+                                map: tickTex,
+                                transparent: true,
+                                opacity: 0.85,
+                                depthWrite: false,
+                                side: THREE.DoubleSide
+                            });
+                            const tickPlaneMesh = new THREE.Mesh(tickPlaneGeo, tickPlaneMat);
+                            tickPlaneMesh.rotation.x = -Math.PI / 2;
+                            tickPlaneMesh.position.y = -6.43;
+                            stageGroup.add(tickPlaneMesh);
+                        }
+
+                        // 4. Soft Contact Ambient Occlusion Shadow Disc
+                        const shadowCanvas = document.createElement('canvas');
+                        shadowCanvas.width = 256;
+                        shadowCanvas.height = 256;
+                        const shctx = shadowCanvas.getContext('2d');
+                        if (shctx) {
+                            const shGrad = shctx.createRadialGradient(128, 128, 10, 128, 128, 128);
+                            shGrad.addColorStop(0, 'rgba(0, 0, 0, 0.85)');
+                            shGrad.addColorStop(0.35, 'rgba(0, 0, 0, 0.60)');
+                            shGrad.addColorStop(0.7, 'rgba(0, 0, 0, 0.20)');
+                            shGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                            shctx.fillStyle = shGrad;
+                            shctx.fillRect(0, 0, 256, 256);
+
+                            const shadowTex = new THREE.CanvasTexture(shadowCanvas);
+                            const shadowGeo = new THREE.PlaneGeometry(54, 54);
+                            const shadowMat = new THREE.MeshBasicMaterial({
+                                map: shadowTex,
+                                transparent: true,
+                                opacity: 0.95,
+                                depthWrite: false,
+                                side: THREE.DoubleSide
+                            });
+                            const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+                            shadowMesh.rotation.x = -Math.PI / 2;
+                            shadowMesh.position.y = -6.42;
+                            stageGroup.add(shadowMesh);
+                        }
+                    }
+                } catch (e) {
+                    // Ignore canvas errors in restricted test environments
+                }
+            }
+
+            return stageGroup;
+        }
 
         let camTheta = 0.75;
         let camPhi = 0.95;
@@ -4500,6 +4791,8 @@
             });
             substrateMesh = new THREE.Mesh(subGeo, subMat);
             substrateMesh.position.y = -3.0;
+            substrateMesh.castShadow = true;
+            substrateMesh.receiveShadow = true;
             packageGroup.add(substrateMesh);
 
             // 3. SMD Decoupling Capacitors around die footprint
@@ -4567,6 +4860,8 @@
                 roughness: 0.08
             });
             dieBaseMesh = new THREE.Mesh(dieBaseGeo, dieBaseMat);
+            dieBaseMesh.castShadow = true;
+            dieBaseMesh.receiveShadow = true;
             dieGroup.add(dieBaseMesh);
 
             // 3D Extruded Microarchitectural Blocks
@@ -4641,6 +4936,8 @@
 
                 const blockMesh = new THREE.Mesh(blockGeo, blockMat);
                 blockMesh.position.set(bx, 0.8, bz);
+                blockMesh.castShadow = true;
+                blockMesh.receiveShadow = true;
                 blockMesh.userData = {
                     block: b.block,
                     originalY: 0.8,
@@ -4755,7 +5052,11 @@
             });
 
             const ihsMainMesh = new THREE.Mesh(ihsMainGeo, ihsMat);
+            ihsMainMesh.castShadow = true;
+            ihsMainMesh.receiveShadow = true;
             const ihsPedestal = new THREE.Mesh(ihsPedestalGeo, new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.3 }));
+            ihsPedestal.castShadow = true;
+            ihsPedestal.receiveShadow = true;
             ihsPedestal.position.y = -1.2;
             ihsGroup.add(ihsMainMesh, ihsPedestal);
 
@@ -4826,6 +5127,10 @@
             camera3D.position.y = camRadius * Math.cos(camPhi);
             camera3D.position.z = camRadius * Math.sin(camPhi) * Math.cos(camTheta);
             camera3D.lookAt(0, 0, 0);
+
+            if (lightingRig3D && lightingRig3D.camSpecular) {
+                lightingRig3D.camSpecular.position.copy(camera3D.position);
+            }
 
             explodeProgress += (targetExplodeProgress - explodeProgress) * 0.07;
 
@@ -4919,6 +5224,15 @@
                 renderer3D = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
                 renderer3D.setSize(width, height);
                 renderer3D.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+                renderer3D.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer3D.toneMappingExposure = 1.25;
+                if ('outputColorSpace' in renderer3D && THREE.SRGBColorSpace) {
+                    renderer3D.outputColorSpace = THREE.SRGBColorSpace;
+                } else if ('outputEncoding' in renderer3D && THREE.sRGBEncoding) {
+                    renderer3D.outputEncoding = THREE.sRGBEncoding;
+                }
+                renderer3D.shadowMap.enabled = true;
+                renderer3D.shadowMap.type = THREE.PCFSoftShadowMap;
                 container.appendChild(renderer3D.domElement);
             } catch (err) {
                 console.warn('WebGL initialization failed, falling back to 2D canvas:', err);
@@ -4927,20 +5241,43 @@
                 return;
             }
 
-            const ambLight = new THREE.AmbientLight(0x334155, 1.2);
-            scene3D.add(ambLight);
+            // Cleanroom Metrology Turntable Stage Floor
+            turntableStageGroup = buildTurntableStage();
+            if (turntableStageGroup) {
+                scene3D.add(turntableStageGroup);
+            }
 
-            const keyLight = new THREE.DirectionalLight(0xffffff, 1.5);
-            keyLight.position.set(45, 60, 45);
-            scene3D.add(keyLight);
+            // Photorealistic Semiconductor Studio Lighting Rig
+            lightingRig3D.ambient = new THREE.AmbientLight(0x334155, 1.2);
+            scene3D.add(lightingRig3D.ambient);
 
-            const fillLight = new THREE.DirectionalLight(0x00e5ff, 0.7);
-            fillLight.position.set(-45, 30, -35);
-            scene3D.add(fillLight);
+            lightingRig3D.key = new THREE.DirectionalLight(0xffffff, 2.2);
+            lightingRig3D.key.position.set(35, 70, 45);
+            lightingRig3D.key.castShadow = true;
+            if (lightingRig3D.key.shadow) {
+                lightingRig3D.key.shadow.mapSize.width = 1024;
+                lightingRig3D.key.shadow.mapSize.height = 1024;
+                lightingRig3D.key.shadow.camera.near = 10;
+                lightingRig3D.key.shadow.camera.far = 180;
+                lightingRig3D.key.shadow.bias = -0.0005;
+            }
+            scene3D.add(lightingRig3D.key);
 
-            const rimLight = new THREE.PointLight(0xa855f7, 1.4, 140);
-            rimLight.position.set(0, -10, 40);
-            scene3D.add(rimLight);
+            lightingRig3D.fill = new THREE.DirectionalLight(0xe2e8f0, 1.0);
+            lightingRig3D.fill.position.set(-45, 35, -30);
+            scene3D.add(lightingRig3D.fill);
+
+            lightingRig3D.rimCyan = new THREE.PointLight(0x00f0ff, 2.5, 180, 1.2);
+            lightingRig3D.rimCyan.position.set(-55, 25, 45);
+            scene3D.add(lightingRig3D.rimCyan);
+
+            lightingRig3D.rimMagenta = new THREE.PointLight(0xd946ef, 1.8, 180, 1.2);
+            lightingRig3D.rimMagenta.position.set(50, 18, -45);
+            scene3D.add(lightingRig3D.rimMagenta);
+
+            lightingRig3D.camSpecular = new THREE.PointLight(0xffffff, 1.3, 160, 1.1);
+            lightingRig3D.camSpecular.position.copy(camera3D.position);
+            scene3D.add(lightingRig3D.camSpecular);
 
             raycaster3D = new THREE.Raycaster();
 
@@ -4954,6 +5291,9 @@
             const btnRotate = document.getElementById('btn-3d-rotate');
             const btnReset = document.getElementById('btn-3d-reset');
             const btnWire = document.getElementById('btn-3d-wireframe');
+            const btnLighting = document.getElementById('btn-3d-lighting');
+            const btnTheater = document.getElementById('btn-3d-theater');
+            const btnToggleWs = document.getElementById('btn-toggle-widescreen');
 
             if (btnExplode) {
                 btnExplode.addEventListener('click', () => {
@@ -4994,20 +5334,25 @@
                 });
             }
 
+            if (btnLighting) {
+                btnLighting.addEventListener('click', cycleLightingMode);
+            }
+
+            if (btnTheater) {
+                btnTheater.addEventListener('click', toggleWidescreenMode);
+            }
+
+            if (btnToggleWs) {
+                btnToggleWs.addEventListener('click', toggleWidescreenMode);
+            }
+
             build3DChipPackage(HARDWARE_DB[currentChipKey]);
 
             renderSilicon3DLoop();
 
             if (typeof ResizeObserver !== 'undefined') {
                 const ro = new ResizeObserver(() => {
-                    if (!renderer3D || !camera3D || !container) return;
-                    const w = container.clientWidth;
-                    const h = container.clientHeight;
-                    if (w > 0 && h > 0) {
-                        camera3D.aspect = w / h;
-                        camera3D.updateProjectionMatrix();
-                        renderer3D.setSize(w, h);
-                    }
+                    updateViewport3DSize();
                 });
                 ro.observe(container);
             }

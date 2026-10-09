@@ -3718,6 +3718,192 @@
             .rail-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
             .workspace-column > .view-nav { display: grid; }
         }
+
+        /* Minimal professional system: replace the neon prototype aesthetic with
+           a quiet editorial UI while keeping every analysis surface functional. */
+        :root {
+            color-scheme: light;
+            --bg-base: #f4f6f8;
+            --bg-surface: #ffffff;
+            --bg-surface-elevated: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f7f9fb;
+            --bg-glass: #ffffff;
+            --border: #d9e0e7;
+            --border-light: #e8edf2;
+            --border-highlight: #8fb4ee;
+            --text-main: #172033;
+            --text-muted: #5f6b7a;
+            --text-dim: #7e8997;
+            --accent-cyan: #2563eb;
+            --accent-blue: #2563eb;
+            --accent-purple: #6846c7;
+            --accent-green: #0f8a5f;
+            --accent-amber: #b66a00;
+            --accent-rose: #c53c55;
+            --card-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 8px 22px rgba(16, 24, 40, .035);
+            --shadow-elevated: 0 1px 2px rgba(16, 24, 40, .04), 0 16px 34px rgba(16, 24, 40, .06);
+            --shadow-soft: 0 1px 2px rgba(16, 24, 40, .04);
+            --surface-tint: #ffffff;
+            --surface-tint-strong: #ffffff;
+            --border-quiet: #d9e0e7;
+            --border-control: #c8d1dc;
+            --focus-ring: 0 0 0 3px rgba(37, 99, 235, .14);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 10px;
+            --header-h: 64px;
+        }
+
+        html { color-scheme: light; background: var(--bg-base); }
+        body {
+            color: var(--text-main);
+            background: var(--bg-base);
+            background-image: none;
+        }
+        body::before, body::after { display: none !important; }
+        header {
+            height: var(--header-h);
+            min-height: var(--header-h);
+            padding-inline: clamp(18px, 4vw, 52px);
+            background: rgba(255, 255, 255, .96);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 0 rgba(16,24,40,.02);
+        }
+        .brand-title, .chip-title, .site-hero-title, .cap-card-title, .section-title { color: var(--text-main); }
+        .brand-tag { color: var(--accent-blue); background: #eff5ff; border-color: #c9dcfb; box-shadow: none; }
+        .header-nav-links { background: #f6f8fa; border-color: var(--border); box-shadow: none; }
+        .header-nav-link { color: var(--text-muted); }
+        .header-nav-link.active { color: #fff; background: var(--accent-blue); }
+        .btn-detect, .btn-github { color: var(--text-main); background: #fff; border-color: var(--border-control); box-shadow: none; }
+        .btn-detect:hover, .btn-github:hover { color: var(--accent-blue); background: #f7faff; border-color: #9bbcf0; box-shadow: none; }
+        .pulse-dot { background: var(--accent-green); box-shadow: 0 0 0 4px rgba(15,138,95,.12); }
+        #detect-banner { color: var(--text-main); background: #f4fbf8; border-color: #b9e5d3; box-shadow: none; }
+        .banner-btn { color: #fff; background: var(--accent-green); box-shadow: none; }
+
+        .app-container { max-width: 1500px; padding: clamp(20px, 3vw, 42px); gap: 18px; }
+        .workspace-layout { grid-template-columns: 216px minmax(0, 1fr); gap: 24px; }
+        .workspace-column { gap: 18px; }
+        .workbench-rail {
+            min-height: calc(100vh - var(--header-h) - 68px);
+            padding: 18px 10px 12px;
+            background: #fff;
+            border-color: var(--border);
+            border-radius: 10px;
+            box-shadow: var(--shadow-soft);
+        }
+        .rail-project { background: #f8fafc; border-color: var(--border); }
+        .rail-project-mark { color: #fff; background: var(--accent-blue); }
+        .rail-live { color: var(--accent-green); }
+        .rail-link { color: #556274; border-color: transparent; }
+        .rail-link:hover { color: var(--text-main); background: #f4f7fb; border-color: #e3e8ee; }
+        .rail-link.active { color: #164ca7; background: #edf4ff; border-color: #cbdcf7; box-shadow: inset 3px 0 0 var(--accent-blue); }
+        .rail-icon { color: var(--accent-blue); }
+        .rail-health-card { background: #fafbfc; border-color: var(--border); }
+        .rail-health-bar { background: #e8edf2; }
+        .rail-health-bar span { background: var(--accent-green); }
+        .context-breadcrumb, .rail-kicker, .rail-section-label { color: #7a8795; }
+        .workspace-context-bar h2 { color: var(--text-main); }
+        .context-chip { color: var(--accent-green); background: #effaf5; border-color: #bfe6d3; }
+        .context-time { color: var(--text-dim); }
+
+        .site-hero-section { padding: 0; }
+        .site-hero-content {
+            padding: clamp(30px, 4vw, 52px);
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: var(--shadow-elevated);
+        }
+        .site-hero-badge { color: var(--accent-blue); }
+        .badge-highlight { color: var(--accent-blue); }
+        .badge-divider { color: #b2bbc5; }
+        .site-hero-title { max-width: 760px; font-size: clamp(38px, 4vw, 58px); letter-spacing: -.05em; }
+        .text-gradient-cyan-amber { color: #36526f; background: none; -webkit-text-fill-color: #36526f; }
+        .site-hero-subtitle { color: #617084; max-width: 670px; }
+        .hero-cta-btn.primary { color: #fff; background: var(--accent-blue); box-shadow: none; }
+        .hero-cta-btn.secondary, .hero-cta-btn.tertiary { color: var(--text-main); background: #fff; border-color: var(--border-control); }
+        .hero-cta-btn.secondary:hover, .hero-cta-btn.tertiary:hover { background: #f5f8fc; border-color: #9bbcf0; }
+        .site-hero-stats-bar { gap: 10px; }
+        .hero-stat-item { background: #f8fafc; border-color: var(--border); }
+        .hero-stat-value { color: var(--text-main); }
+        .hero-stat-label { color: #6e7b8d; }
+
+        .chip-selector-bar, .chip-hero, .blueprint-stage, .blueprint-inspector,
+        .cap-card, .plot-card, .controls-card, .tile-pipeline-card,
+        .custom-architect-form, .compare-table-container, .systolic-sim-container {
+            background: #fff !important;
+            border-color: var(--border) !important;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow) !important;
+            backdrop-filter: none;
+        }
+        .chip-selector-bar { padding: 16px; border-inline-start: 3px solid var(--accent-blue) !important; }
+        .filter-tab, .vendor-pill, .view-btn, .preset-pill, .die-toggle-btn, .die-mode-btn, .hud-3d-btn {
+            color: #596677;
+            background: #fff;
+            border-color: var(--border-control);
+            box-shadow: none;
+        }
+        .filter-tab:hover, .vendor-pill:hover, .view-btn:hover, .preset-pill:hover,
+        .die-toggle-btn:hover, .die-mode-btn:hover, .hud-3d-btn:hover { color: var(--text-main); background: #f4f7fb; border-color: #9bbcf0; }
+        .filter-tab.active, .view-btn.active, .preset-pill.active, .die-toggle-btn.active, .die-mode-btn.active, .hud-3d-btn.active, .vendor-pill.active { color: #fff; background: var(--accent-blue); border-color: var(--accent-blue); box-shadow: none; }
+        .chip-search-input, .chip-select, .form-group input, .form-group select { color: var(--text-main); background: #fff !important; border-color: var(--border-control); box-shadow: none; }
+        .chip-search-input::placeholder, .form-group input::placeholder { color: #8995a3; }
+        .chip-search-input:focus, .chip-select:focus, .form-group input:focus, .form-group select:focus { border-color: var(--accent-blue); box-shadow: var(--focus-ring); }
+        .chip-hero { padding: clamp(24px, 3vw, 36px); }
+        .chip-hero::before { background: var(--accent-blue); opacity: 1; }
+        .chip-title { font-size: clamp(30px, 3.2vw, 44px); }
+        .chip-vendor, .chip-desc { color: #657286; }
+        .chip-class-badge, .chip-vendor-badge, .chip-node-badge { color: #315f9f; background: #eef5ff; border-color: #cbdcf7; box-shadow: none; }
+        .chip-node-badge { color: var(--accent-green); background: #effaf5; border-color: #bfe6d3; }
+        .btn-hero-action { color: #4f5e70; background: #fff; border-color: var(--border-control); }
+        .btn-hero-action:hover { color: var(--accent-blue); background: #f5f8fc; border-color: #9bbcf0; box-shadow: none; }
+        .metric-box { min-height: 126px; background: #f8fafc !important; border-color: var(--border) !important; box-shadow: none; }
+        .metric-box::before { background: var(--accent-blue); }
+        .metric-label, .metric-gauge-val, .metric-sub { color: #718096; }
+        .metric-value { color: var(--text-main); }
+        .metric-gauge-track { background: #e7edf3; }
+        .metric-gauge-fill { background: var(--accent-blue); box-shadow: none; }
+
+        .view-nav { background: #fff; border-color: var(--border); box-shadow: var(--shadow-soft); }
+        .workspace-column > .view-nav { display: none; }
+        .stage-title, .cap-card-title, .chart-header h2, .controls-card h3, .tile-pipeline-card h3 { color: var(--text-main) !important; }
+        .stage-header, .die-graphics-controls, .cap-card-header, .chart-header { border-color: var(--border); }
+        .die-canvas-container { background: #f8fafc; border-color: var(--border); }
+        .inspector-badge { color: var(--accent-blue); background: #eef5ff; border-color: #cbdcf7; }
+        .role-highlight-box, .diagnostic-card { color: #28506e; background: #f2f7fb !important; border-color: #c9ddec !important; box-shadow: none; }
+        .llm-table th, .compare-table th { color: #526174; background: #f6f8fa; }
+        .llm-table td, .llm-table th, .compare-table td, .compare-table th, .inspector-specs-table td { color: #4f5d6d; border-bottom-color: #e2e7ed; }
+        .llm-table tr:hover td, .compare-table tr:hover td { background: #f7faff; }
+        .tier-box { color: #2e4a64; box-shadow: none; }
+        .tier-hbm { background: #fff5f5 !important; border-color: #f1c5cb !important; }
+        .tier-l2 { background: #fff9ed !important; border-color: #f1d69c !important; }
+        .tier-sram { background: #eff7ff !important; border-color: #bdd9f6 !important; }
+        .tier-compute { background: #effaf5 !important; border-color: #bfe6d3 !important; }
+        .tier-connector { color: var(--accent-blue); }
+        input[type="range"]::-webkit-slider-runnable-track, input[type="range"]::-moz-range-track { background: #e4eaf0; border-color: #cbd4df; }
+        input[type="range"]::-webkit-slider-thumb, input[type="range"]::-moz-range-thumb { background: var(--accent-blue); border-color: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+        .systolic-canvas-wrap { background: #f8fafc; border-color: var(--border); }
+        .systolic-btn { color: #526174; background: #fff; border-color: var(--border-control); }
+        .btn-architect { color: #fff; background: var(--accent-blue); border-color: var(--accent-blue); box-shadow: none; }
+        .btn-architect:hover { background: #1d4ed8; box-shadow: none; }
+
+        .site-footer { margin-top: 10px; color: #657286; background: #fff; border-top: 1px solid var(--border); }
+        .footer-col-title { color: var(--text-main); }
+        .footer-link-action, .footer-ext-link { color: var(--accent-blue); }
+        .footer-bottom { border-top-color: var(--border); }
+        .footer-badge { color: #5d6b7c; background: #f5f7f9; border-color: var(--border); }
+
+        @media (max-width: 1100px) {
+            .workspace-layout { grid-template-columns: 1fr; }
+            .workbench-rail { background: #fff; }
+        }
+        @media (max-width: 600px) {
+            .site-hero-title { font-size: 34px; }
+            .site-hero-content { padding: 26px 20px; }
+            .workspace-context-bar h2 { font-size: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -3815,16 +4001,16 @@
             <div class="site-hero-content">
                 <div class="site-hero-badge">
                     <span class="badge-sparkle">✦</span>
-                    <span>TILELENS SILICON WORKBENCH</span>
+                    <span>TILELENS / SILICON ANALYSIS</span>
                     <span class="badge-divider">•</span>
-                    <span class="badge-highlight">18+ AI & MOBILE PROCESSORS</span>
+                    <span class="badge-highlight">18+ PROCESSOR PROFILES</span>
                 </div>
                 <h1 class="site-hero-title">
-                    Inspect chips like a hardware lab.
-                    <span class="text-gradient-cyan-amber">Tune workloads like a compiler team.</span>
+                    Make better decisions about silicon.
+                    <span class="text-gradient-cyan-amber">From blueprint to workload.</span>
                 </h1>
                 <p class="site-hero-subtitle">
-                    Explore processor floorplans, memory hierarchy, roofline limits, LLM fit, and custom accelerator tradeoffs from one responsive analysis surface.
+                    A focused workspace for comparing architectures, validating memory behavior, and sizing workloads before implementation.
                 </p>
                 <div class="site-hero-actions">
                     <button type="button" class="hero-cta-btn primary" id="hero-btn-explore-3d">
@@ -3865,11 +4051,11 @@
         <section class="chip-selector-bar">
             <div class="selector-row-primary">
                 <div class="filter-tabs" id="category-tabs">
-                    <button type="button" class="filter-tab active" data-filter="all">All Chips (18)</button>
-                    <button type="button" class="filter-tab" data-filter="mobile">📱 Mobile Phones</button>
-                    <button type="button" class="filter-tab" data-filter="laptop">💻 Laptop PCs</button>
-                    <button type="button" class="filter-tab" data-filter="cloud">☁️ Cloud & Datacenter</button>
-                    <button type="button" class="filter-tab" data-filter="edge">⚡ Custom & Edge ASIC</button>
+                    <button type="button" class="filter-tab active" data-filter="all">All chips (18)</button>
+                    <button type="button" class="filter-tab" data-filter="mobile">Mobile</button>
+                    <button type="button" class="filter-tab" data-filter="laptop">Laptop & PC</button>
+                    <button type="button" class="filter-tab" data-filter="cloud">Cloud & datacenter</button>
+                    <button type="button" class="filter-tab" data-filter="edge">Custom & edge ASIC</button>
                 </div>
                 <div class="chip-search-wrap">
                     <svg class="chip-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
